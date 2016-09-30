@@ -1,4 +1,18 @@
-      'use strict';
+	/**********************************************************************
+	*  Author: Neha Kapoor (neha@rootcrm.org)
+	*  Project Lead: Balinder WALIA (bwalia@rootcrm.org)
+	*  Project Lead Web...: https://twitter.com/balinderwalia
+	*  Name..: ROOTCRM
+	*  Desc..: Root CRM (part of RootCrm Suite of Apps)
+	*  Web: http://rootcrm.org
+	*  License: http://rootcrm.org/LICENSE.txt
+	**/
+
+	/**********************************************************************
+	*  express.js
+	**/
+	
+	'use strict';
 
 /**
  * Module dependencies.
