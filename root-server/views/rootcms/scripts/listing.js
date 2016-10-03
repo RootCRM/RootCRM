@@ -2,7 +2,10 @@ var xhrStatus;
 
 var pageSize=15, totalNum=0;
 var start=0, end=pageSize;
-function generateHeading(e, upperCase=false){
+function generateHeading(e, upperCase){
+	if(typeof upperCase == 'undefined' && upperCase==''){ 
+		var upperCase=false;
+	} 
 	var patt=/[^A-Za-z0-9]/g;
 	var result=e.replace(patt,' ');
 	result=result.replace(/\s+/g, ' ');
