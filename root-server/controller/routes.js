@@ -91,7 +91,7 @@ app.post(backendDirectoryPath+'/validlogin', (req, res) => {
 	
 })
 
-app.get(backendDirectoryPath+'/list_forms/', requireLogin, function(req, res) {
+app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res) {
 	var itemsPerPage = 10, pageNum=1, templateStr="", collectionStr="";
 	var outputObj = new Object();
 	if(req.query.templateStr){

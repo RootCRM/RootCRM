@@ -517,7 +517,7 @@ $(document).ready(function(){
       });
 
 	var xhr;
-	xhr=$.getJSON("list_forms?start=0&limit=20&s=&collection=documents",function(result){
+	xhr=$.getJSON("api_fetch_list?start=0&limit=20&s=&collection=documents",function(result){
 		var dropdownStr='<option value="" selected="selected">Select a web page</option>';
 		if(result.aaData.length>=1){
 			$.each(result.aaData, function(i,row){
@@ -667,7 +667,7 @@ var xhr;
 				else
 				{
 				
-				var jsonRow = '<%= backendDirectory %>/list_forms?start=0&limit=20&collection=documents&s='+request.term;
+				var jsonRow = '<%= backendDirectory %>/api_fetch_list?start=0&limit=20&collection=documents&s='+request.term;
 				
 				if(xhr) xhr.abort();
 				xhr=$.getJSON(jsonRow,function(result){

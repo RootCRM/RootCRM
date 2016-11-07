@@ -90,7 +90,7 @@ function load_more(){
 	
 	function load_data(){
 		$(".alert").remove();
-		var jsonRow=backendDirectory+"/list_forms?start="+start+"&limit="+pageSize+"&templateStr="+templateStr+"&s="+searchStr,
+		var jsonRow=backendDirectory+"/api_fetch_list?start="+start+"&limit="+pageSize+"&templateStr="+templateStr+"&s="+searchStr,
 		xhrStatus=$.getJSON(jsonRow,function(html){
 			if(html.error){
 				$(".topOptionsClass").hide();

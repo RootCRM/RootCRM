@@ -1,7 +1,7 @@
 var menuxhr;
 function load_navigation_data(){
 	$("#dashboard-menu").html('');
-	var jsonRow = backendDirectory+'/list_forms?start=0&limit=15&collection=modules';
+	var jsonRow = backendDirectory+'/api_fetch_list?start=0&limit=15&collection=modules';
 	var keyword= $("#menuSearchBox").val();
 	if(keyword!='' && keyword!='undefined'){
 		jsonRow +='&s='+keyword;
