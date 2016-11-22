@@ -91,6 +91,87 @@ app.post(backendDirectoryPath+'/validlogin', (req, res) => {
 	
 })
 
+app.get(backendDirectoryPath+'/task_scheduler', (req, res) => {
+	var schedulerFrom = req.query.schedulerFrom, schedulerTo=req.query.schedulerTo, collectionStr=req.query.collection;
+	var outputObj = new Object();
+	
+	db.collection(collectionStr).find({ $and:[ { timestamp_start: { $gte: schedulerFrom } },  { timestamp_start: { $lte: schedulerTo } } ] }).sort({Modified: 1}).toArray(function(err, items) {
+		if (err) {
+			outputObj["error"]   = 'no records found';
+			res.send(outputObj);
+      	} else if (items) {
+      		outputObj["aaData"]   = items;
+			res.send(outputObj);
+     	}
+	});
+	
+});
+
+app.get(backendDirectoryPath+'/save_task_scheduler', (req, res) => {
+	var getJson=req.query;
+	var outputObj = new Object();
+	var table_nameStr='calendar-events';
+	
+	if(getJson.action=="create"){
+		initFunctions.returnFindOneByMongoID(db, 'tasks', getJson.task_id, function(resultObject) {
+			if(resultObject.aaData){
+				var contentObj=resultObject.aaData;
+				
+				db.collection(table_nameStr).save({"title": contentObj.name, "reported_by": contentObj.reported_by, "assigned_to": contentObj.assigned_to, "description": contentObj.description, "task_id": getJson.task_id, "employee_id" : getJson.emp_id, "timestamp_start" : getJson.datetimestart, "timestamp_end" : getJson.datetimeend}, (err, result) => {
+					if(err){
+						outputObj["errormessage"]   = 'Timeslip can\'t be added';
+						res.send(outputObj);
+					}	else if (result){
+      					outputObj["success"] ="OK";
+      					outputObj["aaData"] =result["ops"];
+      					res.send(outputObj);
+      				}
+  				});
+			}else if(resultObject.error){
+				outputObj["errormessage"]   = resultObject.error;
+				res.send(outputObj);
+			}
+			
+		});	
+	}else if(getJson.action=="update"){
+		if(getJson.timeslip_id){
+			var timeslipMongoID= new mongodb.ObjectID(getJson.timeslip_id);
+			db.collection(table_nameStr).findAndModify({_id:timeslipMongoID}, [['_id','asc']], { $set: {"employee_id" : getJson.emp_id, "timestamp_start" : getJson.datetimestart, "timestamp_end" : getJson.datetimeend} }, {}, function(err, result) {
+				if(err){
+					outputObj["errormessage"]   = 'Timeslip can\'t be updated';
+					res.send(outputObj);
+				}	else if (result){
+					if(result.lastErrorObject.updatedExisting){
+						outputObj["success"] ="OK";
+      				}else{
+      					outputObj["errormessage"]   = 'Timeslip can\'t be updated';
+					}
+      				res.send(outputObj);
+      			}
+  			});
+  		}else{
+  			outputObj["errormessage"]   = 'Invalid timeslip passed';
+			res.send(outputObj);
+  		}
+	}else if(getJson.action=="delete"){
+		if(getJson.timeslip_id){
+			var timeslipMongoID= new mongodb.ObjectID(getJson.timeslip_id);
+			db.collection(table_nameStr).remove({_id:timeslipMongoID}, function(err, result){
+				if(err){
+					console.log(err);
+					outputObj["errormessage"]   = 'Timeslip can\'t be deleted';
+					res.send(outputObj);
+				}	else if (result){
+					outputObj["success"] ="OK";
+      				res.send(outputObj);
+      			}
+  			});
+  		}else{
+  			outputObj["errormessage"]   = 'Invalid timeslip passed';
+			res.send(outputObj);
+  		}
+	}
+})
 app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res) {
 	var itemsPerPage = 10, pageNum=1, templateStr="", collectionStr="";
 	var outputObj = new Object();

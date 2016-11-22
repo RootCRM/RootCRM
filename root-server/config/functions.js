@@ -322,6 +322,10 @@ var self = module.exports =
 			table_name="leads";
 		}else if(filename=="modules" || filename=="module"){
 			table_name="modules";
+		}else if(filename=="task" || filename=="calendar" || filename=="test"){
+			table_name="tasks";
+		}else if(filename=="project"){
+			table_name="projects";
 		}
 		return table_name;
 	},
