@@ -28,6 +28,122 @@ app.get(backendDirectoryPath+'/sign-in', function(req, res) {
       	 queryStr : req.query
     });   
 })
+
+//reset password
+app.get(backendDirectoryPath+'/reset_password', function(req, res) {
+	res.render(accessFilePath+'reset_password', {
+      	 queryStr : req.query
+    });   
+})
+
+//post action for save notes
+app.post(backendDirectoryPath+'/savenotes', (req, res) => {
+	var myObj = new Object();
+	var tableID= req.body.uuid;
+	var insertNote=new Object();
+	insertNote["note"]=req.body.note;
+	insertNote["user_uuid"]=req.body.added_by;
+	insertNote["user_name"]=req.body.user_name;
+	insertNote["modified"]=initFunctions.currentTimestamp();
+	insertNote["created"]=initFunctions.currentTimestamp();
+	insertNote["uuid"]=initFunctions.guid();
+	
+	if(tableID!=""){
+		var mongoIDField= new mongodb.ObjectID(tableID);
+		var table_nameStr=req.body.table;
+		if(req.body.action=="create"){
+			initFunctions.returnFindOneByMongoID(db, table_nameStr, tableID, function(resultObject) {
+				if(resultObject.aaData){
+					db.collection(table_nameStr).update({_id:mongoIDField}, { $push: { "notes": insertNote } }, (err, result) => {
+    					if(result){
+    						myObj["success"]   = "Note added successfully!";
+							res.send(myObj);
+    					}else{
+    						myObj["error"]   = "Error posting comment. Please try again later!!!";
+							res.send(myObj);
+    					}
+    				});
+				}else{
+					myObj["error"]   = "Error adding note. Please try again later!!!";
+					res.send(myObj);
+				}	
+  			});	
+  		}else if(req.body.action=="update"){
+			initFunctions.returnFindOneByMongoID(db, table_nameStr, tableID, function(resultObject) {
+				if(resultObject.aaData){
+					db.collection(table_nameStr).update({_id:mongoIDField}, { $pull: { "notes": { "uuid": req.body.note_uuid } } }, (err, result) => {
+    					if(result){
+    						insertNote["uuid"]=req.body.note_uuid;
+    						
+    						db.collection(table_nameStr).update({_id:mongoIDField}, { $push: { "notes": insertNote } }, (err, result) => {
+    							if(result){
+    								myObj["success"]   = "Note updated successfully!";
+									res.send(myObj);
+    							}else{
+    								myObj["error"]   = "Error posting comment. Please try again later!!!";
+									res.send(myObj);
+    							}
+    						});
+    					}else{
+    						myObj["error"]   = "Error in update note. Please try again later!!!";
+							res.send(myObj);
+    					}
+    				});
+				}else{
+					myObj["error"]   = "Error adding note. Please try again later!!!";
+					res.send(myObj);
+				}	
+  			});	
+  		}else if(req.body.action=="delete"){
+  			initFunctions.returnFindOneByMongoID(db, table_nameStr, tableID, function(resultObject) {
+  				if(resultObject.aaData){
+  					db.collection(table_nameStr).update({_id:mongoIDField}, { $pull: { "notes": { "uuid": req.body.note_uuid } } }, (err, result) => {
+    					if(result){
+    						myObj["success"]   = "Note deleted successfully!";
+							res.send(myObj);
+    					}else{
+    						myObj["error"]   = "Error in deleting note. Please try again later!!!";
+							res.send(myObj);
+    					}
+    				});
+  				}else{
+  					myObj["error"]   = "Error in deleting note. Please try again later!!!";
+					res.send(myObj);
+  				}
+  			});
+  		}
+  	}
+});
+
+//post action of reset password
+app.post(backendDirectoryPath+'/reset_password', (req, res) => {
+	var postJson=req.body;
+	var mongoIDField= new mongodb.ObjectID(postJson.token);
+	db.collection('authentication_token').findOne({"_id" : mongoIDField, "status" :true}, function(err, document) {
+		if (document) {
+			//console.log(document);
+			if (typeof postJson.password !== 'undefined' && postJson.password !== null && postJson.password != "") {
+      			postJson['password'] = passwordHash.generate(postJson.password);
+      		}
+			db.collection('users').findAndModify({_id:document.user_id}, [['_id','asc']], { $set: {"password" : postJson.password} }, {}, function(err, result) {
+				db.collection('authentication_token').remove({"_id":mongoIDField},function(err,result){
+    				res.redirect(backendDirectoryPath+'/sign-in?success=reset');
+    			});
+			});
+      	} else {
+      		res.redirect(backendDirectoryPath+'/reset_password?error=invalid');
+        }
+      
+	});
+})
+
+//forgot password
+app.get(backendDirectoryPath+'/forgot_password', function(req, res) {
+	res.render(accessFilePath+'forgot_password', {
+      	 queryStr : req.query
+    });   
+})
+
 //jobshout_server pages
 app.get(backendDirectoryPath+'/', requireLogin, function(req, res) {
 	if(req.authenticationBool){
@@ -62,6 +178,39 @@ app.get(backendDirectoryPath+'/logout', function(req, res) {
    	}	
 }); 
 
+//forgot password post
+app.post(backendDirectoryPath+'/forgot_password', (req, res) => {
+	var postJson=req.body;
+	
+	var checkForExistence= '{"email": \''+postJson.email+'\', "status": { $in: [ 1, "1" ] }}';
+	eval('var obj='+checkForExistence);
+	db.collection('users').findOne(obj, function(err, document) {
+		if (document) {
+			db.collection('authentication_token').save({"user_id": document._id, "status" : true}, (err, result) => {
+				var insertEmail=new Object();
+				insertEmail["sender_name"]=document.firstname;
+				insertEmail["sender_email"]=postJson.email;
+				insertEmail["subject"]='Reset your ROOTCRM password';
+				insertEmail["body"]='Hi '+document.firstname+',<br>Please click on the below link to reset your password:<br><a href="'+backendDirectoryPath+'/reset_password?token='+result["ops"][0]["_id"]+'">'+backendDirectoryPath+'/reset_password?token='+result["ops"][0]["_id"]+'</a>';
+				insertEmail["created"]=initFunctions.currentTimestamp();
+				insertEmail["modified"]=initFunctions.currentTimestamp();
+				insertEmail["recipient"]='bwalia@tenthmatrix.co.uk';
+				insertEmail["status"]=0;
+				db.collection("email_queue").save(insertEmail, (err, e_result) => {
+					if(err){
+						res.redirect(backendDirectoryPath+'/forgot_password?error=email');
+					}else{
+						res.redirect(backendDirectoryPath+'/forgot_password?success=OK');
+					}
+				})
+			});
+      	} else {
+      		res.redirect(backendDirectoryPath+'/forgot_password?error=not_exist');
+        }
+      
+	});
+})
+
 //validate user
 app.post(backendDirectoryPath+'/validlogin', (req, res) => {
 	var postJson=req.body;
@@ -88,7 +237,6 @@ app.post(backendDirectoryPath+'/validlogin', (req, res) => {
         }
       
 	});
-	
 })
 
 app.get(backendDirectoryPath+'/task_scheduler', (req, res) => {
@@ -158,7 +306,7 @@ app.get(backendDirectoryPath+'/save_task_scheduler', (req, res) => {
 			var timeslipMongoID= new mongodb.ObjectID(getJson.timeslip_id);
 			db.collection(table_nameStr).remove({_id:timeslipMongoID}, function(err, result){
 				if(err){
-					console.log(err);
+					//console.log(err);
 					outputObj["errormessage"]   = 'Timeslip can\'t be deleted';
 					res.send(outputObj);
 				}	else if (result){
@@ -172,6 +320,7 @@ app.get(backendDirectoryPath+'/save_task_scheduler', (req, res) => {
   		}
 	}
 })
+
 app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res) {
 	var itemsPerPage = 10, pageNum=1, templateStr="", collectionStr="";
 	var outputObj = new Object();
@@ -324,7 +473,7 @@ app.get(backendDirectoryPath+'/:id', requireLogin, function(req, res) {
 			if(editFieldName=="_id"){
 				 initFunctions.returnFindOneByMongoID(db, table_name, editFieldVal, function(resultObject) {
 					if(resultObject.error){
-		   				console.log(resultObject.error);
+		   				//console.log(resultObject.error);
       				} else if (resultObject.aaData) {
       					contentObj=resultObject.aaData;
       				} 
@@ -378,7 +527,7 @@ app.get(backendDirectoryPath+'/:id', requireLogin, function(req, res) {
 				eval('var queryObj='+queryStr);
 				db.collection(table_name).findOne(queryObj, function(err, document) {
 					if (err) {
-        				console.log(err);
+        				//console.log(err);
       				} else if (document) {
       					contentObj=document;
       				} 

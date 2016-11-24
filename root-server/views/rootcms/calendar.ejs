@@ -223,6 +223,7 @@ function SetupFullCalendar(){
         y = date.getFullYear();
         
     $('#calendar').fullCalendar({
+    		timezone: 'local',
 			now: displayDate.toISOString().substring(0, 10),
 			firstDay: 1,
 			editable: true, // enable draggable events
@@ -279,7 +280,7 @@ function SetupFullCalendar(){
         		}
 			},
 			viewRender: function(view) {
-				console.log(view.name);
+				//console.log(view.name);
 				schedulerFrom=view.start;
 				schedulerTo=view.end;
 				GetCalendarEntries();
@@ -306,7 +307,7 @@ function SetupFullCalendar(){
 					
 			},
 			eventReceive: function(event) { // called when a proper external event is dropped
-				console.log($(this));
+				//console.log($(this));
 				if(eventIdDropped != null) {
 					if(event.end != null) {	var newEndDateStr=event.end;
 					} else { var newEndDateStr=event.start;	 }
@@ -326,6 +327,7 @@ function SetupFullCalendar(){
 					 			event.reporter=contentStr.reporter;
 					 			
 					 			$('#calendar').fullCalendar( 'rerenderEvents' );
+					 			
                         		alert("Added succsesfully");
 							}	else if ( result.errormessage != "" ) {
 								alert( result.errormessage );
@@ -337,7 +339,7 @@ function SetupFullCalendar(){
 			eventDrop: function(event) { // called when an event (already on the calendar) is moved
 				if(event.end != null) {	var newEndDateStr=event.end;
 					} else { var newEndDateStr=event.start;	 }
-					console.log(event);
+					//console.log(event);
 					$.ajax({
 						url: backendDirectory+'/save_task_scheduler?action=update&timeslip_id='+event.id+'&datetimestart='+event.start+'&datetimeend='+ newEndDateStr + '&emp_id=' + event.resourceId,
 						type: "GET",
@@ -353,7 +355,7 @@ function SetupFullCalendar(){
 					});
 			},
 			eventResize: function(event) { // called when an event (already on the calendar) is moved
-				console.log(event);
+				//console.log(event);
 				if(event.end != null) {	var newEndDateStr=event.end;
 					} else { var newEndDateStr=event.start;	 }
 					
@@ -453,8 +455,7 @@ $(function () {
 	});
   });
 function refreshCalendarDependingUponWeeks(week){
-	console.log(week);
-    var weekVal=parseInt(week);
+	var weekVal=parseInt(week);
    
     switch (weekVal) {
         case 1:

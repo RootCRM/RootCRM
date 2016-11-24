@@ -326,6 +326,8 @@ var self = module.exports =
 			table_name="tasks";
 		}else if(filename=="project"){
 			table_name="projects";
+		}else if(filename=="customer"){
+			table_name="Companies";
 		}
 		return table_name;
 	},

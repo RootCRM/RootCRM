@@ -62,9 +62,9 @@ font-size: 20px;
             				<div class="tab-content ">
             					
               					<div class="chart tab-pane active" id="first" >
-              					<form class="form-horizontal" action="<%= backendDirectory %>/save/project" method="POST" id="ProjectForm">
-            						<input type="hidden" class="form-control" id="table_name" name="table_name" value="projects">
-      								<input type="hidden" class="form-control" id="unique_field" name="unique_field" value="_id">
+              					<form class="form-horizontal" action="<%= backendDirectory %>/save/customer" method="POST" id="contentForm">
+            						<input type="hidden" class="form-control" id="table_name" name="table_name" value="Companies">
+      								<input type="hidden" class="form-control" id="unique_field" name="unique_field" value="account_Number">
       								<input type="hidden" class="form-control" id="id" name="id" value="<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %><%= contentObj._id %><% } %>">
       								<input type="hidden" class="form-control" id="editorField" name="editorField" value="<% if (typeof editorField !== 'undefined' && editorField !== null) { %><%= editorField %><% }else{ %>_id<% } %>">
       								<input type="hidden" class="form-control" id="editorValue" name="editorValue" value="<% if (typeof editorValue !== 'undefined' && editorValue !== null) { %><%= editorValue %><% } %>">
@@ -77,35 +77,25 @@ font-size: 20px;
 														<div class="row">
            		  											<div class=" col-sm-12 col-lg-11">
    																<div class="form-group">
-    																<label for="" class="col-sm-3 control-label">Client <sup class="required">*</sup></label>
+    																<label for="" class="col-sm-3 control-label">Company Name <sup class="required">*</sup></label>
     																<div class="col-sm-9">
-      																	<input type="text" class="form-control" id="Company_Name" name="client" value="<% if (typeof contentObj.client !== 'undefined' && contentObj.client !== null) { %><%= contentObj.client %><% } %>">
+      																	<input type="text" class="form-control" id="Company_Name" name="Company_Name" value="<% if (typeof contentObj.Company_Name !== 'undefined' && contentObj.Company_Name !== null) { %><%= contentObj.Company_Name %><% } %>">
     																</div>
   																</div>
   																<div class="form-group">
-    																<label for="" class="col-sm-3 control-label">Project name <sup class="required">*</sup></label>
-    																<div class="col-sm-9">
-      																	<input type="text" class="form-control" id="name" name="name" value="<% if (typeof contentObj.name !== 'undefined' && contentObj.name !== null) { %><%= contentObj.name %><% } %>">
+    																<label for="" class="col-sm-3 control-label">Account Number <sup class="required">*</sup></label>
+    																<div class="col-sm-6">
+      																	<input type="text" class="form-control" id="account_Number" name="account_Number" value="<% if (typeof contentObj.account_Number !== 'undefined' && contentObj.account_Number !== null) { %><%= contentObj.account_Number %><% } %>">
     																</div>
-  																</div>
-																<div class="form-group">
-    																<label for="" class="col-sm-3 control-label">&nbsp;</label>
-    																<div class="col-sm-2">
-																		<label><input id="active" name="active" value="1" type="radio" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == 1) { %>checked<% } %>> Active</label>
-    			  													</div>
-    			  													<div class="col-sm-3">
-																		<label><input id="active" name="active" value="0" type="radio" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == 1) { %>checked<% } %>> Completed</label>
+  																	<div class="col-sm-3">
+																		<label><input id="inactive" name="inactive" value="false" type="checkbox" <% if (typeof contentObj.inactive !== 'undefined' && contentObj.inactive !== null && contentObj.inactive == true) { %>checked<% } %>> Inactive</label>
     			  													</div>
   																</div>
   																<div class="form-group">
-    																<label for="" class="col-sm-3 control-label">Stage <sup class="required">*</sup></label>
+    																<label for="" class="col-sm-3 control-label">Follow Up Date </label>
     																<div class="col-sm-9">
-																		<select class="form-control" id="status" name="status">
-																			<option value="Proposal" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == "Proposal") { %>selected<% } %>>Proposal</option>
-																			<option value="Development" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == "Development") { %>selected<% } %>>Development</option>
-																			<option value="Testing" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == "Development") { %>selected<% } %>>Testing</option>
-																		</select>
-																	</div>
+      																	<input type="text" class="col-sm-4 datepicker form-control" id="followup_date" name="followup_date" data-date-format="dd/mm/yyyy"  readonly value="<% if (typeof contentObj.followup_date !== 'undefined' && contentObj.followup_date !== null) { %><%= contentObj.followup_date %><% } %>">
+    																</div>
   																</div>
    															</div>
        			 										</div>
@@ -114,23 +104,28 @@ font-size: 20px;
 										</div>
 										<div class="col-xs-6">
           									<div class="box box-primary">
-		    									<h4>Important Dates</h4>
+		    									<h4>Contact Details</h4>
             									<div class="box-body">
 														<div class="row">
            		  											<div class=" col-sm-12 col-lg-11">
    																<div class="form-group">
-    																<label for="" class="col-sm-3 control-label">Start  <sup class="required">*</sup></label>
+    																<label for="" class="col-sm-3 control-label">First name </label>
     																<div class="col-sm-9">
-      																	<input type="text" class="datepicker form-control" id="Start_Date" name="Start_Date" data-date-format="dd/mm/yyyy"  readonly value="<% if (typeof contentObj.Start_Date !== 'undefined' && contentObj.Start_Date !== null) { %><%= contentObj.Start_Date %><% } %>">
+      																	<input type="text" class="form-control" id="contact_firstname" name="contact_firstname" value="<% if (typeof contentObj.contact_firstname !== 'undefined' && contentObj.contact_firstname !== null) { %><%= contentObj.contact_firstname %><% } %>">
     																</div>
   																</div>
-															
   																<div class="form-group">
- 																	<label for="" class="col-sm-3 control-label">Deadline</label>
- 																	<div class="col-sm-9">
-																		<input type="text" class="datepicker form-control" id="deadline_date" name="deadline_date" data-date-format="dd/mm/yyyy"  readonly value="<% if (typeof contentObj.deadline_date !== 'undefined' && contentObj.deadline_date !== null) { %><%= contentObj.deadline_date %><% } %>">
-																	</div>
-																</div>
+    																<label for="" class="col-sm-3 control-label">Last name </label>
+    																<div class="col-sm-9">
+      																	<input type="text" class="form-control" id="contact_Lastname" name="contact_Lastname" value="<% if (typeof contentObj.contact_Lastname !== 'undefined' && contentObj.contact_Lastname !== null) { %><%= contentObj.contact_Lastname %><% } %>">
+    																</div>
+  																</div>
+  																<div class="form-group">
+    																<label for="" class="col-sm-3 control-label">Email</label>
+    																<div class="col-sm-9">
+      																	<input type="text" class="form-control" id="email_address" name="email_address" value="<% if (typeof contentObj.email_address !== 'undefined' && contentObj.email_address !== null) { %><%= contentObj.email_address %><% } %>">
+    																</div>
+  																</div>
    															</div>
        			 										</div>
             									</div>
@@ -140,33 +135,57 @@ font-size: 20px;
 	  								<div class="row" STYLE="margin-top:10px;">
 										<div class="col-xs-6">
           									<div class="box box-primary">
-		    									<h4>Financial</h4>
+		    									<h4>Address</h4>
             									<div class="box-body">
        		 											<div class="row">
            		  											<div class=" col-sm-12 col-lg-11">
    																<div class="form-group">
-    																<label for="" class="col-sm-3 control-label">Budget</label>
+    																<label for="" class="col-sm-3 control-label">Address 1 <span style="color:#6E829B">*</span></label>
     																<div class="col-sm-9">
-      																	<input type="text" class="form-control" id="Budget" placeholder="Budget" name="Budget" value="<% if (typeof contentObj.Budget !== 'undefined' && contentObj.Budget !== null) { %><%= contentObj.Budget %><% } %>">
+      																	<input type="text" class="form-control" id="address_line_1"  name="address_line_1" value="<% if (typeof contentObj.address_line_1 !== 'undefined' && contentObj.address_line_1 !== null) { %><%= contentObj.address_line_1 %><% } %>">
     																</div>
   																</div>
   																<div class="form-group">
-    																<label for="" class="col-sm-3 control-label">Rate</label>
+    																<label for="" class="col-sm-3 control-label">Address 2</label>
     																<div class="col-sm-9">
-      																	<input type="text" class="form-control" id="Rate" placeholder="Rate" name="Rate" value="<% if (typeof contentObj.Rate !== 'undefined' && contentObj.Rate !== null) { %><%= contentObj.Rate %><% } %>">
+      																	<input type="text" class="form-control" id="address_line_2"  name="address_line_2" value="<% if (typeof contentObj.address_line_2 !== 'undefined' && contentObj.address_line_2 !== null) { %><%= contentObj.address_line_2 %><% } %>">
+    																</div>
+  																</div>
+  																<div class="form-group">
+    																<label for="" class="col-sm-3 control-label">City</label>
+    																<div class="col-sm-9">
+      																	<input type="text" class="form-control" id="city_or_town" name="city_or_town" value="<% if (typeof contentObj.city_or_town !== 'undefined' && contentObj.city_or_town !== null) { %><%= contentObj.city_or_town %><% } %>">
+    																</div>
+  																</div>
+  																<div class="form-group">
+    																<label for="" class="col-sm-3 control-label">County</label>
+    																<div class="col-sm-9">
+      																	<input type="text" class="form-control" id="county_or_state" name="county_or_state" value="<% if (typeof contentObj.county_or_state !== 'undefined' && contentObj.county_or_state !== null) { %><%= contentObj.county_or_state %><% } %>">
     																</div>
   																</div>
 																<div class="form-group">
-    																<label for="" class="col-sm-3 control-label">Currency</label>
+    																<label for="" class="col-sm-3 control-label">Post Code</label>
     																<div class="col-sm-9">
-																		<select class="form-control" id="Currency" name="Currency">
-																			<option value=""></option>
-																			<option value="GBP" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == "GBP") { %>selected<% } %>>GBP</option>	
-																			<option value="USD" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == "USD") { %>selected<% } %>>USD</option>	
-																			<option value="EUR" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == "EUR") { %>selected<% } %>>EUR</option>	
-																			<option value="GBP" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == "GBP") { %>selected<% } %>>GBP</option>	
-																		</select>
-																	</div>
+      																	<input type="text" class="form-control" id="post_zip_code" name="post_zip_code" value="<% if (typeof contentObj.post_zip_code !== 'undefined' && contentObj.post_zip_code !== null) { %><%= contentObj.post_zip_code %><% } %>">
+    																</div>
+  																</div>
+  																<div class="form-group">
+    																<label for="" class="col-sm-3 control-label">Telephone</label>
+    																<div class="col-sm-9">
+      																	<input type="text" class="form-control" id="telephone" name="telephone" value="<% if (typeof contentObj.telephone !== 'undefined' && contentObj.telephone !== null) { %><%= contentObj.telephone %><% } %>">
+    																</div>
+  																</div>
+  																<div class="form-group">
+    																<label for="" class="col-sm-3 control-label">Fax</label>
+    																<div class="col-sm-9">
+      																	<input type="text" class="form-control" id="fax" name="fax" value="<% if (typeof contentObj.fax !== 'undefined' && contentObj.fax !== null) { %><%= contentObj.fax %><% } %>">
+    																</div>
+  																</div>
+  																<div class="form-group">
+    																<label for="" class="col-sm-3 control-label">Country</label>
+    																<div class="col-sm-9">
+      																	<input type="text" class="form-control" id="country" name="country" value="<% if (typeof contentObj.country !== 'undefined' && contentObj.country !== null) { %><%= contentObj.country %><% } %>">
+    																</div>
   																</div>
   															</div>
        			 										</div>
@@ -175,17 +194,35 @@ font-size: 20px;
 										</div>
 										<div class="col-xs-6">
           									<div class="box box-primary">
-		    									<h4>Handler</h4>
+		    									<h4>Other Info</h4>
             									<div class="box-body">
 														<div class="row">
            		  											<div class=" col-sm-12 col-lg-11">
+           		  												<div class="form-group ">
+																	<label class="col-sm-3 control-label">&nbsp;</label>
+																	<div class=" col-sm-9">
+																	<label>	<input  name="is_supplier" type="checkbox" value="true" id="is_supplier" <% if (typeof contentObj.is_supplier !== 'undefined' && contentObj.is_supplier !== null && contentObj.is_supplier == true) { %>checked<% } %> >
+								 									Supplier	</label>
+								 									</div>
+																	</div>	
    																<div class="form-group">
-    																<label for="" class="col-sm-3 control-label">Incharge</label>
+    																<label for="" class="col-sm-3 control-label">Relation</label>
     																<div class="col-sm-9">
-      																	<input type="text" class="form-control" id="project_incharge" name="project_incharge" placeholder="" value="<% if (typeof contentObj.project_incharge !== 'undefined' && contentObj.project_incharge !== null) { %><%= contentObj.project_incharge %><% } %>">
+      																	<input type="text" class="form-control" id="relationship" name="relationship" placeholder="" value="<% if (typeof contentObj.relationship !== 'undefined' && contentObj.relationship !== null) { %><%= contentObj.relationship %><% } %>">
     																</div>
   																</div>
-															
+																<div class="form-group">
+    																<label for="" class="col-sm-3 control-label">Referred By</label>
+    																<div class="col-sm-9">
+      																	<input type="text" class="form-control" id="referred_by" name="referred_by" placeholder="" value="<% if (typeof contentObj.referred_by !== 'undefined' && contentObj.referred_by !== null) { %><%= contentObj.referred_by %><% } %>">
+    																</div>
+  																</div>
+  																<div class="form-group">
+    																<label for="" class="col-sm-3 control-label">Comments</label>
+    																<div class="col-sm-9">
+      																	<textarea name="comments" class="form-control" rows="4" id="comments"><% if (typeof contentObj.comments !== 'undefined' && contentObj.comments !== null) { %><%= contentObj.comments %><% } %></textarea>
+    																</div>
+  																</div>
    															</div>
        			 										</div>
              									</div>
@@ -196,7 +233,7 @@ font-size: 20px;
 										<div class="col-md-12 col-lg-12" align="center">
                								<div class="submit-btn-setting"> <button type="submit" class="btn btn-primary btn-color margin-right-5 btn-sm">Submit</button>
                								<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) {	%>
-               									<a href="<%= backendDirectory %>/list/projects" class="btn btn-danger btn-sm">Cancel</a>
+               									<a href="<%= backendDirectory %>/list/customers" class="btn btn-danger btn-sm">Cancel</a>
                								<%	}else{	%>
                									<button type="reset" class="btn btn-danger btn-sm">Reset</button>
                								<% } %>
@@ -264,7 +301,7 @@ font-size: 20px;
 
 <script src="js/basictable.js"></script>
 <script language="javascript">
-var collectionStr="projects";
+var collectionStr="Companies";
 function save() {
 	var row = $(this).parents('.item-row');
 	var noteUUID=$('.noteUUID').val();
@@ -400,7 +437,7 @@ function savenote(uuid,actionStr, note){
 		fetchNotes();
 		<%	}	%>
 		// validate form on keyup and submit
-		$("#ProjectForm").validate({
+		$("#contentForm").validate({
 			ignore: "",
 			onkeyup: false,
 			errorClass: 'error',
@@ -417,8 +454,9 @@ function savenote(uuid,actionStr, note){
 				}
 			},
 			rules: {
-				name: { required: true },
-				Start_Date: { required: true },
+				Company_Name: { required: true },
+				account_Number: { required: true },
+				address_line_1: { required: true }
 			},
 		});			
 		

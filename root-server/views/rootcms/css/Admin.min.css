@@ -11,6 +11,11 @@ html, body {
 .layout-boxed html, .layout-boxed body {
 	height: 100%
 }
+
+
+
+
+
 body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
@@ -19,11 +24,29 @@ body {
 	overflow-x: hidden;
 	overflow-y: auto
 }
+
+@font-face {	
+	font-family: 'icomoon';
+	src:url('../fonts/icomoon/icomoon.eot');
+	src:url('../fonts/icomoon/icomoon.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/icomoon/icomoon.woff') format('woff'),
+		url('../fonts/icomoon/icomoon.ttf') format('truetype'),
+		url('../fonts/icomoon/icomoon.svg#icomoon') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+
+
 .wrapper {
 	min-height: 100%;
 	position: relative;
 	overflow: hidden
 }
+
+
+
+
 .wrapper:before, .wrapper:after {
 	content: " ";
 	display: table
@@ -31,6 +54,43 @@ body {
 .wrapper:after {
 	clear: both
 }
+
+
+.btn-light-orange {
+    background-color: #fbb83b;
+	border-bottom: 3px solid #d69d33!important;
+    border-right: 3px solid #d69d33!important;
+	 border-left: none!important;
+    border-top: none!important;
+	color:#fff!important;
+	
+   
+}
+
+
+.btn-light-orange a {
+	 border-bottom: 3px solid #d69d33!important;
+    border-right: 3px solid #d69d33!important;
+	color:#fff!important;
+	
+   
+}
+
+
+.btn-light-orange:hover, .btn-light-orange:active, .btn-light-orange.hover {
+	background-color: #fbb83b;border-bottom: 3px solid #d69d33;
+border-right: 3px solid #d69d33;
+border-left:none;
+border-top:none;
+
+}
+
+.btn-light-orange.focus, .btn-light-orange:focus{
+	background-color: #dc9a1e!important;
+}
+
+
+
 .layout-boxed .wrapper {
 	max-width: 1250px;
 	margin: 0 auto;
@@ -2205,7 +2265,9 @@ border-top:none;
 	margin: 0;
 	border-bottom-color: #f4f4f4;
 	border-top-right-radius: 3px;
-	border-top-left-radius: 3px
+	border-top-left-radius: 3px;
+	width: 100%;
+	
 }
 .nav-tabs-custom>.nav-tabs>li {
 	border-top: 3px solid transparent;
@@ -4495,22 +4557,20 @@ filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#e73f7c', endCo
   margin-top: -15px;
 }
 .alert button.close {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  margin-top: -13px;
   z-index: 1033;
-  background-color: #FFFFFF;
-  display: block;
-  border-radius: 50%;
-  opacity: .4;
-  line-height: 11px;
-  width: 25px;
-  height: 25px;
-  outline: 0 !important;
-  text-align: center;
-  padding: 3px;
-  font-weight: 300;
+    background-color: #FFFFFF;
+    display: block;
+    border-radius: 50%;
+    opacity: .4;
+	right: 0px;
+    line-height: 11px;
+    width: 25px;
+    height: 25px;
+    outline: 0 !important;
+    text-align: center;
+    padding: 3px;
+    font-weight: 300;
+
 }
 .alert button.close:hover {
   opacity: .55;
@@ -4545,7 +4605,7 @@ filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#e73f7c', endCo
 
 
 
-/*      Checkbox style and color change and radio         
+/*      Checkbox style and color change and radio         */
 .checkbox,
 .radio {
   margin-bottom: 12px;
@@ -4681,7 +4741,7 @@ filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#e73f7c', endCo
   filter: alpha(opacity=100);
   color: #D9D9D9;
 }
-*/
+
 
 
 .bg-light-blue-500 {
@@ -4813,6 +4873,34 @@ border:1px solid #CCCCCC;-webkit-box-shadow: #FEFFFF 0px 1px 1px ;-moz-box-shado
  background-image: -ms-linear-gradient(top, #E0E0E0, #BDBBBC);
  background-image: -o-linear-gradient(top, #E0E0E0, #BDBBBC);
  background-image: linear-gradient(to bottom, #E0E0E0, #BDBBBC);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#E0E0E0, endColorstr=#BDBBBC);
+}
+
+ .logo-margin {
+    margin-top: 100px;
+}
+.login-panel .panel-heading {
+    background: #2a3f54;
+    color: #fff;
+}
+
+.checkbox input, .radio input{
+	display:block!important;
+}
+
+table > tbody > tr > td {
+    border-right: 1px solid #f8f8f9;
+    border-bottom: 1px solid #e2e2e5;
+}
+
+.table.btn-gradient-grey td {
+    background: #f5f6f7;
+    background: -moz-linear-gradient(top,#f5f6f7 0%,#eaebec 100%);
+    background: -webkit-linear-gradient(top,#f5f6f7 0%,#eaebec 100%);
+    background: linear-gradient(to bottom,#f5f6f7 0%,#eaebec 100%);
+}
+
+.table{
+
 }
 
 
