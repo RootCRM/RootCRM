@@ -1,6 +1,15 @@
 <% include include/main-header %>
 
 <link href="plugins/datetime-picker/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+<style>
+.box-primary h4 {
+    border-bottom: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 20px;
+    margin: 7px 5px 0 0;
+    padding: 9px;
+}
+</style>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
 	<div class="wrapper">	
@@ -43,78 +52,55 @@
       								<input type="hidden" class="form-control" id="id" name="id" value="<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %><%= contentObj._id %><% } %>">
       								<input type="hidden" class="form-control" id="editorField" name="editorField" value="<% if (typeof editorField !== 'undefined' && editorField !== null) { %><%= editorField %><% }else{ %>_id<% } %>">
       								<input type="hidden" class="form-control" id="editorValue" name="editorValue" value="<% if (typeof editorValue !== 'undefined' && editorValue !== null) { %><%= editorValue %><% } %>">
+            						
+            						<div class="row">
+            						<div class="col-xs-6"><div class="box box-primary">
+            						<h4>Main Details</h4>
+            						<div class="box-body"><div class="row"><div class=" col-sm-12 col-lg-11">
             						<div class="form-group">
-                  						<label class="control-label col-md-2" for="first-name">Name<span class="required">*</span></label>
-                  						<div class="col-md-6 col-lg-4">
+                  						<label class="control-label col-md-3" for="first-name">Name<span class="required">*</span></label>
+                  						<div class="col-md-6 col-lg-7">
                     						<input type="text" required="required" id="name" name="name" class="form-control col-md-5 col-xs-12" value="<% if (typeof contentObj.name !== 'undefined' && contentObj.name !== null) { %><%= contentObj.name %><% } %>">
                   						</div>
                 					</div>
               						<div class="form-group">
-                  						<label class="control-label col-md-2" for="">Reported by<span class="required">*</span></label>
-                  						<div class="col-md-6 col-lg-4">
+                  						<label class="control-label col-md-3" for="">Reported by<span class="required">*</span></label>
+                  						<div class="col-md-6 col-lg-7">
                    							<input type="text" required="required" class="form-control col-md-5 col-xs-12" id="reported_by" name="reported_by" value="<% if (typeof contentObj.reported_by !== 'undefined' && contentObj.reported_by !== null) { %><%= contentObj.reported_by %><% } %>">
                   						</div>
                 					</div>
                 					<div class="form-group">
-                  						<label class="control-label col-md-2" for="">Project</label>
-                  						<div class="col-md-6 col-lg-4">
+                  						<label class="control-label col-md-3" for="">Project</label>
+                  						<div class="col-md-6 col-lg-7">
                   							<select required="required" class="form-control col-md-5 col-xs-12" name="project" id="project"></select>
                   						</div>
                 					</div>
                 					<div class="form-group">
-                  						<label class="control-label col-md-2" for="">Assigned to<span class="required">*</span></label>
-                  						<div class="col-md-6 col-lg-4">
+                  						<label class="control-label col-md-3" for="">Assigned to<span class="required">*</span></label>
+                  						<div class="col-md-6 col-lg-7">
                    							<input type="text" required="required" class="form-control col-md-5 col-xs-12" id="assigned_to" name="assigned_to" value="<% if (typeof contentObj.assigned_to !== 'undefined' && contentObj.assigned_to !== null) { %><%= contentObj.assigned_to %><% } %>">
                   						</div>
                 					</div>
                 					<div class="form-group">
-                  						<label class="control-label col-md-2" for="">Description</label>
-                  						<div class="col-md-6 col-lg-4">
+                  						<label class="control-label col-md-3" for="">Description</label>
+                  						<div class="col-md-6 col-lg-7">
                    							<textarea class="form-control col-md-5 col-xs-12" id="description" name="description"><% if (typeof contentObj.description !== 'undefined' && contentObj.description !== null) { %><%= contentObj.description %><% } %></textarea>
                   						</div>
                 					</div>
-                					<div class="form-group">
-										<label class="col-sm-2 control-label">Expected Close </label>
-										<div class="col-md-6 col-lg-4">
-										<div class="input-group date form_datetime " style="max-width:300px;" >
-                    						<input class="form-control col-md-5 col-xs-12" required type="text" id="end_date" name="end_date" value="" readonly>
-                    						<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                						</div>
-                						</div>
-                            		</div>
-                					<div class="form-group">
-										<label class="col-sm-2 control-label">Task Start </label>
-										<div class="col-md-6 col-lg-4">
-										<div class="input-group date form_datetime " style="max-width:300px;" >
-                    						<input class="form-control col-md-5 col-xs-12" required type="text" id="start_date" name="start_date" value="" readonly>
-                    						<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                						</div>
-                						</div>
-                            		</div>
-									<div class="form-group">
-										<label class="col-sm-2 control-label">Due Date </label>
-										<div class="col-md-6 col-lg-4">
-											<div class="input-group date form_datetime " style="max-width:300px;" >
-                    							<input class="form-control col-md-5 col-xs-12" required type="text" id="due_date" name="due_date" value="" readonly>
-                    							<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                							</div>
-                            			</div>
-                            		</div>
-							                 
-									<div class="form-group">
-										<label class="col-sm-2 control-label">Estimated Hour </label>
-										<div class="col-md-6 col-lg-4">
+                					<div class="form-group" >
+										<label class="col-sm-3 control-label">Estimated Hour </label>
+										<div class="col-md-6 col-lg-7">
 											<input name="task_estimated_hours" class="form-control num" type="text" value="<% if (typeof contentObj.task_estimated_hours !== 'undefined' && contentObj.task_estimated_hours !== null) { %><%= contentObj.task_estimated_hours %><% } %>" id="task_estimated_hours">
 										</div>
 									</div>                                                                 
 									<div class="form-group">
-										<label class="col-sm-2 control-label">Rate </label>
-										<div class="col-md-6 col-lg-4">
+										<label class="col-sm-3 control-label">Rate </label>
+										<div class="col-md-6 col-lg-7">
 											<input name="task_rate" class="form-control num" type="text" value="<% if (typeof contentObj.task_rate !== 'undefined' && contentObj.task_rate !== null) { %><%= contentObj.task_rate %><% } %>" id="task_rate">
 										</div>
 									</div>
                 					<div class="form-group">
-    									<label for="" class="col-sm-2 control-label">Status</label>
+    									<label for="" class="col-sm-3 control-label">Status</label>
     									<div class="col-sm-7" style="margin-top:6px;">
     										<div STYLE="margin-right:10px;display:inline-block;">
       		  									<label> <input type="radio" id="Status" name="Status" value="1" <% if (typeof contentObj.Status !== 'undefined' && contentObj.Status !== null && contentObj.Status == 1) { %>checked<% } %> > <strong style="font-weight:600">Active</strong></label>
@@ -124,16 +110,53 @@
     			  							</div>
 										</div>
 									</div>
+                            		</div></div>
+                            		</div></div></div>
+							        <div class="col-xs-6"><div class="box box-primary">
+							        <h4>Important Dates</h4>
+            						<div class="box-body"><div class="row"><div class=" col-sm-12 col-lg-11">
+							        <div class="form-group" style="margin-top:10px;">
+										<label class="col-sm-3 control-label">Expected Close </label>
+										<div class="col-md-6 col-lg-7">
+										<div class="input-group date form_datetime " style="max-width:300px;" >
+                    						<input class="form-control col-md-5 col-xs-12" required type="text" id="end_date" name="end_date" value="<% if (typeof contentObj.end_date !== 'undefined' && contentObj.end_date !== null) { %><%= contentObj.end_date %><% } %>" readonly>
+                    						<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                						</div>
+                						</div>
+                            		</div>
                 					<div class="form-group">
-                   						<div class="col-md-9 col-lg-6" align="CENTER">
+										<label class="col-sm-3 control-label">Task Start </label>
+										<div class="col-md-8 col-lg-7">
+										<div class="input-group date form_datetime " style="max-width:300px;">
+                    						<input class="form-control col-md-5 col-xs-12" required type="text" id="start_date" name="start_date" value="<% if (typeof contentObj.start_date !== 'undefined' && contentObj.start_date !== null) { %><%= contentObj.start_date %><% } %>" readonly>
+                    						<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                						</div>
+                						</div>
+                            		</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">Due Date </label>
+										<div class="col-md-6 col-lg-7">
+											<div class="input-group date form_datetime " style="max-width:300px;" >
+                    							<input class="form-control col-md-5 col-xs-12" required type="text" id="due_date" name="due_date" value="<% if (typeof contentObj.due_date !== 'undefined' && contentObj.due_date !== null) { %><%= contentObj.due_date %><% } %>" readonly>
+                    							<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                							</div>
+                            			</div>
+                            		</div>
+									</div></div>
+                					</div></div></div>
+                					<div class="col-xs-12">
+                					<div class="form-group">
+                   						<div class="col-md-9 col-lg-12" align="CENTER">
                								<div class="submit-btn-setting"> <button type="submit" class="btn btn-primary btn-color margin-right-5 btn-sm">Submit</button>
                								<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) {	%>
-               									<a href="<%= backendDirectory %>/list/categories" class="btn btn-danger btn-sm">Cancel</a>
+               									<a href="<%= backendDirectory %>/list/tasks" class="btn btn-danger btn-sm">Cancel</a>
                								<%	}else{	%>
                									<button type="reset" class="btn btn-danger btn-sm">Reset</button>
                								<% } %>
                								</div>
                							</div>
+                					</div>
+                					</div>
                 					</div>
               					</form>
               				</div>
@@ -168,8 +191,8 @@ $(function () {
 function load_projects(){
 		var jsonRow=backendDirectory+"/api_fetch_list?start=0&limit=100&collection=projects";
 		var projectSelectedStr="";
-		<% if (typeof contentObj.project_uuid !== 'undefined' && contentObj.project_uuid !== null) { %>
-			projectSelectedStr="<%= contentObj.project_uuid %>";
+		<% if (typeof contentObj.project !== 'undefined' && contentObj.project !== null) { %>
+			projectSelectedStr="<%= contentObj.project %>";
 		<% } %>
 		$.getJSON(jsonRow,function(html){
 			var contentHtml="<option value=''>--Select--</option>";

@@ -155,6 +155,7 @@ app.get(backendDirectoryPath+'/', requireLogin, function(req, res) {
 	}
 }); 
 
+//index
 app.get(backendDirectoryPath+'/index', requireLogin, function(req, res) {
 	if(req.authenticationBool){
 		res.render(accessFilePath+'index', {
@@ -239,6 +240,7 @@ app.post(backendDirectoryPath+'/validlogin', (req, res) => {
 	});
 })
 
+// task scheduler
 app.get(backendDirectoryPath+'/task_scheduler', (req, res) => {
 	var schedulerFrom = req.query.schedulerFrom, schedulerTo=req.query.schedulerTo, collectionStr=req.query.collection;
 	var outputObj = new Object();
@@ -255,6 +257,7 @@ app.get(backendDirectoryPath+'/task_scheduler', (req, res) => {
 	
 });
 
+//post request to save task scheduler
 app.get(backendDirectoryPath+'/save_task_scheduler', (req, res) => {
 	var getJson=req.query;
 	var outputObj = new Object();
@@ -264,8 +267,14 @@ app.get(backendDirectoryPath+'/save_task_scheduler', (req, res) => {
 		initFunctions.returnFindOneByMongoID(db, 'tasks', getJson.task_id, function(resultObject) {
 			if(resultObject.aaData){
 				var contentObj=resultObject.aaData;
+				var startTimeStr=parseInt(getJson.datetimestart);
+				var addHours=1;
+				if(contentObj.task_estimated_hours && contentObj.task_estimated_hours!=null){
+					addHours=parseInt(contentObj.task_estimated_hours);
+				}
 				
-				db.collection(table_nameStr).save({"title": contentObj.name, "reported_by": contentObj.reported_by, "assigned_to": contentObj.assigned_to, "description": contentObj.description, "task_id": getJson.task_id, "employee_id" : getJson.emp_id, "timestamp_start" : getJson.datetimestart, "timestamp_end" : getJson.datetimeend}, (err, result) => {
+				var endTimeStr=parseInt(startTimeStr+(addHours*60*60*1000));
+				db.collection(table_nameStr).save({"title": contentObj.name, "reported_by": contentObj.reported_by, "assigned_to": contentObj.assigned_to, "description": contentObj.description, "task_id": getJson.task_id, "employee_id" : getJson.emp_id, "timestamp_start" : getJson.datetimestart, "timestamp_end" : endTimeStr}, (err, result) => {
 					if(err){
 						outputObj["errormessage"]   = 'Timeslip can\'t be added';
 						res.send(outputObj);
@@ -321,6 +330,117 @@ app.get(backendDirectoryPath+'/save_task_scheduler', (req, res) => {
 	}
 })
 
+//api to insert, update or delete
+app.get(backendDirectoryPath+'/api_crud/', requireLogin, function(req, res) {
+	var uniqueFieldNameStr = "", uniqueFieldValueStr="", actionStr="", collectionStr="";
+	var outputObj = new Object();
+	
+	if(req.authenticationBool){
+		var postContent=req.query;
+		console.log(postContent);
+		if(req.query.collection){
+			collectionStr=req.query.collection;
+			delete postContent['collection']; 
+		}
+	
+		if(req.query.action){
+			actionStr=req.query.action;
+			delete postContent['action']; 
+		}
+	
+		if(req.query.fieldName){
+			uniqueFieldNameStr=req.query.fieldName;
+			delete postContent['fieldName']; 
+		}
+	
+		if(req.query.fieldValue){
+			uniqueFieldValueStr=req.query.fieldValue;
+			delete postContent['fieldValue']; 
+		}
+		postContent.Modified=initFunctions.currentTimestamp();
+		
+		if(collectionStr!=""){
+			if(uniqueFieldNameStr!="" && uniqueFieldValueStr!=""){
+			var checkForExistenceObj= '{'+uniqueFieldNameStr +': \''+uniqueFieldValueStr+'\'}';
+			eval('var findStr='+checkForExistenceObj);
+			switch (actionStr) {
+    			case 'findOne':
+        			db.collection(collectionStr).findOne(findStr, function(searchErr, document) {
+        				if(document){
+      						outputObj["success"] = uniqueFieldValueStr+" exists!";
+      						outputObj["aaData"] = document;
+      						res.send(outputObj);
+      					}else{
+      						outputObj["error"]   = "No results found!";
+							res.send(outputObj);
+      					}
+					});
+        			break;
+        		case 'create':
+        			db.collection(collectionStr).findOne(findStr, function(searchErr, document) {
+        				if (searchErr) {
+        					outputObj["error"]   = "Error occurred while saving ["+searchErr+"], please try after some time!";
+							res.send(outputObj);
+      					}else if(document){
+      						outputObj["error"] = "This "+uniqueFieldValueStr+" already exists!"
+      						res.send(outputObj);
+      					}else{
+      						postContent.Created=initFunctions.currentTimestamp();
+      						db.collection(collectionStr).save(postContent, (err4, result) => {
+      							if (err4) outputObj["error"]  = "Error occurred while saving ["+err4+"], please try after some time!";
+    							outputObj["success"]  = uniqueFieldValueStr+" saved successfully!";
+    							res.send(outputObj);
+  							});
+      					}
+					});
+        			break;
+    			case 'update':
+    				db.collection(collectionStr).findOne(findStr, function(searchErr, document) {
+        				if(document){
+      						db.collection(collectionStr).update(findStr, postContent, (err1	, result) => {
+    							if (err1) outputObj["error"]="Error occurred while updating ["+err1+"], please try after some time!";
+    							outputObj["success"]= uniqueFieldValueStr+" updated successfully!";
+    							res.send(outputObj);
+  							});
+						}else{
+							outputObj["error"]   = "Error occurred while updating ["+searchErr+"], please try after some time!";
+							res.send(outputObj);
+						}
+					});
+       				break;
+       			case 'delete':
+       				db.collection(collectionStr).findOne(findStr, function(searchErr, document) {
+       					if(document){
+							db.collection(table_nameStr).remove(findStr, function(err, result){
+    							if (err1) outputObj["error"]="Error occurred while deleting ["+err1+"], please try after some time!";
+    							outputObj["success"]="Deleted successfully!";
+    							res.send(outputObj);
+  							});
+						}else {
+							outputObj["error"]   = "Error occurred while deleting, please try after some time!";
+							res.send(outputObj);
+						}
+					});
+       				break;
+    			default:
+        			outputObj["error"]   = "Please specify the action!";
+					res.send(outputObj);
+			}
+			}else{
+				outputObj["error"]   = "Please specify unique field name and its value!";
+				res.send(outputObj);
+			}
+		}else{
+			outputObj["error"]   = "Please pass the collection name!";
+			res.send(outputObj);
+		}
+	}else{
+		outputObj["error"]   = "Authorization error!";
+		res.send(outputObj);
+	}
+}); 
+
+//GENERIC: fetch listing depending upon collection or template passed
 app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res) {
 	var itemsPerPage = 10, pageNum=1, templateStr="", collectionStr="";
 	var outputObj = new Object();
@@ -372,6 +492,7 @@ app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res
 	}
 }); 
 
+// fetch record detail
 app.get(backendDirectoryPath+'/collection_details/', requireLogin, function(req, res) {
 	var templateStr="", collectionStr="", search_id="";
 	var outputObj = new Object();
@@ -413,6 +534,7 @@ app.get(backendDirectoryPath+'/collection_details/', requireLogin, function(req,
 	}
 }); 
 
+// listing pages ui
 app.get(backendDirectoryPath+'/list/:id', requireLogin, function(req, res) {
 	if(req.authenticationBool){
 		var pageRequested = req.params.id;
@@ -433,6 +555,7 @@ app.get(backendDirectoryPath+'/list/:id', requireLogin, function(req, res) {
 	}
 })
 
+//fetch Table fields
 app.get(backendDirectoryPath+'/fetchTableColumns', requireLogin, function(req, res) {
 	if(req.authenticationBool){
 		initFunctions.fetchTableColumns(db, req.query.e, function(result) {	
@@ -445,6 +568,7 @@ app.get(backendDirectoryPath+'/fetchTableColumns', requireLogin, function(req, r
 	}
 });
 
+// render pages
 app.get(backendDirectoryPath+'/:id', requireLogin, function(req, res) {
 	if(req.authenticationBool){
 	var pageRequested = req.params.id;
@@ -625,6 +749,7 @@ app.get(backendDirectoryPath+'/:id', requireLogin, function(req, res) {
     }	
 }); 
 
+//save form
 app.post(backendDirectoryPath+'/save/:id', requireLogin, (req, res) => {
 	if(req.authenticationBool){
 	var postJson=req.body;
