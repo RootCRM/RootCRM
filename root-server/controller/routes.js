@@ -331,30 +331,30 @@ app.get(backendDirectoryPath+'/save_task_scheduler', (req, res) => {
 })
 
 //api to insert, update or delete
-app.get(backendDirectoryPath+'/api_crud/', requireLogin, function(req, res) {
+app.post(backendDirectoryPath+'/api_crud/', requireLogin, function(req, res) {
 	var uniqueFieldNameStr = "", uniqueFieldValueStr="", actionStr="", collectionStr="";
 	var outputObj = new Object();
 	
 	if(req.authenticationBool){
-		var postContent=req.query;
-		console.log(postContent);
-		if(req.query.collection){
-			collectionStr=req.query.collection;
+		var postContent=req.body;
+		
+		if(req.body.collection){
+			collectionStr=req.body.collection;
 			delete postContent['collection']; 
 		}
 	
-		if(req.query.action){
-			actionStr=req.query.action;
+		if(req.body.action){
+			actionStr=req.body.action;
 			delete postContent['action']; 
 		}
 	
-		if(req.query.fieldName){
-			uniqueFieldNameStr=req.query.fieldName;
+		if(req.body.fieldName){
+			uniqueFieldNameStr=req.body.fieldName;
 			delete postContent['fieldName']; 
 		}
 	
-		if(req.query.fieldValue){
-			uniqueFieldValueStr=req.query.fieldValue;
+		if(req.body.fieldValue){
+			uniqueFieldValueStr=req.body.fieldValue;
 			delete postContent['fieldValue']; 
 		}
 		postContent.Modified=initFunctions.currentTimestamp();
