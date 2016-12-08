@@ -185,6 +185,39 @@ app.get('/sitemap', function(req, res) {
     });
 });
 
+//fetch tokens
+app.get('/tokens', function(req, res) {
+	var tokensStr = "";
+	
+	if(req.query.code){
+		tokensStr=req.query.code;
+	}
+	var tokensArr = tokensStr.split(",");
+	var myObj = new Object();	
+	
+	if(tokensArr.length>0){
+		db.collection('tokens').find({ "code": { "$in" : tokensArr} }).toArray(function(err, document) {
+			if (err) {
+				
+      			myObj["error"]   = err;
+				res.send(myObj);
+      		} else if (document) {
+      			if(document!=""){
+      				myObj["aaData"]   = document;
+					res.send(myObj);
+     				
+				}else{
+					myObj["error"]   = 'not found';
+					res.send(myObj);
+				}
+      		}
+      	});
+	}else{
+      	myObj["error"]   = 'pass the code';
+		res.send(myObj);
+    }  	
+});
+
 //search results page
 app.get('/search-results', function(req, res) {
 	var itemsPerPage = 10, pageNum=1;
