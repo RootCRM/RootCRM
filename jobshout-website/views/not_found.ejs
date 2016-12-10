@@ -1,0 +1,64 @@
+<%  include ../partials/main-header %>
+<style>
+	.noresultbcg{
+	background:url(images/404-bcg.jpg) center top no-repeat;
+	height:503px;
+	margin-top:30px;	
+}
+
+.noresultbcg h2{
+	margin-top:34px;
+	color:#444242;
+	font-size:25px;
+	line-height: 40px;
+	font-family: "museo_sans_cyrl100";
+	text-align: left;
+	margin-bottom: 27px;
+}
+
+.noresultbcg ul{
+	list-style:none;
+	padding:0px;
+	margin:0px;
+}
+
+.noresultbcg ul li{
+	background:url(images/404-li-bcg.png) left top  no-repeat;
+	font-size:16px;
+	text-align:left;
+	font-family: "museo_sans_cyrl100";
+	background-position: -42px;
+	margin-bottom:7px;
+	line-height:38px;
+	padding-left:50px;
+}
+</style>
+</head>
+<body>
+	<div id="wrapper">
+		<% include ../partials/header %>
+
+		<div id="contentContainer" class="full-width">
+			<!-- Content Start -->
+			<div style="float:left;">
+				<img src="images/404.jpg" width="417" height="279" alt=""/>
+			</div>
+			<div style="padding-left:20px; padding-top:10px;" id="sliderRight">
+				<h1 style="line-height:39px;">Sorry! The page you were looking <br />for was not found.  </h1>
+				<ul style="padding-left:18px;">
+					<li>If you typed in the address, check your spelling. Could just be a typo.</li>
+					<li>Go to <a href="/">main page.</a></li>
+					<!--<li>Get to know us a little better - <a href="/about">About us</a>, or visit our full website Site Map here.</li>
+					--><li><p class="buttons"> <a class="btn black" href="http://www.facebook.com/pages/Jobshout/139675936083142"><span>Visit us on Facebook</span></a> <a class="btn black" href="http://twitter.com/#!/jobshoutnews" target="_blank" title="follow our tweets."><span>follow our tweets.</span></a> </p></li>
+				</ul>
+			</div>
+			<br>
+		</div>
+				<!-- Content Finish --> 
+	</div>
+	
+   	<!--footer start-->
+    <% include ../partials/footer %>
+    <!--footer end-->
+  </body>
+</html>

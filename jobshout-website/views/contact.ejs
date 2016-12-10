@@ -1,0 +1,236 @@
+<%  include ../partials/main-header %>
+<% var tokenContentStr="";
+if (typeof address_token !== 'undefined' && address_token !== null && address_token !="") {
+	var tokenContentStr = JSON.parse(address_token.token_content);  
+}
+%>
+<link media="screen" rel="stylesheet" href="css/usertabs.css" />
+<script type="text/javascript">
+$(document).ready(function(){
+	$( "#tabs" ).tabs();
+});
+</script>
+</head>
+<body>
+ 	<div id="wrapper">
+		<% include ../partials/header %>
+
+<div id="contentContainer" class="full-width">
+
+<div class="blog">
+<h1>Contact</h1>
+<% if (typeof queryStr.error !== 'undefined' && queryStr.error !== null && queryStr.error !="") {	%>
+	<span style="font-weight: bold;font-size:16px;"><%=  queryStr.error %></span></br></br>
+<% 	}	%>
+<% if (typeof queryStr.success !== 'undefined' && queryStr.success !== null && queryStr.success !="") {	%>
+	<span style="font-weight: bold;font-size:16px;color:green;"><%=  queryStr.success %></span></br></br>
+<% 	}	%>
+<div id="tabs">
+    <ul>
+    	<% if (typeof tokenContentStr['uk_head_office'] !== 'undefined' && tokenContentStr['uk_head_office'] !== null && tokenContentStr['uk_head_office']!="") {	%>
+        <li><a href="#tabs-1">UK Head Office</a></li>
+        <% } %>
+         <% if (typeof tokenContentStr['uk_registered_office'] !== 'undefined' && tokenContentStr['uk_registered_office'] !== null && tokenContentStr['uk_registered_office']!="") { %>
+        <li><a href="#tabs-2">UK Registered Office</a></li>
+        <% } %>
+       	 <% if (typeof tokenContentStr['india'] !== 'undefined' && tokenContentStr['india'] !== null && tokenContentStr['india']!="") { %>
+        <li style="width:249px;"><a href="#tabs-3">India Support Centre</a></li>
+          <% } %>
+          <% if (typeof tokenContentStr['australia'] !== 'undefined' && tokenContentStr['australia'] !== null && tokenContentStr['australia']!="") { %>
+        <li><a href="#tabs-4" onclick="initialize_aus()">Australia Office</a></li>
+         <% } %>
+    </ul>
+    	<% if (typeof tokenContentStr['uk_head_office'] !== 'undefined' && tokenContentStr['uk_head_office'] !== null && tokenContentStr['uk_head_office']!="") {
+    		var addrDetails= tokenContentStr['uk_head_office']	%>
+    <!--Begin of Tab 1-->
+    <div id="tabs-1" style="width: auto;">
+    <div class="textwidget" style="width: 180px; float: left">
+              <p>
+			  <img src="images/head-ofice.jpg" width="174" height="129"  alt=""/> </p>
+			 <% if (typeof addrDetails.address !== 'undefined' && addrDetails.address !== null) {	%>
+			 	<%- addrDetails.address %><br>
+			 <% }else{ %>
+			  <p>SUITE 608, HAMILTON HOUSE, 
+				111 MARLOWES, 
+				HEMEL HEMPSTEAD,
+				HERTS <br />
+
+				HP1 1BB UK <br> </p><br><br>
+			<% } %>
+			 <% if (typeof addrDetails.sales_number !== 'undefined' && addrDetails.sales_number !== null) {	%>
+            <div>For sales please call:<br><%= addrDetails.sales_number %><br></div><br>
+            <% } %>
+            <% if (typeof addrDetails.email_address !== 'undefined' && addrDetails.email_address !== null) {	%>
+                Email: <a href="mailto:<%= addrDetails.email_address %>"><%= addrDetails.email_address %></a><br>
+            <% } %>
+            <% if (typeof addrDetails.phone_number !== 'undefined' && addrDetails.phone_number !== null) {	%>
+                For support call:<br><%= addrDetails.phone_number %><br>
+             <% } %>
+            <% if (typeof addrDetails.fax_number !== 'undefined' && addrDetails.fax_number !== null) {	%>
+				UK Fax Number:&nbsp <%= addrDetails.fax_number %>
+            <% } %> 
+           </div>
+          <% if (typeof addrDetails.map !== 'undefined' && addrDetails.map !== null) {	%>
+           <div class="textwidget" style="width: 460; float: left">
+				<iframe src="<%= addrDetails.map %>" width="750" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><br /><small><a href="https://www.google.com/maps?ll=51.752303,-0.472356&z=15&t=m&hl=en-US&gl=IN&mapclient=embed&q=Hamilton+House+111+Marlowes+Hemel+Hempstead,+Hertfordshire+HP1+1BB,+UK" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+			</div>
+           <% } %>
+           <div style="clear:both;"></div>  
+    </div>
+    <!--End of Tab 1-->
+    <% } %>
+    <% if (typeof tokenContentStr['uk_registered_office'] !== 'undefined' && tokenContentStr['uk_registered_office'] !== null && tokenContentStr['uk_registered_office']!="") {
+    		var addrDetails= tokenContentStr['uk_registered_office']	%>
+    <!--Begin of Tab 2-->
+    <div id="tabs-2" style="width: auto;">
+    <div class="textwidget" style="width: 180px; float: left">
+              
+			 <% if (typeof addrDetails.address !== 'undefined' && addrDetails.address !== null) {	%>
+			 	<%- addrDetails.address %><br>
+			 <% }else{ %>
+			  <p>SUITE 608, HAMILTON HOUSE, 
+				111 MARLOWES, 
+				HEMEL HEMPSTEAD,
+				HERTS <br />
+
+				HP1 1BB UK <br> </p><br><br>
+			<% } %>
+			 <% if (typeof addrDetails.sales_number !== 'undefined' && addrDetails.sales_number !== null) {	%>
+            <div>For sales please call:<br><%= addrDetails.sales_number %><br></div><br>
+            <% } %>
+            <% if (typeof addrDetails.email_address !== 'undefined' && addrDetails.email_address !== null) {	%>
+                Email: <a href="mailto:<%= addrDetails.email_address %>"><%= addrDetails.email_address %></a><br>
+            <% } %>
+            <% if (typeof addrDetails.phone_number !== 'undefined' && addrDetails.phone_number !== null) {	%>
+                For support call:<br><%= addrDetails.phone_number %><br>
+             <% } %>
+            <% if (typeof addrDetails.fax_number !== 'undefined' && addrDetails.fax_number !== null) {	%>
+				UK Fax Number:&nbsp <%= addrDetails.fax_number %>
+            <% } %> 
+           </div>
+          <% if (typeof addrDetails.map !== 'undefined' && addrDetails.map !== null) {	%>
+           <div class="textwidget" style="width: 460; float: left">
+				<iframe src="<%= addrDetails.map %>" width="750" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><br /><small><a href="https://www.google.com/maps?ll=51.752303,-0.472356&z=15&t=m&hl=en-US&gl=IN&mapclient=embed&q=Hamilton+House+111+Marlowes+Hemel+Hempstead,+Hertfordshire+HP1+1BB,+UK" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+			</div>
+           <% } %>
+           <div style="clear:both;"></div>  
+    </div>
+    <!--End of Tab 2-->
+    <% } %>
+   <% if (typeof tokenContentStr['india'] !== 'undefined' && tokenContentStr['india'] !== null && tokenContentStr['india']!="") {
+    		var addrDetails= tokenContentStr['india']	%>
+    <!--Begin of Tab 3-->
+    <div id="tabs-3" style="width: auto;">
+    <div class="textwidget" style="width: 180px; float: left">
+              
+			 <% if (typeof addrDetails.address !== 'undefined' && addrDetails.address !== null) {	%>
+			 	<%- addrDetails.address %><br>
+			 <% }else{ %>
+			  <p>SUITE 608, HAMILTON HOUSE, 
+				111 MARLOWES, 
+				HEMEL HEMPSTEAD,
+				HERTS <br />
+
+				HP1 1BB UK <br> </p><br><br>
+			<% } %>
+			 <% if (typeof addrDetails.sales_number !== 'undefined' && addrDetails.sales_number !== null) {	%>
+            <div>For sales please call:<br><%= addrDetails.sales_number %><br></div><br>
+            <% } %>
+            <% if (typeof addrDetails.email_address !== 'undefined' && addrDetails.email_address !== null) {	%>
+                Email: <a href="mailto:<%= addrDetails.email_address %>"><%= addrDetails.email_address %></a><br>
+            <% } %>
+            <% if (typeof addrDetails.phone_number !== 'undefined' && addrDetails.phone_number !== null) {	%>
+                For support call:<br><%= addrDetails.phone_number %><br>
+             <% } %>
+            <% if (typeof addrDetails.fax_number !== 'undefined' && addrDetails.fax_number !== null) {	%>
+				UK Fax Number:&nbsp <%= addrDetails.fax_number %>
+            <% } %> 
+           </div>
+          <% if (typeof addrDetails.map !== 'undefined' && addrDetails.map !== null) {	%>
+           <div class="textwidget" style="width: 460; float: left">
+				<iframe src="<%= addrDetails.map %>" width="750" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><br /><small><a href="https://www.google.com/maps?ll=51.752303,-0.472356&z=15&t=m&hl=en-US&gl=IN&mapclient=embed&q=Hamilton+House+111+Marlowes+Hemel+Hempstead,+Hertfordshire+HP1+1BB,+UK" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+			</div>
+           <% } %>
+           <div style="clear:both;"></div>  
+    </div>
+    <!--End of Tab 3-->
+    <% } %>
+    
+    <% if (typeof tokenContentStr['australia'] !== 'undefined' && tokenContentStr['australia'] !== null && tokenContentStr['australia']!="") {
+    		var addrDetails= tokenContentStr['australia']	%>
+    <!--Begin of Tab 4-->
+    <div id="tabs-4" style="width: auto;">
+    <div class="textwidget" style="width: 180px; float: left">
+             
+			 <% if (typeof addrDetails.address !== 'undefined' && addrDetails.address !== null) {	%>
+			 	<%- addrDetails.address %><br>
+			 <% }else{ %>
+			  <p>SUITE 608, HAMILTON HOUSE, 
+				111 MARLOWES, 
+				HEMEL HEMPSTEAD,
+				HERTS <br />
+
+				HP1 1BB UK <br> </p><br><br>
+			<% } %>
+			 <% if (typeof addrDetails.sales_number !== 'undefined' && addrDetails.sales_number !== null) {	%>
+            <div>For sales please call:<br><%= addrDetails.sales_number %><br></div><br>
+            <% } %>
+            <% if (typeof addrDetails.email_address !== 'undefined' && addrDetails.email_address !== null) {	%>
+                Email: <a href="mailto:<%= addrDetails.email_address %>"><%= addrDetails.email_address %></a><br><br>
+            <% } %>
+            <% if (typeof addrDetails.phone_number !== 'undefined' && addrDetails.phone_number !== null) {	%>
+                For support call:<br><%= addrDetails.phone_number %><br>
+             <% } %>
+            <% if (typeof addrDetails.fax_number !== 'undefined' && addrDetails.fax_number !== null) {	%>
+				UK Fax Number:&nbsp <%= addrDetails.fax_number %>
+            <% } %> 
+           </div>
+          <% if (typeof addrDetails.map !== 'undefined' && addrDetails.map !== null) {	%>
+           <div class="textwidget" style="width: 460; float: left">
+				<iframe src="<%= addrDetails.map %>" width="750" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><br /><small><a href="https://www.google.com/maps?ll=51.752303,-0.472356&z=15&t=m&hl=en-US&gl=IN&mapclient=embed&q=Hamilton+House+111+Marlowes+Hemel+Hempstead,+Hertfordshire+HP1+1BB,+UK" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+			</div>
+           <% } %>
+           <div style="clear:both;"></div>  
+    </div>
+    <!--End of Tab 4-->
+    <% } %>
+</div>
+</div>
+</div>
+</div>
+
+   	<!--footer start-->
+    <% include ../partials/footer %>
+    <!--footer end-->
+    <script src="js/jquery.validate.js"></script>
+    <script type="text/javascript">
+$(document).ready(function(){
+	$("#ajax-contact-form").validate({
+		rules: {
+			name: "required",
+			email: {
+				required: true,
+				email: true
+			},
+			subject: "required",
+			message: "required",
+			captcha_code: "required",
+			
+		},
+		messages: {
+			name: "Please enter your name",
+			email: {
+				required: "Please enter your E-mail",
+				email: "Please enter valid E-mail"
+			},
+			subject: "Please enter Subject",
+			message: "Please enter Message",
+			captcha_code: "Please enter Security Code",
+		}
+	});
+
+});
+
+</script>
+  </body>
+</html>

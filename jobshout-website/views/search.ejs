@@ -1,0 +1,154 @@
+<%  var searchTerm="";
+if (typeof queryString !== 'undefined' && queryString !== null) {
+searchTerm=queryString;
+} 
+%>
+
+<% include ../partials/main-header %>
+<link media="screen" rel="stylesheet" href="css/usertabs.css" />
+</head>
+<body>
+
+	<div id="wrapper">
+		<% include ../partials/header %>
+
+		<div id="contentContainer" class="full-width">
+
+		<div class="blog">
+			<h1>Search result for '<%= searchTerm %>'</h1>
+			<div id="tabs">
+   				<ul >
+        			<li><a href="#tab-1" onClick="$.doSearch('site','<%= searchTerm %>');" class="">Site search result</a></li>
+        			<li><a href="#tab-2" onClick="$.doSearch('blog','<%= searchTerm %>');" class="">Blog</a></li>
+        			<li><a href="#tab-3" onClick="$.doSearch('news','<%= searchTerm %>');" class="">News</a></li>
+    			</ul>
+    			<div id="tab-1">
+    				<div style="text-align:center;margin-top:20px;" >
+						<a style="width: 60%; margin-bottom: 10px;" class="btn btn-primary display_more_btn" title="Load more" onclick="load_more()" href="javascript:void(0);">
+						Load more
+						</a>
+        			</div>
+        			<div style="text-align:center;margin-top:20px;" class="img_loading_div">
+						Loading...<br /> <img id="imgAjaxLoading" src="images/loading-1.gif"" width="109" height="25" style="border-width: 0px;">
+					</div>
+        		</div><!--End of Tab 1-->
+
+    			<div id="tab-2">
+    				<div style="text-align:center;margin-top:20px;" >
+						<a style="width: 60%; margin-bottom: 10px;" class="btn btn-primary display_more_btn" title="Load more" onclick="load_more()" href="javascript:void(0);">
+						Load more
+						</a>
+        			</div>
+        			<div style="text-align:center;margin-top:20px;" class="img_loading_div">
+						Loading...<br /> <img id="imgAjaxLoading" src="images/loading-1.gif"" width="109" height="25" style="border-width: 0px;">
+					</div>
+   				</div><!--End of Tab 2-->    
+
+    			<div id="tab-3">
+    				<div style="text-align:center;margin-top:20px;" >
+						<a style="width: 60%; margin-bottom: 10px;" class="btn btn-primary display_more_btn" title="Load more" onclick="load_more()" href="javascript:void(0);">
+						Load more
+						</a>
+        			</div>
+        			<div style="text-align:center;margin-top:20px;" class="img_loading_div">
+						Loading...<br /> <img id="imgAjaxLoading" src="images/loading-1.gif"" width="109" height="25" style="border-width: 0px;">
+					</div>
+    			</div><!--End of Tab 3-->    
+
+			</div>
+	
+		</div>
+		</div>
+	</div>
+ 	
+	<!--footer start-->
+    <% include ../partials/footer %>
+    <!--footer end-->
+<script>
+var xhrStatus;
+var searchkeyword="", typeStr="site";
+var pageSize=10, totalNum=0;
+var start=0, end=pageSize;
+
+$(document).ready(function() {
+	$( "#tabs" ).tabs();
+	var qryStr="";
+	<% if (typeof queryString !== 'undefined' && queryString !== null) {	%>
+		qryStr="<%= queryString %>";
+	<%	}	%>
+	$('.display_more_btn').hide();
+		$.doSearch('site',qryStr);
+});
+
+function load_more(){
+	$('.display_more_btn').hide();
+	$('.img_loading_div').show();
+	start=end+1;
+	end=start+pageSize;
+	load_data();
+}
+	$.updateContent = function updateContent(type,html){
+		$('.ImageLoadingDiv').hide();
+		if(type=='site'){
+			$("#tab-1").append(html);
+		}
+		if(type=='blog'){
+			$("#tab-2").append(html);
+		}
+		else if(type=='news'){
+			$("#tab-3").append(html);
+		}
+	}
+	
+	$.doSearch = function doSearch(type,searchText){
+		$("#tab-1").html('');$("#tab-2").html('');$("#tab-3").html('');
+		start=0, end=pageSize;
+
+		$('.display_more_btn').hide();
+		$('.img_loading_div').show();
+		searchkeyword=searchText;
+		typeStr=type;
+		$('#typeText').attr('value',type);
+		load_data();
+	}
+	
+	function load_data(){
+		$(".alert").remove();
+		totalNum=0;
+		var jsonRow="/search-results?start="+start+"&s="+searchkeyword+"&type="+typeStr+"&limit="+pageSize,
+		xhrStatus=$.getJSON(jsonRow,function(html){
+			if(html.error){
+				var msg='<h2>No search results found!</h2>';
+				$.updateContent(typeStr,msg);
+			}else{
+				if(html.total){
+					totalNum=parseInt(html.total);
+				}
+				var contentHtml="";
+				$.each(html.aaData, function(i,row){
+					if(row.Code!=""){
+						contentHtml+='<h2><a href="/'+row.Code+'" title="'+row.Document+'">'+row.Document+'</a></h2>';
+                      	contentHtml+='<p>';
+                      	var bodyStr=row.Body;
+                      	bodyStr=bodyStr.replace(/<\/?[^>]+(>|$)/g, "");
+                      	bodyStr=bodyStr.substr(0, 250);
+                      	contentHtml+=bodyStr+'... <a href="/'+row.Code+'" title="'+row.Document+'">more</a>';
+                      	contentHtml+='</p>';
+					}
+				});
+				$.updateContent(typeStr,contentHtml);
+			}
+			if(end< totalNum){
+				if(totalNum==0){
+					$('.display_more_btn').hide();
+				}else{
+					$('.display_more_btn').show();
+				}
+			}
+			$('.img_loading_div').hide();
+		});
+	}
+
+</script>
+  </body>
+</html>
