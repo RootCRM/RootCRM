@@ -1,11 +1,11 @@
 	/**********************************************************************
-	*  Author: Neha Kapoor (neha@rootcrm.org)
-	*  Project Lead: Balinder WALIA (bwalia@rootcrm.org)
+	*  Author: Neha Kapoor (neha@jobshout.org)
+	*  Project Lead: Balinder WALIA (bwalia@jobshout.org)
 	*  Project Lead Web...: https://twitter.com/balinderwalia
-	*  Name..: ROOTCRM
-	*  Desc..: Root CRM (part of RootCrm Suite of Apps)
-	*  Web: http://rootcrm.org
-	*  License: http://rootcrm.org/LICENSE.txt
+	*  Name..: Jobshout Server NodeJS
+	*  Desc..: Jobshout Server (part of Jobshout Suite of Apps)
+	*  Web: http://jobshout.org
+	*  License: http://jobshout.org/LICENSE.txt
 	**/
 
 	/**********************************************************************
@@ -18,56 +18,52 @@ module.exports = function(init, app, db){
 	var mongodb=init.mongodb;
 	
 	//index page
-	app.get('/', function(req, res) {
+	app.get('/', checkForCookie, function(req, res) {
 		initFunctions.returnNavigation(db, function(resultNav) {
 			res.render('index', {
-      	 		navigation : resultNav 
+      	 		navigation : resultNav,
+      	 		displayCookieBool : req.ucsCookie 
        		});
     	});
 	});
 	
-	app.get('/index', function(req, res) {
+	app.get('/index', checkForCookie, function(req, res) {
 		initFunctions.returnNavigation(db, function(resultNav) {
 			res.render('index', {
-      	 		navigation : resultNav 
+      	 		navigation : resultNav,
+      	 		displayCookieBool : req.ucsCookie 
        		});
     	});
 	});
 	
 	
-	//clients testimonials
-	app.get('/client-testimonials', function(req, res) {
+	//case studies
+	app.get('/case-studies', checkForCookie, function(req, res) {
 		initFunctions.returnNavigation(db, function(resultNav) {
-      		res.render('client-testimonial', {
-      	 		navigation : resultNav 
+      		res.render('case-studies', {
+      	 		navigation : resultNav ,
+      	 		displayCookieBool : req.ucsCookie 
        		});
    	 	});
-	})
-	//projects undertaken
-	app.get('/projects-undertaken', function(req, res) {
-		initFunctions.returnNavigation(db, function(resultNav) {
-      		db.collection('documents').findOne({"Code" : "projects-undertaken"}, function(err, document) {
-      			if (err) {
-      				res.redirect('/not_found');
-      			}else if(document){
-					res.render('projects-undertaken', {
-      					resultData : document,
-      	 				navigation : resultNav 
-       				});
-       			}else{
-       				res.redirect('/not_found');
-       			}
-			});
-		});
 	});
-		
-	//web mail
-	app.get('/webmail', function(req, res) {
-		res.render('webmail');
-	}); 
 	
+	//signup
+	app.get('/signup', checkForCookie, function(req, res) {
+		initFunctions.returnNavigation(db, function(resultNav) {
+      		res.render('signup', {
+      	 		navigation : resultNav,
+      	 		displayCookieBool : req.ucsCookie  
+       		});
+   	 	});
+	});
+	
+	//tour slider
+	app.get('/tour-slider', function(req, res) {
+		res.render('tour-slider');
+	}); 
+
 	//our clients
-	app.get('/our-clients', function(req, res) {
+	app.get('/our-clients', checkForCookie, function(req, res) {
 		initFunctions.returnNavigation(db, function(resultNav) {
       		db.collection('documents').findOne({"Code" : "our-clients"}, function(err, document) {
       			if (err) {
@@ -75,7 +71,8 @@ module.exports = function(init, app, db){
       			}else if(document){
       				res.render('our-clients', {
       					resultData : document,
-      	 				navigation : resultNav 
+      	 				navigation : resultNav,
+      	 				displayCookieBool : req.ucsCookie  
        				});
        			}else{
        				res.redirect('/not_found');
@@ -85,11 +82,12 @@ module.exports = function(init, app, db){
 	});
 
 	//search page
-	app.get('/search', function(req, res) {
+	app.get('/search', checkForCookie, function(req, res) {
 		initFunctions.returnNavigation(db, function(result) {
      	 	res.render('search', {
       			queryString : req.query.s,
-      	 		navigation : result 
+      	 		navigation : result,
+      	 		displayCookieBool : req.ucsCookie 
        		});
     	});
 	});
@@ -174,12 +172,13 @@ app.get('/unsubscribe', function(req, res) {
 })
 
 //search page
-app.get('/sitemap', function(req, res) {
+app.get('/sitemap', checkForCookie, function(req, res) {
 	initFunctions.returnNavigation(db, function(resultNav) {
        	db.collection('bookmarks').find({"categories" : "sitemap"}).toArray(function(err, document) {
 			res.render('sitemap', {
       	 		resultData : document,
-      	 		navigation : resultNav 
+      	 		navigation : resultNav,
+      	 		displayCookieBool : req.ucsCookie 
        		});
 		});
     });
@@ -219,8 +218,14 @@ app.get('/search-results', function(req, res) {
 		eval('var obj='+query);
 		eval('var fetchFieldsobj='+fetchFieldsObj);
 		
+		if(req.query.showResultsNum){
+			var definedLimitNum=parseInt(req.query.showResultsNum);
+			if(itemsPerPage>=definedLimitNum){
+				itemsPerPage=definedLimitNum;
+			}
+		}
 		//console.log(itemsPerPage * (pageNum-1));
-		db.collection('documents').find(obj, fetchFieldsobj).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, document) {
+		db.collection('documents').find(obj, fetchFieldsobj).skip(pageNum-1).limit(itemsPerPage).sort( { Published_timestamp: 1 } ).toArray(function(err, document) {
 			
 			if (err) {
 				var myObj = new Object();
@@ -229,14 +234,24 @@ app.get('/search-results', function(req, res) {
 				res.send(myObj);
       		} else if (document) {
       			if(document!=""){
-      				db.collection('documents').find(obj).count(function (e, count) {
-      					
-      					var myObj = new Object();
-      					myObj["total"]   = count;
-      					myObj["aaData"]   = document;
-						res.send(myObj);
-     				});
-					
+      				
+      				if(req.query.showResultsNum){
+      					console.log(req.showResultsNum)
+      					db.collection('documents').find(obj).limit(parseInt(req.query.showResultsNum)).count(function (e, count) {
+      						console.log(count)
+      						var myObj = new Object();
+      						myObj["total"]   = count;
+      						myObj["aaData"]   = document;
+							res.send(myObj);
+     					});
+      				}else{
+      					db.collection('documents').find(obj).count(function (e, count) {
+      						var myObj = new Object();
+      						myObj["total"]   = count;
+      						myObj["aaData"]   = document;
+							res.send(myObj);
+     					});
+					}
 				}else{
 					var myObj = new Object();
       				myObj["total"]   = 0;
@@ -253,59 +268,59 @@ app.get('/search-results', function(req, res) {
 });
 
 //404 page
-app.get('/not_found', function(req, res) {
+app.get('/not_found', checkForCookie, function(req, res) {
 	initFunctions.returnNavigation(db, function(resultNav) {
       	res.render('not_found', {
-      	 	navigation : resultNav 
+      	 	navigation : resultNav,
+      	 	displayCookieBool : req.ucsCookie 
        	});
     });
 	
 });
 
 //blog page
-app.get('/blog', function(req, res) {
+app.get('/blog', checkForCookie, function(req, res) {
 	initFunctions.returnNavigation(db, function(resultNav) {
       	res.render('blog', {
-      	 	navigation : resultNav 
+      	 	navigation : resultNav,
+      	 	queryStr : req.query,
+			displayCookieBool : req.ucsCookie 
        	});
     });
 });
 
 //news page
-app.get('/news', function(req, res) {
+app.get('/news', checkForCookie, function(req, res) {
 	initFunctions.returnNavigation(db, function(resultNav) {
       	res.render('news', {
-      	 	navigation : resultNav 
+      	 	navigation : resultNav,
+      	 	queryStr : req.query,
+      	 	displayCookieBool : req.ucsCookie  
        	});
     });
 });
 
-//signup page
-app.get('/signup', function(req, res) {
+//resource-centre page
+app.get('/resource-centre', checkForCookie, function(req, res) {
 	initFunctions.returnNavigation(db, function(resultNav) {
-      	res.render('signup', {
-      	 	navigation : resultNav 
+      	res.render('resource-centre', {
+      	 	navigation : resultNav,
+      	 	queryStr : req.query,
+      	 	displayCookieBool : req.ucsCookie 
        	});
     });
 });
 
-//login page
-app.get('/login', function(req, res) {
-	initFunctions.returnNavigation(db, function(resultNav) {
-      	res.render('login', {
-      	 	navigation : resultNav 
-       	});
-    });
-});
 
 //contact page
-app.get('/contact', function(req, res) {
+app.get('/contact', checkForCookie, function(req, res) {
     initFunctions.returnNavigation(db, function(resultNav) {
     	db.collection('tokens').findOne({"code" : "contact-page-address"}, function(errdoc, addressContent) {
     		res.render('contact', {
       	 		navigation : resultNav ,
       	 		address_token: addressContent,
-      	 		queryStr : req.query
+      	 		queryStr : req.query,
+      	 		displayCookieBool : req.ucsCookie 
        		});
 		});
    	});
@@ -385,8 +400,55 @@ app.post('/saveblogcomment', (req, res) => {
   	}
 })
 
+//save wi_users
+app.post('/savewiusers', (req, res) => {
+	var postJson=req.body;
+	postJson.created=currentTimestamp;
+	postJson.modified=currentTimestamp;
+	postJson.status=0;
+	postJson.uuid=guid();
+	var email= postJson.email;
+	var myObj = new Object();
+	if(email!=""){
+		var table_nameStr="wi_users";
+    	db.collection(table_nameStr).findOne({"email" : email}, function(err, existingDocument) {
+			if(existingDocument){
+				myObj["error"]   = "You are already a registered user!";
+				res.send(myObj);
+				
+			}else{
+				
+				db.collection(table_nameStr).save(postJson, (err, result) => {
+    				if(result){
+    					var insertEmail=new Object();
+    					var nameStr=req.body.name;
+						insertEmail["sender_name"]=nameStr;
+						insertEmail["sender_email"]=req.body.email;
+						insertEmail["subject"]=nameStr+" has registered to Jobshout";
+						insertEmail["body"]=req.body.comment;
+						insertEmail["created"]=currentTimestamp;
+						insertEmail["modified"]=currentTimestamp;
+						insertEmail["recipient"]='bwalia@tenthmatrix.co.uk';
+						insertEmail["status"]=0;
+						db.collection("email_queue").save(insertEmail, (err, e_result) => {
+							myObj["success"]   = "Thank you for registering with us, we will contact you soon!";
+							res.send(myObj);
+						})
+    				}else{
+    					myObj["error"]   = "Error while registration, please try again later!";
+						res.send(myObj);
+    				}
+    			});
+			}	
+  		});	
+  	}else{
+  		myObj["error"]   = "Please specify your email address!";
+		res.send(myObj);
+  	}
+})
+
 //content page
-app.get('/:id', function(req, res) {
+app.get('/:id', checkForCookie, function(req, res) {
 	initFunctions.returnNavigation(db, function(resultNav) {
       	db.collection('documents').findOne({Code: req.params.id}, function(err, document) {
 			if (err) {
@@ -395,7 +457,8 @@ app.get('/:id', function(req, res) {
       			res.render('content', {
         			document_details: document,
         			db_connection : db,
-        			navigation : resultNav 
+        			navigation : resultNav,
+      	 			displayCookieBool : req.ucsCookie 
     			});
       		} else {
         		res.redirect('/not_found');
@@ -403,5 +466,18 @@ app.get('/:id', function(req, res) {
     	}); 
     });
 });
+
+function checkForCookie (req, res, next) {
+	if(req.cookies){
+		if(req.cookies["ucs"] != null && req.cookies["ucs"] != 'undefined' && req.cookies["ucs"]=="ok"){
+   			req.ucsCookie = false;
+		}else{
+   			req.ucsCookie = true;
+   		}
+   	}else{
+   		req.ucsCookie = true;
+   	}
+   	next();
+}
 
 }

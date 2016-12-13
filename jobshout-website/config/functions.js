@@ -1,11 +1,11 @@
 	/**********************************************************************
-	*  Author: Neha Kapoor (neha@rootcrm.org)
-	*  Project Lead: Balinder WALIA (bwalia@rootcrm.org)
+	*  Author: Neha Kapoor (neha@jobshout.org)
+	*  Project Lead: Balinder WALIA (bwalia@jobshout.org)
 	*  Project Lead Web...: https://twitter.com/balinderwalia
-	*  Name..: ROOTCRM
-	*  Desc..: Root CRM (part of RootCrm Suite of Apps)
-	*  Web: http://rootcrm.org
-	*  License: http://rootcrm.org/LICENSE.txt
+	*  Name..: Jobshout Server NodeJS
+	*  Desc..: Jobshout Server (part of Jobshout Suite of Apps)
+	*  Web: http://jobshout.org
+	*  License: http://jobshout.org/LICENSE.txt
 	**/
 
 	/**********************************************************************

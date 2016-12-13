@@ -1,0 +1,339 @@
+/* LINKS */
+a {
+	color: #000000;
+}
+
+#footer a:hover {
+	color: #000;
+}
+
+/* HEADINGS */
+
+h1 { font-size: 26px; color: #b9003e; margin-bottom: 20px; }
+h2 { font-size: 18px; color: #000000; }
+h3 { font-size: 18px; }
+h4 { font-size: 18px; }
+h5 { font-size: 16px; }
+h6 { font-size: 14px; }
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 10px 0;
+}
+
+#header h2 {
+	font-size: 28px;
+	margin-top: 0;
+}
+
+#column h4 {
+	font-size: 16px;
+	padding-bottom: 2px;
+	border-bottom: 1px solid #D7D7D7;
+}
+
+/* DEFAULT CONTENT CSS */
+p {
+	padding-bottom: 1em;
+}
+
+img.border {
+	padding: 2px;
+	background-color: #fff;
+	border: 1px solid #ccc;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.hr {
+	height: 60px;
+	clear: both;
+	background: url(../images/general/hr.png) repeat-x 0 50% transparent;
+}
+
+#column .hr {
+	height: 30px;
+}
+
+.hr.noline {
+	height: 40px;
+	clear: both;
+	background: none;
+}
+
+img.left {
+	margin: 5px 14px 5px 0;
+}
+
+img.right {
+	margin: 5px 0 5px 14px;
+}
+
+/* content buttons */
+a.btn,
+button {
+	display: inline-block;
+	height: 33px;
+	padding-left: 6px;
+	margin-right: 25px;
+	margin-top: 15px;
+}
+
+a.btn span,
+button span {
+	display: inline-block;
+	float: left;
+	height: 28px;
+	padding: 5px 24px 0 16px;
+	font-weight: bold;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+a.btn:hover {
+	text-decoration: none;
+}
+
+a.btn.grey {
+	background: url(../images/general/btn-content-grey.png) no-repeat 0 0 transparent;
+	color: #565e62;
+}
+
+a.btn.grey span {
+	background: url(../images/general/btn-content-grey.png) no-repeat 100% 0 transparent;
+}
+
+a.btn.black {
+	background: url(../images/general/btn-content-black.png) no-repeat 0 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.black span {
+	background: url(../images/general/btn-content-black.png) no-repeat 100% 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.orange {
+	background: url(../images/general/btn-content-orange.png) no-repeat 0 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.orange span {
+	background: url(../images/general/btn-content-orange.png) no-repeat 100% 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.red {
+	background: url(../images/general/btn-content-red.png) no-repeat 0 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.red span {
+	background: url(../images/general/btn-content-red.png) no-repeat 100% 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.green {
+	background: url(../images/general/btn-content-green.png) no-repeat 0 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.green span {
+	background: url(../images/general/btn-content-green.png) no-repeat 100% 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.blue {
+	background: url(../images/general/btn-content-blue.png) no-repeat 0 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.blue span {
+	background: url(../images/general/btn-content-blue.png) no-repeat 100% 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.purple {
+	background: url(../images/general/btn-content-purple.png) no-repeat 0 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.purple span {
+	background: url(../images/general/btn-content-purple.png) no-repeat 100% 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.pink {
+	background: url(../images/general/btn-content-pink.png) no-repeat 0 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.pink span {
+	background: url(../images/general/btn-content-pink.png) no-repeat 100% 0 transparent;
+	color: #ffffff;
+}
+
+/* FORM CSS */
+form p {
+	margin: 0;
+	padding: 0;
+}
+
+form fieldset input,
+form fieldset textarea {
+	background-image: url(../images/general/bg-footer-input.png);
+	background-repeat: no-repeat;
+	background-position: top left;
+	background-color: transparent;
+	border: 1px solid #dad8d1;
+	margin-bottom: 8px;
+	width: 275px;
+	color: #757575;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", Garuda,sans-serif, Arial, Helvetica, Garuda, sans-serif;
+	font-size: 110%;
+	border: 0;
+	padding: 1px 20px 0 5px;
+}
+
+form input {
+	height: 35px;
+}
+
+#content form input {
+	height: 39px;
+	width: 305px;
+	background-image: url(../images/general/bg-content-input.png);
+}
+
+form p.spam label {
+	float: left;
+	margin-top: 4px;
+}
+
+form p.spam input {
+	width: 40px;
+	height: 35px;
+	background: url(../images/general/bg-footer-input-spam.png) no-repeat top left transparent;
+	float: left;
+	padding-right: 5px;
+	margin-right: 10px;
+}
+
+#content form p.spam input {
+	width: 54px;
+	height: 39px;
+	background: url(../images/general/bg-content-input-check.png) no-repeat top left transparent;
+}
+
+form p.spam input.LV_invalid_field,
+#content form p.spam input.LV_invalid_field {
+	background-position: bottom left;
+}
+
+form fieldset input.LV_invalid_field {
+	background-position: left bottom;
+}
+
+form fieldset p.spam .LV_validation_message {
+	display: none;
+}
+
+form fieldset textarea {
+	background: url(../images/general/bg-footer-textarea.png) no-repeat top left transparent;
+	height: 88px;
+	width: 274px;
+	padding-top: 8px;
+}
+
+#content form fieldset textarea {
+	background: url(../images/general/bg-content-textarea.png) no-repeat top left transparent;
+	height: 91px;
+	width: 605px;
+	padding-top: 8px;
+}
+
+form fieldset textarea.LV_invalid_field,
+#content form fieldset textarea.LV_invalid_field {
+	background-position: bottom left;
+}
+
+/**form p label.error {
+	background: url(../images/icons/icon-error.png) no-repeat 100% 0 transparent;
+	color: #772e0a;
+	font-size: 10px;
+	height: 20px;
+	padding: 0 4px 4px 4px;
+	margin: 0;
+	top: 8px;
+	right: 4px;
+	left: auto;
+	display: inline-block;
+	width: 20px;
+	font-size: 1px;
+	text-indent: -99999px;
+	color: #d7dadc;
+}
+**/
+
+form p label.error {
+	color: #b9003e!important;
+}
+
+button.submit {
+	background: url(../images/general/btn-send.png) no-repeat 0 0 transparent;
+	color: #ffffff;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	width: 101px;
+	height: 33px;
+	line-height: 32px;
+	font-family: Arial, Helvetica, Garuda, sans-serif;
+}
+
+button.submit:hover {
+	background: url(../images/general/btn-send-hover.png) no-repeat 0 0 transparent;
+	color: #000000;
+}
+
+#content form fieldset,
+#footer form fieldset {
+	padding-bottom: 5px;
+}
+
+/* TOOLTIP CSS */
+.tipsy { padding: 5px; font-size: 10px; position: absolute; z-index: 100000; }
+.tipsy-inner { padding: 5px 8px 4px 8px; background-color: black; color: white; max-width: 200px; text-align: center; }
+.tipsy-inner { border-radius: 3px; -moz-border-radius:3px; -webkit-border-radius:3px; }
+.tipsy-arrow { position: absolute; background: url('../images/general/tipsy.gif') no-repeat top left; width: 9px; height: 5px; }
+.tipsy-n .tipsy-arrow { top: 0; left: 50%; margin-left: -4px; }
+.tipsy-nw .tipsy-arrow { top: 0; left: 10px; }
+.tipsy-ne .tipsy-arrow { top: 0; right: 10px; }
+.tipsy-s .tipsy-arrow { bottom: 0; left: 50%; margin-left: -4px; background-position: bottom left; }
+.tipsy-sw .tipsy-arrow { bottom: 0; left: 10px; background-position: bottom left; }
+.tipsy-se .tipsy-arrow { bottom: 0; right: 10px; background-position: bottom left; }
+.tipsy-e .tipsy-arrow { top: 50%; margin-top: -4px; right: 0; width: 5px; height: 9px; background-position: top right; }
+.tipsy-w .tipsy-arrow { top: 50%; margin-top: -4px; left: 0; width: 5px; height: 9px; }
+
+/*Changes implemented by Harpreet Singh on 15 FEB 2012*/
+#blogdate {
+	background: #393b2f url(../../images/blogdate_bg.jpg) no-repeat 50% bottom;
+	padding: 3px 2px 9px 2px;
+	margin-bottom: 10px;
+	width: 50px;
+	text-align: center;
+	text-transform: uppercase;
+	font-size: 85%;
+}	
+
+#blogdate-day {
+	color: #f0f20b;
+}
+
+#blogdate-month {
+	color: #FFFFFF;
+}

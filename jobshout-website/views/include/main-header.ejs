@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<meta name="description" content="">
+    	<meta name="author" content="cosmic">
+    	<% 	if (typeof pageTileStr !== "undefined" && pageTileStr!="") { 	%>
+    	<title><%= pageTileStr %> </title>
+    	<% 	} 	else{	%>
+    	<title>Jobshout - Job board off the shelf software, Job board Developers, Job board for employers, candidates, Talent management Software Solutions, Talent Management Software Solutions</title>
+    	<% } %>
+    	<% 	if (typeof metaKeywordsStr !== "undefined" && metaKeywordsStr!="") { 	%>
+    	<meta name="keywords" content="<%= metaKeywordsStr %>">
+    	<% }else{ %>
+    		<meta name="keywords" content="web, design, seo, development, cms, london, content management, new media, job board, programming, uk, database, sem, search engine optimisation, search engine optimization, search engine marketing, agency, apps, applications, technology, tenthmatrix, tenth matrix, net, internet, network, communication, software, ppc, coding, programing, system, inbound links, outbound links, code, e-mail, email, keyword, url, server, expert, jobshout, get found, data, england, online, consultants, digital, drupal, wordpress, blog, web design, website design, web designers, cms integrator, cms developer, cms website development, seo services, ppc services, online marketing company, ecommerce developer, online store development, web development, search, engine, optimisation, internet marketing, google, yahoo!, bing, msn, organic, iphone developer, android developer, application developer, ecommerce, 4d, sql" />
+		<% } %>
+    	<% 	if (typeof metaDescriptionStr !== "undefined" && metaDescriptionStr!="") { 	%>
+        <meta name="description" content="<%= metaDescriptionStr %>">
+       	<% }else{ %>
+       		<meta name="description" content="TenthMatrix is a full service new media agency, incorporating web design, SEO (Search Engine Optimisation), development including databases and Content Mamagement Systems. We are expert in deploying large web database applications using SQL - MySQL, MSSQL Server, Oracle, 4D, PostgreSQL, Sybase & NoSQL such as MongoDB. Tenthmatrix is a 4D Silver Partner in London (UK)." />
+		<% } %>
+        <meta http-equiv="pragma" content="no-cache" />
+		<meta http-equiv="cache-control" content="no-cache" />
+    	<!-- Bootstrap core CSS -->
+    	<!-- Stylesheets -->
+		<link href="assets/css/reset.css" rel="stylesheet" media="screen" />
+		<link href="assets/css/basics.css" rel="stylesheet" media="screen" />
+		<link href="assets/css/default.css" rel="stylesheet" media="screen" />
+		<link href="assets/css/elements.css" rel="stylesheet" media="screen" />
+		<!-- Change this to get other skins, see the documentation -->
+		<link href="assets/css/skin-4.css" rel="stylesheet" media="screen" />
+		<link href="assets/css/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" media="screen" />
+		<!-- Bugfixes for IE -->
+		<!--[if IE]><link href="assets/css/ie.css" rel="stylesheet" type="text/css"><![endif]-->
+		
+		<!-- jQuery framework -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.3/jquery-ui.min.js" type="text/javascript"></script>
+		<script type="text/javascript" src="assets/js/jquery.cookie.js"></script>
+		<script type="text/javascript" src="assets/js/jquery.easing.1.2.js"></script>
+		<!-- Tooltip -->
+		<script type="text/javascript" src="assets/js/tooltip.js"></script>
+		<!-- Custom javascript for this template -->
+		<script type="text/javascript" src="assets/js/custom.js"></script>
+		<!-- Cufon, titles replaced by images -->
+		<script type="text/javascript" src="assets/js/cufon-yui.js"></script>
+		<script type="text/javascript" src="assets/js/Myriad_Pro.js"></script>
+		<!-- Homepage slider -->
+		<script type="text/javascript" src="assets/js/jquery.nivo.slider.js"></script>
+		<!-- Fancybox lightbox -->
+		<script type="text/javascript" src="assets/js/jquery.fancybox-1.3.1.js"></script>
+		<script type="text/javascript" src="assets/js/livevalidation.js"></script>
+		<script type="text/javascript" src="js/common.js"></script>
+		<script type="text/javascript">
+			Cufon.replace('h1, h2, h3, h4, h5, h6, .subtitle, .our-people .job-title', {
+				hover: true
+			});				
+		
+			<!-- Nivo slider options -->
+			$(window).load(function() {
+				$('#slider').nivoSlider({effect:'fade'});
+			});
+		</script>
+		<script type="text/javascript" charset="utf-8">
+			$(function(){
+				$('#loopedSlider').loopedSlider({
+					autoHeight: 300
+				});
+			});
+			$.checkSearchBox = function checkSearchBox(){
+				var csearch = $('#csearch').val();	
+				if(csearch==""){
+					alert('Please enter job search keyword(s)');return false;
+				}
+				else return true;
+			}
+		</script>
+    	<link rel="stylesheet" href="assets/css/colorbox.css" />
+    
+   		<script src="assets/js/jquery.colorbox.js" type="text/javascript"></script>
+    
+		<script type="text/javascript"> 
+        	function OpenColorBox(clientId) {  
+    			if(clientId=='tourintro'){
+	           		$("#"+clientId).colorbox({width:"60%", height:"80%", iframe:true});
+				}else{
+    	       		$("#"+clientId).colorbox({width:"90%", height:"90%", iframe:true});
+				}
+       		}
+    	</script>  

@@ -1,0 +1,103 @@
+/* LINKS */
+a {
+	color: #ef4529;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+div.latest.tweets a.reply {
+	color: #000000;
+}
+
+div#tabs ul li.ui-state-active a {
+	color: #000000;
+}
+
+/* MAINMENU */
+#mainMenu li.hover a,
+#mainMenu a:hover {
+	color: #ffffff;
+	background: url(../images/colors/skin-4/btn-mainmenu.png) no-repeat 0 0 transparent;
+}
+
+#mainMenu li.hover a span,
+#mainMenu a:hover span {
+	background: url(../images/colors/skin-4/btn-mainmenu.png) no-repeat 100% 0 transparent;
+}
+
+#mainMenu ul ul li.current a,
+#mainMenu li.active li.current a,
+#mainMenu ul ul a:hover,
+#mainMenu li.active li a:hover,
+#mainMenu ul li.active li a:hover {
+	color: #000 !important;
+}
+
+/* CONTENT BUTTONS */
+a.btn.grey:hover {
+	background: url(../images/general/btn-content-black.png) no-repeat 0 0 transparent;
+	color: #ffffff;
+}
+
+a.btn.black:hover,
+a.btn.red:hover,
+a.btn.black:hover,
+a.btn.pink:hover,
+a.btn.purple:hover {
+	background: url(../images/general/btn-content-black.png) no-repeat 0 0 transparent;
+}
+
+a.btn.grey:hover span {
+	background: url(../images/general/btn-content-black.png) no-repeat 100% 0 transparent;
+}
+
+a.btn.black:hover span,
+a.btn.red:hover span,
+a.btn.black:hover span,
+a.btn.pink:hover span,
+a.btn.purple:hover span {
+	background: url(../images/general/btn-content-black.png) no-repeat 100% 0 transparent;
+}
+
+a.btn.black:hover {
+	background: url(../images/general/btn-content-grey.png) no-repeat 0 0 transparent;
+	color: #565E62 !important;
+}
+
+a.btn.black:hover span {
+	background: url(../images/general/btn-content-grey.png) no-repeat 100% 0 transparent;
+	color: #565E62 !important;
+}
+
+/* MISC */
+span.highlight,
+.our-people h6 {
+	color: #1d1d1d;
+}
+
+#blog .meta li {
+	background-color: #5f5f5f;
+}
+
+#blog .meta li:hover {
+	background-color: #383838;
+}
+
+ul.submenu li.current span {
+		background:url(../images/colors/skin-4/icon-submenu.png) no-repeat scroll right bottom transparent;
+}
+
+.leftCol ul.submenu li.current span {
+	background:url(../images/colors/skin-4/icon-submenu-leftcol.png) no-repeat scroll left top transparent;
+}
+
+#blog div.about-author div.content h4 a {
+	color: #1d1d1d;
+}
+
+.twitterfeed p a {
+color:#1d1d1d;
+}
+

@@ -1,4 +1,4 @@
-<%  include ../partials/main-header %>
+<%  include include/main-header %>
 <style>
 	.noresultbcg{
 	background:url(images/404-bcg.jpg) center top no-repeat;
@@ -36,9 +36,12 @@
 </head>
 <body>
 	<div id="wrapper">
-		<% include ../partials/header %>
+		<% include include/header %>
 
 		<div id="contentContainer" class="full-width">
+			<!-- cookie law uk notice -->
+			<% include include/cookie-law-notice %>
+    		<!-- cookie law uk notice -->
 			<!-- Content Start -->
 			<div style="float:left;">
 				<img src="images/404.jpg" width="417" height="279" alt=""/>
@@ -58,7 +61,7 @@
 	</div>
 	
    	<!--footer start-->
-    <% include ../partials/footer %>
+    <% include include/footer %>
     <!--footer end-->
   </body>
 </html>

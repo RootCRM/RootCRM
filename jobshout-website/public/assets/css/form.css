@@ -1,0 +1,133 @@
+/*iContact Classes*/
+.clear {
+	height:0px; 
+	overflow:hidden; 
+	clear:both;
+}
+
+/*Main blocks*/
+.formInstruction {
+	width:400px;
+	float:left;
+	margin-right:30px;
+	/*font-size:11px;*/
+}
+
+.form {    
+	font-size: 11px;    
+	font-weight: bold;    
+	width: 330px;
+	float:right;
+	border: 0px solid #cccccc;
+	margin-top:85px;
+} 
+
+/*Field blocks*/
+.fieldLabel {
+	width:100%;
+	float:left;
+	font-weight:bold;
+	text-align:left;
+	color:#555555;
+    padding: 0 0 5px;
+}
+.fieldHolder {
+	width:100%;
+	float:left;
+	/*padding:10px;*/
+	/*padding-left:20px;*/
+	border-left:0px solid #f0f0f0;
+	font-weight:normal;
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+
+/*Form element styles*/
+.formInput { 
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;    
+	border: 1px solid #cccccc;
+	background-color: #ffffff;
+	padding: 3px;
+	width: 320px;
+	color: #888888;
+	border-radius: 5px;
+	height: 15px;
+}
+
+.formSelect { 
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;    
+	border: 1px solid #cccccc;
+	background-color: #ffffff;
+	padding: 3px;
+	width: 328px;
+	color: #888888;
+border-radius: 5px;
+}
+
+.formTextarea {
+	font-family: Arial, Helvetica, sans-serif; 
+	font-size: 10px;    border: 1px solid #cccccc;
+	background-color: #ffffff;
+	padding: 3px;
+	width: 320px;
+	color: #888888;
+border-radius: 5px;
+}
+
+.formCheckbox {
+	
+}
+
+.formCheckboxLabel {
+	font-weight:normal;
+}
+
+.formRadio {
+	
+}
+
+.formRadioLabel {
+	font-weight:normal;
+}
+
+
+.formButton {
+	font-family: Arial, Helvetica, sans-serif;    
+	font-size: 10px;    
+	font-weight: bold;    
+	color: #FFFFFF;    
+	padding-top: 2px;    
+	padding-bottom: 2px;    
+	background-color: #888888;   
+	border-top: 1px solid #ffffff;    
+	border-left: 1px solid #ffffff;    
+	border-bottom: 1px solid #ffffff;    
+	border-right: 1px solid #ffffff;    
+	width: 50px;
+	height: 20px;
+	cursor:pointer;
+	vertical-align:top;
+}
+
+.paypalButton {
+	font-family: Arial, Helvetica, sans-serif;    
+	font-size: 10px;    
+	font-weight: bold;    
+	color: #FFFFFF;    
+	padding-top: 2px;    
+	padding-bottom: 2px;    
+	background-color: #888888;   
+	border-top: 1px solid #ffffff;    
+	border-left: 1px solid #ffffff;    
+	border-bottom: 1px solid #ffffff;    
+	border-right: 1px solid #ffffff;    
+	cursor:pointer;
+}
+
+
+
+
+
+

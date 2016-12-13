@@ -4,16 +4,18 @@ searchTerm=queryString;
 } 
 %>
 
-<% include ../partials/main-header %>
+<% include include/main-header %>
 <link media="screen" rel="stylesheet" href="css/usertabs.css" />
 </head>
 <body>
 
 	<div id="wrapper">
-		<% include ../partials/header %>
+		<% include include/header %>
 
 		<div id="contentContainer" class="full-width">
-
+			<!-- cookie law uk notice -->
+			<% include include/cookie-law-notice %>
+    		<!-- cookie law uk notice -->
 		<div class="blog">
 			<h1>Search result for '<%= searchTerm %>'</h1>
 			<div id="tabs">
@@ -62,7 +64,7 @@ searchTerm=queryString;
 	</div>
  	
 	<!--footer start-->
-    <% include ../partials/footer %>
+    <% include include/footer %>
     <!--footer end-->
 <script>
 var xhrStatus;

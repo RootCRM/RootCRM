@@ -11,7 +11,7 @@ metaDescriptionStr= document_details.MetaTagDescription;
 
 %>
 
-<%  include ../partials/main-header %>
+<%  include include/main-header %>
 
    <style type="text/css">
 	.Heading-IE{
@@ -19,6 +19,16 @@ metaDescriptionStr= document_details.MetaTagDescription;
 		font-weight:normal;
 		color:#B9003E;
 		margin-bottom:20px;
+	}
+	.error{
+		color: #b9003e!important;
+		padding-left:5px;
+	}
+	#content form input {
+   	 	height: 40px;
+    	width: 325px;
+    	padding-left: 5px;
+    	margin-right: 5px;
 	}
 	</style> 
 	<script type="text/javascript">var switchTo5x=true;</script><script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script><script type="text/javascript">stLight.options({publisher:'caec0ae8-7693-4b77-a713-ed5c038c62c0'});</script>
@@ -35,11 +45,11 @@ metaDescriptionStr= document_details.MetaTagDescription;
 </head>
 <body>
 <div id="wrapper">
-	<% include ../partials/header %>
+	<% include include/header %>
 
 	<div id="contentContainer" class="full-width">
 		  	<!-- cookie law uk notice -->
-			<% include ../partials/cookie-law-notice %>
+			<% include include/cookie-law-notice %>
     		<!-- cookie law uk notice -->
     		
       	<div id="content">
@@ -58,7 +68,7 @@ metaDescriptionStr= document_details.MetaTagDescription;
       			<% } %>
 	  			<%- document_details.Body %>
 	  			
-	  			<% include ../partials/facebook_like_button %>
+	  			<% include include/facebook_like_button %>
       			<div id="blog-leavecomment"><h3>Comments</h3>
 				<p><a href="#comments">
 					<% if(document_details.Objects.length>=1) { %><%= document_details.Objects.length %> response<% } else{ %>No response<% } %>
@@ -68,9 +78,9 @@ metaDescriptionStr= document_details.MetaTagDescription;
 							<label>Leave a comment</label><br />
 							<input id="blog_uuid" name="blog_uuid" type="hidden" value="<%= document_details._id %>">
 
-							<textarea name="comment" rows="8" cols="40" id="comment" class="blogform-input-large"></textarea><br />
+							<textarea name="comment" rows="8" cols="43" id="comment" class="blogform-input-large"></textarea><br />
   							<label>Name (required)</label><br />
-    							<input name="name" id="name" class="blogform-input" style="height:32px; margin-bottom:10px;" value="" >
+    							<input name="name" id="name" class="blogform-input" style="margin-bottom:10px;" value="" >
     							<br />
   							<label>Email (will not be published)</label><br />
     						<input name="email" id="email" class="blogform-input" value="" >
@@ -133,7 +143,7 @@ metaDescriptionStr= document_details.MetaTagDescription;
 	  						}	  					
 	  					}
 	  			} %>
-	  			<% include ../partials/linkedin_share_button %>
+	  			<% include include/linkedin_share_button %>
 	  		<% }	%>
 	  		
 	  	</div>
@@ -141,7 +151,7 @@ metaDescriptionStr= document_details.MetaTagDescription;
 </div>
 
    	<!--footer start-->
-    <% include ../partials/footer %>
+    <% include include/footer %>
     <!--footer end-->
 
        <script>

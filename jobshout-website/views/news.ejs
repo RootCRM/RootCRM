@@ -1,4 +1,4 @@
-<% include ../partials/main-header %>
+<% include include/main-header %>
 <% 	
 var pageNum=1;
 if (typeof queryStr.page !== "undefined" && queryStr.page!="" && queryStr.page!="") { 
@@ -12,8 +12,11 @@ pageNum=queryStr.page;
 </head>
 <body>
  	<div id="wrapper">
-		<% include ../partials/header %>
+		<% include include/header %>
 		<div id="contentContainer" class="full-width">
+			<!-- cookie law uk notice -->
+			<% include include/cookie-law-notice %>
+    		<!-- cookie law uk notice -->
 			<h1>News</h1>
 			<div id="newsData">
 
@@ -26,12 +29,12 @@ pageNum=queryStr.page;
 	</div>
 
    	<!--footer start-->
-    <% include ../partials/footer %>
+    <% include include/footer %>
     <!--footer end-->
 <script>
 var xhrStatus;
-var searchkeyword="", typeStr="news", currentPageNum='<%= pageNum %>';
-var pageSize=3, totalNum=0;
+var searchkeyword="", typeStr="blog", currentPageNum='<%= pageNum %>';
+var pageSize=5, totalNum=0, showLatestResultsNum=20;
 var start=0, end=pageSize;
 
 $(document).ready(function() {
@@ -110,7 +113,7 @@ function applyPagination(total_count,displayResultsNum){
 	
 	function load_data(){
 		$(".alert").remove();
-		var jsonRow="/search-results?start="+start+"&s=&type="+typeStr+"&limit="+pageSize,
+		var jsonRow="/search-results?start="+start+"&s=&type="+typeStr+"&limit="+pageSize+"&showResultsNum="+showLatestResultsNum;
 		xhrStatus=$.getJSON(jsonRow,function(html){
 			if(html.error){
 				$("#newsData").before('<div class="alert" style="text-align:center"><h2>No recent news found!</h2></div>');

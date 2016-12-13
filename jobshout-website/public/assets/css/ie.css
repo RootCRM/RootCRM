@@ -1,0 +1,46 @@
+a.btn span {
+	height: 27px;
+	padding-top: 6px;
+}
+
+form fieldset input {
+	padding: 10px 20px 0 5px;
+}
+
+form input,
+form p.spam input,
+#search input {
+	height: 26px;
+}
+
+#content form input {
+	height: 29px;
+}
+
+#content form p.spam input {
+	height: 29px;
+}
+
+#search input {
+	padding: 10px 0 0 15px;
+}
+
+/* CONTENT TOGGLE */
+h6.toggle {
+	margin: 0 0 0 0\9; /* fix for IE8 */
+	padding: 0 0 5px 0\9;
+}
+
+h6.toggle {
+	*margin: 0 0 5px 0; /* set it back for IE7 */
+	*padding: 0 0 0 0;
+}  
+
+/* COLUMN SUBMENU */
+ul.submenu li {
+
+}
+
+ul.submenu li a {
+
+}

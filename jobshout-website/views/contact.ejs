@@ -1,4 +1,4 @@
-<%  include ../partials/main-header %>
+<%  include include/main-header %>
 <% var tokenContentStr="";
 if (typeof address_token !== 'undefined' && address_token !== null && address_token !="") {
 	var tokenContentStr = JSON.parse(address_token.token_content);  
@@ -13,10 +13,12 @@ $(document).ready(function(){
 </head>
 <body>
  	<div id="wrapper">
-		<% include ../partials/header %>
+		<% include include/header %>
 
 <div id="contentContainer" class="full-width">
-
+<!-- cookie law uk notice -->
+			<% include include/cookie-law-notice %>
+    		<!-- cookie law uk notice -->
 <div class="blog">
 <h1>Contact</h1>
 <% if (typeof queryStr.error !== 'undefined' && queryStr.error !== null && queryStr.error !="") {	%>
@@ -200,7 +202,7 @@ $(document).ready(function(){
 </div>
 
    	<!--footer start-->
-    <% include ../partials/footer %>
+    <% include include/footer %>
     <!--footer end-->
     <script src="js/jquery.validate.js"></script>
     <script type="text/javascript">
