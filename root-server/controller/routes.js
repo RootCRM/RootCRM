@@ -226,15 +226,15 @@ app.post(backendDirectoryPath+'/validlogin', (req, res) => {
       					res.cookie(init.cookieName , result["ops"][0]["_id"])
       					res.redirect(backendDirectoryPath+'/index');
       				}else{
-      					res.redirect(backendDirectoryPath+'/sign-in?error=no');
+      		res.redirect(backendDirectoryPath+'/sign-in?error=session_not_saved&error_txt=User session can\'t be saved.');
     				}
   				});
 				
 			}else{
-      			res.redirect(backendDirectoryPath+'/sign-in?error=password');
+      			res.redirect(backendDirectoryPath+'/sign-in?error=invalid_password&error_txt=Invalid login password.');
       		}
       	} else {
-      		res.redirect(backendDirectoryPath+'/sign-in?error=no');
+      		res.redirect(backendDirectoryPath+'/sign-in?error=user_not_found&error_txt=Email address not found.');
         }
       
 	});
