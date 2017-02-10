@@ -2,6 +2,8 @@ var xhrStatus;
 
 var pageSize=15, totalNum=0;
 var start=0, end=pageSize;
+var accessRightCode=parseInt(access_right);
+
 function generateHeading(e, upperCase){
 	if(typeof upperCase == 'undefined' && upperCase==''){ 
 		var upperCase=false;
@@ -158,7 +160,11 @@ function load_more(){
 							});
 						}
 						if (typeof html.uniqueField !== 'undefined' && html.uniqueField !== null && uniqueFieldVal!=""){
-							contentHtml+='<td class="actions-list"><a href="'+editorPage+'?'+html.uniqueField+'='+uniqueFieldVal+'" title="Edit"><i class="fa fa-pencil"></i></a></td>';
+							if(accessRightCode==0){
+								contentHtml+='<td class="actions-list"><a href="javascript:void(0)" onClick="alert(\'Sorry you do not have access to this option!\');"><i class="fa fa-pencil"></i></a></td>';
+							}else{
+								contentHtml+='<td class="actions-list"><a href="'+editorPage+'?'+html.uniqueField+'='+uniqueFieldVal+'" title="Edit"><i class="fa fa-pencil"></i></a></td>';
+							}
 						}
 						contentHtml+="</tr>";
 					});

@@ -41,13 +41,10 @@ if (typeof searched_keyword !== 'undefined' && searched_keyword !== null) {
 
     <!-- Main content -->
     <section class="content">
-	<div CLASS="row">
-	<div CLASS="col-md-12">
+		<div CLASS="row">
+			<div CLASS="col-md-12">
 	
-	
-	
-	
-	<div class="clearfix hidden-xs">
+						<div class="clearfix hidden-xs">
       						<div class="form-group no-margin">
      							<div class="pull-right margin-bottom-10 ">
 									<div class="form-inline" style="">                 	          
@@ -78,7 +75,7 @@ if (typeof searched_keyword !== 'undefined' && searched_keyword !== null) {
 							</div>
 						</div>
 	
-	</div>
+				</div>
 	
 	</div>
    
@@ -124,6 +121,12 @@ if (typeof searched_keyword !== 'undefined' && searched_keyword !== null) {
 <script src="js/basictable.js"></script>
 <script type="text/javascript">
 var templateStr="<%= currentTemplateStr %>", searchStr="<%= keywordStr %>";
+
+<% if (typeof authenticatedUser.access_right !== 'undefined' && authenticatedUser.access_right !== null) {	%>
+var	access_right="<%= authenticatedUser.access_right %>";
+<% }	else{	 %>
+var access_right=0;
+<% } %>
 </script>
 <script type="text/javascript" src="scripts/listing.js"></script>
 </body>

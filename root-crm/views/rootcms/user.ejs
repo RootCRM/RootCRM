@@ -1,5 +1,26 @@
 <% include include/main-header %>
+<link rel="stylesheet" href="plugins/combobox/autocomplete-ui.css"/>
 <link rel="stylesheet" href="css/chosen.css">
+<style>
+.custom-combobox {
+		position: relative;
+		display: inline-block;
+	}
+	.custom-combobox-toggle {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		margin-left: -1px;
+		padding: 0;
+	}
+	.custom-combobox-input {
+		margin: 0;
+		padding: 5px 10px;
+	}
+	.ui-widget-overlay {
+		position: fixed;
+	}
+</style>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
    	<div class="wrapper">
@@ -46,7 +67,25 @@
             						<input type="hidden" class="form-control" id="table_name" name="table_name" value="users">
       								<input type="hidden" class="form-control" id="unique_field" name="unique_field" value="email">
       								<input type="hidden" class="form-control" id="id" name="id" value="<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %><%= contentObj._id %><% } %>">
+            						
+            						<% if (typeof authenticatedUser.access_right !== 'undefined' && authenticatedUser.access_right !== null  && authenticatedUser.access_right == "11"  && authenticatedUser.access_right == 11) {	%>
             						<div class="form-group">
+                  						<label class="control-label col-md-2" for="first-name">Default Systems<span class="required">*</span></label>
+                  						<div class="col-md-6 col-lg-4 autocomplete">
+                    						<select id="uuid_default_system" name="uuid_default_system" class="form-control">
+                  								
+                  							</select>
+                    					</div>
+                					</div>
+            						<div class="form-group">
+                  						<label class="control-label col-md-2" for="first-name">Assign Systems<span class="required">*</span></label>
+                  						<div class="col-md-6 col-lg-4">
+                    						<input name="user_systems" type="hidden" value="" id="user_systems">
+                  							<select id="select_systems" name="select_systems" multiple="multiple" class="chosen-select form-control"></select>
+                    					</div>
+                					</div>
+                					<% } %>
+                					<div class="form-group">
                   						<label class="control-label col-md-2" for="first-name">User Name<span class="required">*</span></label>
                   						<div class="col-md-6 col-lg-4">
                     						<input type="text" required="required" id="username" name="username" class="form-control col-md-5 col-xs-12" value="<% if (typeof contentObj.username !== 'undefined' && contentObj.username !== null) { %><%= contentObj.username %><% } %>">
@@ -103,11 +142,25 @@
     									<label for="" class="col-sm-2 control-label">Access Right Code</label>
     									<div class="col-sm-9">
     										<div class="radio" STYLE="float:left; margin-right:10px;">
-      		  									<label> <input type="radio" id="access_rights_code" name="access_rights_code" value="1" <% if (typeof contentObj.access_rights_code !== 'undefined' && contentObj.access_rights_code !== null && contentObj.access_rights_code == 1) { %>checked<% } %> > <strong style="font-weight:600">ReadWrite</strong></label>
+      		  									<label> <input type="radio" id="access_right" name="access_right" value="1" <% if (typeof contentObj.access_right !== 'undefined' && contentObj.access_right !== null && contentObj.access_right == 1 && contentObj.access_right == "1") { %>checked<% } %> > <strong style="font-weight:600">ReadWrite</strong></label>
     			  							</div>
 				  							<div class="radio" STYLE="float:left;">
-      		  									<label> <input type="radio" id="access_rights_code" name="access_rights_code" value="0" <% if (typeof contentObj.access_rights_code !== 'undefined' && contentObj.access_rights_code !== null && contentObj.access_rights_code == 0) { %>checked<% } %> > <strong style="font-weight:600">ReadOnly</strong></label>
+      		  									<label> <input type="radio" id="access_right" name="access_right" value="0" <% if (typeof contentObj.access_right !== 'undefined' && contentObj.access_right !== null && contentObj.access_right == 0 && contentObj.access_right == "0") { %>checked<% } %> > <strong style="font-weight:600">ReadOnly</strong></label>
     			  							</div>
+    			  							<% if (typeof authenticatedUser.access_right !== 'undefined' && authenticatedUser.access_right !== null  && authenticatedUser.access_right == "11"  && authenticatedUser.access_right == 11) {	%>
+            								<div class="radio" STYLE="float:left;">
+      		  									<label> <input type="radio" id="access_right" name="access_right" value="11" <% if (typeof contentObj.access_right !== 'undefined' && contentObj.access_right !== null && contentObj.access_right == 11 && contentObj.access_right == "11") { %>checked<% } %> > <strong style="font-weight:600">Admin</strong></label>
+    			  							</div>
+    			  							<% } %>
+										</div>
+									</div>
+									<div class="form-group">
+    									<label for="" class="col-sm-2 control-label"></label>
+    									<div class="col-sm-9">
+    										<input type="hidden" id="allow_web_access" name="allow_web_access" value="<% if (typeof contentObj.allow_web_access !== 'undefined' && contentObj.allow_web_access !== null) { %><%= contentObj.allow_web_access %><% } else{	%>0<% } %>">
+    										<div class="checkbox">
+      		  									<label><input type="checkbox" id="web_access" <% if (typeof contentObj.allow_web_access !== 'undefined' && contentObj.allow_web_access !== null && contentObj.allow_web_access == 1  && contentObj.allow_web_access == "1") { %>checked<% } %>> Allow web access</label>
+      		  								</div>
 										</div>
 									</div>
                 					<div class="form-group">
@@ -121,17 +174,7 @@
     			  							</div>
 										</div>
 									</div>
-									<!--
-									<div class="form-group">
-    									<label for="" class="col-sm-2 control-label">Assign Modules</label>
-    									<div class="col-md-6 col-lg-4">
-    										<input type="hidden" class="form-control" id="modules" name="modules" value="<% if (typeof contentObj.modules !== 'undefined' && contentObj.modules !== null) { %><%= contentObj.modules %><% } %>">
-                   							<select data-placeholder="Choose a module..." class="form-control chosen-select" multiple style="width:100%;" tabindex="4" id="modules_selected">
-
-											</select>
-                  						</div>
-									</div>-->
-									
+																		
                 					<div class="form-group">
                    						<div class="col-md-9 col-lg-6" align="center">
                								<div class="submit-btn-setting"> <button type="submit" class="btn btn-primary btn-color margin-right-5 btn-sm">Submit</button>
@@ -158,6 +201,7 @@
 <!--//Main Content--> 
 	</div>
 <!-- Page-Level Plugin Scripts-->
+<script src="plugins/combobox/autocomplete-ui.js"></script>
 <script src="js/chosen.jquery.js" type="text/javascript"></script>
 <script src="js/jquery.validate.js"></script>
 <script>
@@ -180,30 +224,63 @@ function generate_code(name,code){
 	document.getElementById(code).value=result;
 }
 
-$(document).ready(function() {
-	/**var selectedModulesArr = new Array();
-	if($("#modules").val()!=""){
-		selectedModulesArr = JSON.parse($("#modules").val());
-	}
+function load_systems(e){
+	$("#select_systems").html("");
+	var onLoadBool = typeof e !== 'undefined';
 	
-	var xhr;
-	xhr=$.getJSON("api_fetch_list?start=0&limit=100&s=&collection=modules",function(result){
-		var dropdownStr='';
-		if(result.aaData.length>=1){
-			$.each(result.aaData, function(i,row){
-				var asSelectedStr="";
-				if($.inArray( row.code, selectedModulesArr )!==-1){
-					asSelectedStr="selected";
+	var defaultAssignedVal=$("#uuid_default_system").val();
+	var jsonRow=backendDirectory+"/api_fetch_list?start=0&limit=100&collection=systems";
+	
+	$.getJSON(jsonRow,function(response){
+		var contentHtml="", defaultContentHTML="";
+		if(response.aaData.length>0){
+			var selectedSearchArr = new Array();
+			<% if (typeof contentObj.uuid_default_system !== 'undefined' && contentObj.uuid_default_system !== null && contentObj.uuid_default_system !== "") { %>
+				defaultAssignedVal="<%= contentObj.uuid_default_system %>";
+			<% } %>
+			
+			<% if (typeof contentObj.user_systems !== 'undefined' && contentObj.user_systems !== null && contentObj.user_systems !== "") { %>
+				var tempselectedSearchArr=<%- JSON.stringify(contentObj.user_systems) %>;
+				if(typeof(tempselectedSearchArr)=="object" || typeof(tempselectedSearchArr)=="array"){
+					selectedSearchArr = tempselectedSearchArr;
+				}	else	{
+					selectedSearchArr = JSON.parse(tempselectedSearchArr);
 				}
-				dropdownStr+='<option value="'+row.code+'" '+asSelectedStr+'>'+row.name+'</option>';
+			<% } %>	
+			
+			$.each(response.aaData, function(i,row){
+				if(defaultAssignedVal!="" && defaultAssignedVal==row._id){
+					var tempcontentHtml="<option value='"+row._id+"' selected >"+row.name+"</option>"; 
+					defaultContentHTML+=tempcontentHtml;
+				}else{
+					var tempcontentHtml="<option value='"+row._id+"' ";
+					if(selectedSearchArr.length>0){
+						if($.inArray( row._id, selectedSearchArr)!==-1){
+							tempcontentHtml+="selected";
+						}
+					}
+					tempcontentHtml+=" >"+row.name+"</option>";
+					contentHtml+=tempcontentHtml;
+					defaultContentHTML+="<option value='"+row._id+"' >"+row.name+"</option>"; 
+				}
 			});
-		}
-		$("#modules_selected").html(dropdownStr);
-		for (var selector in configDropDown) {
-   			$(selector).chosen(configDropDown[selector]);
-		}
+     	}
+     	if(onLoadBool){
+     		$("#uuid_default_system").html(defaultContentHTML);
+     		$('#uuid_default_system').combobox();
+     	}
+     	$("#select_systems").html(contentHtml);
+     	
+     	for (var selector in configDropDown) {
+      		$(selector).chosen(configDropDown[selector]);
+   		}
+   		$("#select_systems").trigger("chosen:updated");
 	});
-	**/
+}
+
+$(document).ready(function() {
+	load_systems(true);
+	
 	// validate form on keyup and submit
 		$("#contentForm").validate({
 			ignore: "",
@@ -212,7 +289,7 @@ $(document).ready(function() {
 			validClass: 'valid',
 			errorElement: "em",
 			errorPlacement: function(error, element) {
-				if (element.attr("name") == "access_rights_code" || element.attr("name") == "status" ) {
+				if (element.attr("name") == "access_right" || element.attr("name") == "status" ) {
       				$(element).closest('div').after(error);
    				} else {
 					$(element).closest('div').append(error);
@@ -226,21 +303,27 @@ $(document).ready(function() {
 				}
 			},
 			rules: {
+				select_systems: { required: true },
 				username: { required: true },
 				firstname: { required: true },
 				lastname: { required: true },
-				email: { required: true },
-				access_rights_code: { required: true },
-				password: { required: true },		status: { required: true }
+				email: { required: true, email : true },
+				access_right: { required: true },
+				password: { required: true },
+				status: { required: true }
 			},
 			submitHandler: function(form) {
-				/**var selectedModulesArr=new Array();
-				$('#modules_selected :selected').each(function(i, selected){ 
-  					selectedModulesArr[i] = $(selected).val(); 
-				});
-				$("#modules").val(JSON.stringify(selectedModulesArr));
-				**/
+				var userSystemsStr= $('#select_systems').val();  
 				
+				var uuid_default_system= $('#uuid_default_system').val();  
+				if(userSystemsStr!="" && userSystemsStr!=null && userSystemsStr!="undefined"){
+					var	userSystemsArr=userSystemsStr.toString().split(",");
+					userSystemsArr.push(uuid_default_system);
+					var selectedSystemsStr= JSON.stringify(userSystemsArr);
+					
+					$('#user_systems').val(selectedSystemsStr);
+					$('#select_systems').remove();
+				}
 				dataAsJson('contentForm', form);
  			}
 		});	
@@ -251,8 +334,215 @@ $(document).ready(function() {
       		$('#password').attr('disabled', true);
     	}
     });
+    
+    $("#web_access").click(function() {
+    	if ($('#web_access').is(':checked')) {
+      		$('#allow_web_access').val(1);
+      	} else {
+      		$('#allow_web_access').val(0);
+    	}
+    });
+    
 });
+var xhr;
+(function( $ ) {
+	$.widget( "custom.combobox", {
+		_create: function() {
+				this.wrapper = $( "<span>" )
+				.addClass( "custom-combobox" )
+				.insertAfter( this.element );
 
+				this.element.hide();
+				this._createAutocomplete();
+				this._createShowAllButton();
+				},
+
+				_createAutocomplete: function() {
+				var ele_select= this.element;
+				var selected = this.element.children( ":selected" ),
+				value = selected.val() ? selected.text() : "";
+
+				this.input = $( "<input>" )
+				.appendTo( this.wrapper )
+				.val( value )
+				.attr( "title", "" )
+				.addClass( "custom-combobox-input ui-widget ui-widget-content ui-state-default ui-corner-left" )
+				.autocomplete({
+				delay: 0,
+				minLength: 0,
+				source: $.proxy( this, "_source" )
+				})
+				.tooltip({
+				tooltipClass: "ui-state-highlight"
+				});
+
+				this._on( this.input, {
+				autocompleteselect: function( event, ui ) {
+				//alert("show all");
+				ui.item.option.selected = true;
+
+				this._trigger( "select", event, {
+				  item: ui.item.option
+				});
+				
+				ele_select.trigger('change');
+					if(ele_select.attr('id')=='uuid_default_system'){
+						load_systems();
+					}
+				},
+
+				autocompletechange: "_removeIfInvalid"
+				});
+				},
+
+				_createShowAllButton: function() {
+				var input = this.input,
+				wasOpen = false;
+
+				$( "<a>" )
+				.attr( "tabIndex", -1 )
+				.attr( "title", "Show All Items" )
+				.tooltip()
+				.appendTo( this.wrapper )
+				.button({
+				icons: {
+				  primary: "ui-icon-triangle-1-s"
+				},
+				text: false
+				})
+				.removeClass( "ui-corner-all" )
+				.addClass( "custom-combobox-toggle ui-corner-right" )
+				.mousedown(function() {
+				wasOpen = input.autocomplete( "widget" ).is( ":visible" );
+				})
+				.click(function() {
+				input.focus();
+
+				// Close if already visible
+				if ( wasOpen ) {
+				  return;
+				}
+
+				// Pass last search string as value to search for, displaying last results
+				input.autocomplete( "search", 'SHOWALL' );
+				});
+				},
+
+				_source: function( request, response ) {
+				//var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+				var ele_select= this.element;
+				if(request.term=='SHOWALL'){
+				response(ele_select.children( "option" ).map(function() {
+				var text = $( this ).text();
+				var value= $( this ).val();
+				//if ( this.value && ( !request.term || matcher.test(text) ) )
+				return {
+				  label: text,
+				  value: text,
+				  option: this
+				};
+				}) );
+
+				}
+				else
+				{
+				
+				var jsonRow = '<%= backendDirectory %>/api_fetch_list?start=0&limit=20&collection=systems&s='+request.term;
+				
+				if(xhr) xhr.abort();
+				xhr=$.getJSON(jsonRow,function(result){
+					
+				if(result.error){
+					var html='<option value=""></option>';
+					ele_select.html(html);
+					response(ele_select.children( "option" ).map(function() {
+					var text = $( this ).text();
+					var value= $( this ).val();
+					//if ( this.value && ( !request.term || matcher.test(text) ) )
+					return {
+				  		label: text,
+				  		value: text,
+				  		option: this
+					};
+					}) );
+				}else{
+					var html='<option value=""></option>';
+					if(result.aaData.length>=1){
+						$.each(result.aaData, function(i,row){
+							html+='<option value="'+row._id+'">'+row.name+'</option>';
+						});
+					}
+					
+					ele_select.html(html);
+					
+					
+					response(ele_select.children( "option" ).map(function() {
+				var text = $( this ).text();
+				var value= $( this ).val();
+				//if ( this.value && ( !request.term || matcher.test(text) ) )
+				return {
+				  label: text,
+				  value: text,
+				  option: this
+				};
+				}) );
+					
+					
+				}
+				});
+
+				} 
+
+				},
+
+				_removeIfInvalid: function( event, ui ) {
+
+					// Selected an item, nothing to do
+					if ( ui.item ) {
+
+					return;
+					}
+
+					// Search for a match (case-insensitive)
+					var value = this.input.val(),
+					valueLowerCase = value.toLowerCase(),
+					valid = false;
+					var ele_select= this.element;
+					this.element.children( "option" ).each(function() {
+					if ( $( this ).text().toLowerCase() === valueLowerCase ) {
+						this.selected = valid = true;	
+						if(ele_select.attr('id')=='uuid_default_system'){
+							load_systems();
+						}
+						ele_select.trigger('change');
+
+						return false;
+					}
+					});
+
+					// Found a match, nothing to do
+					if ( valid ) {
+					return;
+					}
+
+					// Remove invalid value
+					this.input
+					.val( "" )
+					.attr( "title", value + " didn't match any item" )
+					.tooltip( "open" );
+					this.element.val( "" );
+					this._delay(function() {
+					this.input.tooltip( "close" ).attr( "title", "" );
+					}, 2500 );
+					this.input.data( "ui-autocomplete" ).term = "";
+				},
+
+				_destroy: function() {
+					this.wrapper.remove();
+					this.element.show();
+				}
+			});
+			})( jQuery );
 </script>
 </body>
 </html>

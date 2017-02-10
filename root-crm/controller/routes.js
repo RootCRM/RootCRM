@@ -12,12 +12,15 @@
 	*  routes.js handles the http requests
 	**/
 	
-var initFunctions = require('../config/functions');	
+var initFunctions = require('../config/functions');		
 var passwordHash = require('password-hash'),
 	cookieParser = require('cookie-parser');
 	
 module.exports = function(init, app,db){
 var mongodb=init.mongodb;
+
+//call defined admin tables array which are independent of system table
+var definedAdminTablesArr= init.adminTablesArr;
 
 var accessFilePath=init.backendDirectoryName+"/";
 var backendDirectoryPath=init.backendDirectoryPath;
@@ -201,19 +204,13 @@ app.post(backendDirectoryPath+'/forgot_password', (req, res) => {
 				
 			//db.collection('authentication_token').save({"user_id": document._id, "status" : true}, (err, result) => {
 			initFunctions.crudOpertions(db, 'authentication_token', 'create', addAuthToken, null, null, null,function(result) {
-				console.log(result);
-				var insertEmail=new Object();
-				insertEmail["sender_name"]=document.firstname;
-				insertEmail["sender_email"]=postJson.email;
-				insertEmail["subject"]='Reset your ROOTCRM password';
-				insertEmail["body"]='Hi '+document.firstname+',<br>Please click on the below link to reset your password:<br><a href="'+backendDirectoryPath+'/reset_password?token='+result._id+'">'+backendDirectoryPath+'/reset_password?token='+result._id+'</a>';
-				insertEmail["created"]=initFunctions.currentTimestamp();
-				insertEmail["modified"]=initFunctions.currentTimestamp();
-				insertEmail["recipient"]='bwalia@tenthmatrix.co.uk';
-				insertEmail["status"]=0;
+				var subjectStr='Reset your ROOTCRM password';
 				
-				//db.collection("email_queue").save(insertEmail, (err, e_result) => {
-				initFunctions.crudOpertions(db, 'email_queue', 'create', insertEmail, null, null, null,function(email_response) {
+				var urlStr= "http://"+req.headers.host+backendDirectoryPath;
+				var bodyStr ='Hi '+document.firstname+',<br>Please click on the below link to reset your password:<br><a href="'+urlStr+'/reset_password?token='+result._id+'">'+urlStr+'/reset_password?token='+result._id+'</a>';
+				var recipientStr='bwalia@tenthmatrix.co.uk';
+				
+				initFunctions.send_email(db, recipientStr, document.firstname, postJson.email, subjectStr, bodyStr, bodyStr, function(email_response) {
 					if(email_response.error){
 						res.redirect(backendDirectoryPath+'/forgot_password?error=email');
 					}else{
@@ -240,10 +237,10 @@ app.post(backendDirectoryPath+'/validlogin', (req, res) => {
 		if (result.aaData) {
 			var document= result.aaData;
 			if(passwordHash.verify(postJson.password, document.password)){
-				db.collection('sessions').save({"user_id": document._id, "status" : true}, (err, result) => {
-					if (result){
-      					res.cookie(init.cookieName , result["ops"][0]["_id"])
-      					res.redirect(backendDirectoryPath+'/index');
+				initFunctions.saveSessionBeforeLogin(db, document._id, document.uuid_default_system, function(result) {
+					if (result.success){
+      					res.cookie(init.cookieName , result.cookie)
+      					res.redirect(backendDirectoryPath+result.link);
       				}else{
       					res.redirect(backendDirectoryPath+'/sign-in?error=no');
     				}
@@ -259,10 +256,10 @@ app.post(backendDirectoryPath+'/validlogin', (req, res) => {
 				if (result.aaData) {
 					var document= result.aaData;
 					if(passwordHash.verify(postJson.password, document.password)){
-						db.collection('sessions').save({"user_id": document._id, "status" : true}, (err, result) => {
-							if (result){
-      								res.cookie(init.cookieName , result["ops"][0]["_id"])
-      								res.redirect(backendDirectoryPath+'/index');
+						initFunctions.saveSessionBeforeLogin(db, document._id, document.uuid_default_system, function(result) {
+							if (result.success){
+      								res.cookie(init.cookieName , result.cookie)
+      								res.redirect(backendDirectoryPath+result.link);
       						}else{
       							res.redirect(backendDirectoryPath+'/sign-in?error=no');
     						}
@@ -284,7 +281,7 @@ app.get(backendDirectoryPath+'/task_scheduler', (req, res) => {
 	var schedulerFrom = req.query.schedulerFrom, schedulerTo=req.query.schedulerTo, collectionStr=req.query.collection;
 	var outputObj = new Object();
 	
-	db.collection(collectionStr).find({ $and:[ { timestamp_start: { $gte: schedulerFrom } },  { timestamp_start: { $lte: schedulerTo } } ] }).sort({Modified: 1}).toArray(function(err, items) {
+	db.collection(collectionStr).find({ $and:[ { timestamp_start: { $gte: schedulerFrom } },  { timestamp_start: { $lte: schedulerTo } } ] }).sort({modified: 1}).toArray(function(err, items) {
 		if (err) {
 			outputObj["error"]   = 'no records found';
 			res.send(outputObj);
@@ -439,9 +436,15 @@ app.get(backendDirectoryPath+'/api_crud_get/', requireLogin, function(req, res) 
 		}
 		
 		if(collectionStr!=""){
-			initFunctions.crudOpertions(db, collectionStr, actionStr, postContent, uniqueFieldNameStr, uniqueFieldValueStr, null, function(result) {
-				res.send(result);
-			});	
+			/**if(uniqueFieldNameStr=="_id" && actionStr=="findOne"){
+				initFunctions.returnFindOneByMongoID(db, collectionStr, uniqueFieldValueStr, function(resultObject) {
+					res.send(resultObject);
+				});
+			}	else	{**/
+				initFunctions.crudOpertions(db, collectionStr, actionStr, postContent, uniqueFieldNameStr, uniqueFieldValueStr, null, function(result) {
+					res.send(result);
+				});	
+			//}
 		}else{
 			outputObj["error"]   = "Please pass the collection name!";
 			res.send(outputObj);
@@ -466,6 +469,60 @@ app.get(backendDirectoryPath+'/api_fetch_collections/', requireLogin, function(r
 	}
 }); 
 
+//change session for user selected system
+app.get(backendDirectoryPath+'/swtich_user_system/', requireLogin, function(req, res) {
+	var outputObj = new Object();
+	
+	if(req.authenticationBool){
+		var tempID=req.query.id;
+		tempID=new mongodb.ObjectID(tempID);
+			
+		db.collection("sessions").update({'user_id':req.authenticatedUser._id}, {'$set' : {"active_system_uuid" : tempID}}, (err, result) => {
+			if(result){
+    			outputObj["success"]   = "OK";
+				res.send(outputObj);
+    		}else{
+    			outputObj["error"]   = "Error occurred while switch!";
+				res.send(outputObj);
+			}
+    	});
+	}else{
+		outputObj["error"]   = "You are not authorizied!";
+		res.send(outputObj);
+	}
+});
+
+//get logged in user systems
+app.get(backendDirectoryPath+'/fetch_user_systems/', requireLogin, function(req, res) {
+	var outputObj = new Object();
+	
+	if(req.authenticationBool){
+		var userSysArr= req.authenticatedUser.user_systems;
+		if(typeof(columnsArr)!=="array" || typeof(columnsArr)!=="object"){
+			userSysArr = JSON.parse(userSysArr);
+		}
+		
+		var definedSystemArr=new Array();
+		//loop and convert in mongo object id
+		for (var i=0; i < userSysArr.length; i++) {
+			var tempID=new mongodb.ObjectID(userSysArr[i]);
+			definedSystemArr.push(tempID);
+		}
+		
+		db.collection('systems').find({_id : { '$in': definedSystemArr }}).sort({name: 1}).toArray(function(err, items) {
+			if (err) {
+				outputObj["error"]   = 'not found';
+				res.send(outputObj);
+      		} else if (items) {
+      			outputObj["aaData"]   = items;
+      			res.send(outputObj);
+      		}
+		});
+	}else{
+		outputObj["error"]   = "You are not authorizied!";
+		res.send(outputObj);
+	}
+});
 
 //load navigator
 app.get(backendDirectoryPath+'/load_navigator/', requireLogin, function(req, res) {
@@ -480,12 +537,13 @@ app.get(backendDirectoryPath+'/load_navigator/', requireLogin, function(req, res
 		
 		db.collection('groups').find(obj).toArray(function(g_err, g_details) {
 			if(g_err){
-				outputObj["aaData"]   = items;
+				outputObj["error"]   = "no record found!";
 				res.send(outputObj);
 			}	else	{
 				var modulesStrArr = new Array();
 				var modulesArr = new Array();
 				var isUserAdmin= false;
+				
 				for (var count=0; count < g_details.length; count++) {
 					if(g_details[count].code=="admin"){
 						isUserAdmin=true;
@@ -513,7 +571,6 @@ app.get(backendDirectoryPath+'/load_navigator/', requireLogin, function(req, res
      			}
      			query+=" } ";
      			eval('var queryObj='+query);
-     			//console.log(query);
 				
 				coll.find(queryObj).sort({sort_order: -1}).toArray(function(err, items) {
 					if (err) {
@@ -576,34 +633,53 @@ app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res
 	}
 	
 	if(req.authenticationBool){
-		if(templateStr!=""){
-			initFunctions.templateSearch(db, templateStr, req, function(resultObject) {
-				res.send(resultObject);
-			});
-		}else if(collectionStr!=""){
-			var query="{}";
-			var total_records=0;
-			var coll= db.collection(collectionStr);
-			if(req.query.s){
-     			//create text index
-     			coll.createIndex({ "$**": "text" },{ name: "TextIndex" });
-     			query="{ '$text': { '$search': '"+req.query.s+"' } }";
-     		}
-     		eval('var queryObj='+query);
-     		coll.find(queryObj).count(function (e, count) {
-      			total_records= count;
-     		});
-			coll.find(queryObj).sort({Modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
-				if (err) {
-					outputObj["total"]   = 0;
-      				outputObj["error"]   = 'not found';
-					res.send(outputObj);
-      			} else if (items) {
-      				outputObj["total"]   = total_records;
-      				outputObj["aaData"]   = items;
-					res.send(outputObj);
+		var activeSystemsStr=req.authenticatedUser.active_system_uuid;
+		if (typeof activeSystemsStr !== 'undefined' && activeSystemsStr !== null && activeSystemsStr!="") {
+			
+			if(templateStr!=""){
+				initFunctions.templateSearch(db, templateStr, activeSystemsStr, req, function(resultObject) {
+					res.send(resultObject);
+				});
+			}else if(collectionStr!=""){
+				//var query="{ 'system_uuid': { $in: "+activeSystemsStr+" } ";
+				var query="{";
+				
+				if(definedAdminTablesArr.indexOf(collectionStr)==-1){
+					query+=" 'uuid_system': { $in: ['"+activeSystemsStr+"'] } ";
+				}
+				var total_records=0;
+				var coll= db.collection(collectionStr);
+				if(req.query.s){
+     				//create text index
+     				coll.createIndex({ "$**": "text" },{ name: "TextIndex" });
+     				if(query!="{"){
+     					query+=",";
+     				}
+     				query+=" '$text': { '$search': '"+req.query.s+"' } ";
      			}
-			});
+     			query+= "}";
+     			//console.log(query);
+     			eval('var queryObj='+query);
+     			
+     			coll.find(queryObj).count(function (e, count) {
+      				total_records= count;
+      			});
+				coll.find(queryObj).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+					if (err) {
+						outputObj["total"]   = 0;
+      					outputObj["error"]   = 'not found';
+						res.send(outputObj);
+      				} else if (items) {
+      					outputObj["total"]   = total_records;
+      					outputObj["aaData"]   = items;
+						res.send(outputObj);
+     				}
+				});
+			}else{
+				outputObj["total"]   = 0;
+      			outputObj["error"]   = "No such page exists!";
+				res.send(outputObj);
+			}
 		}else{
 			outputObj["total"]   = 0;
       		outputObj["error"]   = "No such page exists!";
@@ -616,7 +692,7 @@ app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res
 	}
 }); 
 
-// fetch record detail
+// fetch record detail api
 app.get(backendDirectoryPath+'/collection_details/', requireLogin, function(req, res) {
 	var templateStr="", collectionStr="", search_id="";
 	var outputObj = new Object();
@@ -715,7 +791,7 @@ app.get(backendDirectoryPath+'/:id', requireLogin, function(req, res) {
 	
 	var contentObj= "";
 	var table_name =initFunctions.fetchTableName(pageRequested);
-	//console.log(table_name);
+	
 	pageRequested=accessFilePath+pageRequested;
 	
 		if(table_name==""){
@@ -772,6 +848,76 @@ app.get(backendDirectoryPath+'/:id', requireLogin, function(req, res) {
     }	
 }); 
 
+//generate basic modules
+app.post(backendDirectoryPath+'/add_basic_modules', requireLogin, (req, res) => {
+	if(req.authenticationBool){
+		
+	}else{
+		res.redirect('/sign-in');
+	}
+})
+
+//save default system for admin
+app.post(backendDirectoryPath+'/default_system', requireLogin, (req, res) => {
+	if(req.authenticationBool){
+	var postJson=req.body;
+	
+	var contentJson = JSON.parse(req.body.data);
+	
+	var idField="", editorFieldName="", editorFieldVal="", checkForExistence="";
+	
+	var table_nameStr=postJson.table_name;
+	var unique_fieldStr=postJson.unique_field;
+	if(unique_fieldStr=="_id"){
+		unique_fieldStr="id";
+	}
+	var unique_fieldVal="";
+	var link =backendDirectoryPath+"/"+req.params.id;
+	
+	for(var key in contentJson) {
+		if(key==unique_fieldStr){
+			unique_fieldVal= contentJson[key];
+   		}
+	}
+	
+	if(unique_fieldVal==""){
+		for(var key in postJson) {
+			if(key==unique_fieldStr){
+				unique_fieldVal= postJson[key];
+   			}
+		}
+	}
+	if (typeof postJson.editorField !== 'undefined' && postJson.editorField !== null && postJson.editorField !== "") { 
+		editorFieldName=postJson.editorField;
+	}
+	
+	if (typeof postJson.editorValue !== 'undefined' && postJson.editorValue !== null && postJson.editorValue !== null) { 
+		editorFieldVal=postJson.editorValue;
+	}
+	if(postJson.id){
+		idField=postJson.id;
+		var mongoIDField= new mongodb.ObjectID(idField);
+		if(editorFieldName=="" && editorFieldVal==""){
+    		editorFieldName="id";
+    		editorFieldVal=idField;
+    	}
+	}
+	
+		initFunctions.crudOpertions(db, table_nameStr, 'create', contentJson, unique_fieldStr, unique_fieldVal, null,function(result) {
+    		if(result.success){
+    			db.collection("users").update({_id:req.authenticatedUser._id}, {'$set' : {"uuid_default_system" : result._id, "user_systems" : new Array(result._id)}}, (err1	, result) => {
+    				db.collection("session").update({'user_id':req.authenticatedUser._id}, {'$set' : {"active_system_uuid" : result._id}}, (err2	, result2) => {
+    					res.redirect(backendDirectoryPath+'/default_system?success=Saved the basic details successfully!');
+    				});
+  				});
+    		}
+  		});
+
+	}else{
+		res.redirect('/sign-in');
+	}
+})
+
 //save form
 app.post(backendDirectoryPath+'/save/:id', requireLogin, (req, res) => {
 	if(req.authenticationBool){
@@ -820,6 +966,9 @@ app.post(backendDirectoryPath+'/save/:id', requireLogin, (req, res) => {
 	
 	var callMongoQueriesBool=true; // set true to save in db after this if-else condition
 	
+	if(definedAdminTablesArr.indexOf(table_nameStr)==-1){
+		contentJson['uuid_system'] = req.authenticatedUser.active_system_uuid.toString();
+	}
 	if(table_nameStr=="bookmarks"){
 		checkForExistence= '{\''+unique_fieldStr +'\': \''+unique_fieldVal+'\', "categories": \''+req.body.categories+'\'}';
 	}
@@ -842,7 +991,7 @@ app.post(backendDirectoryPath+'/save/:id', requireLogin, (req, res) => {
       				initFunctions.returnFindOneByMongoID(db, table_nameStr, mongoIDField, function(existingDoc) {
       					if (existingDoc.aaData) {
       						var existingDocument=existingDoc.aaData;
-      						contentJson["Created"]=existingDocument.Created;
+      						contentJson["created"]=existingDocument.created;
       				
       						var  updaTeContent="{ $set: { ";
       						for(var key in contentJson) {
@@ -874,13 +1023,13 @@ app.post(backendDirectoryPath+'/save/:id', requireLogin, (req, res) => {
       				res.redirect(link);
       			}
       		} else {
-      			contentJson.Created=initFunctions.currentTimestamp();
+      			contentJson.created=initFunctions.currentTimestamp();
       			
       			
       			initFunctions.returnFindOneByMongoID(db, table_nameStr, mongoIDField, function(existingDoc) {
       				if (existingDoc.aaData) {
       					var existingDocument=existingDoc.aaData;
-      					contentJson["Created"]=existingDocument.Created;
+      					contentJson["created"]=existingDocument.created;
       				
       					var  updaTeContent="{ $set: { ";
       					for(var key in contentJson) {
@@ -913,8 +1062,8 @@ app.post(backendDirectoryPath+'/save/:id', requireLogin, (req, res) => {
 	}
 	
 	if(callMongoQueriesBool){
-		//console.log("checkForExistence: "+checkForExistence+", id="+req.params.id+ ", mongoId= "+mongoIDField+", uniquefield: "+unique_fieldStr+", unique value="+unique_fieldVal);
 		initFunctions.saveEntry(db, table_nameStr, checkForExistence, contentJson, req.params.id, mongoIDField, unique_fieldStr, unique_fieldVal, function(result) {
+			
 			var tempLink="";
 			if(editorFieldName!="" && editorFieldVal!=""){
     			tempLink+="?"+editorFieldName+"="+editorFieldVal;
@@ -974,9 +1123,16 @@ var authenticatedUser =function (req, cb) {
 				return cb(null);	
 			}else if(result.aaData) {
 				var session_result= result.aaData;
+				var returnUserDetsils = new Array();
 				initFunctions.returnFindOneByMongoID(db, 'users', session_result.user_id, function(userDetails) {
-					if(userDetails.error) return cb(null)
-					return cb(userDetails.aaData);
+					if(userDetails.error) return cb(null);
+					if(userDetails.aaData){
+						returnUserDetsils=userDetails.aaData;
+						if(session_result.active_system_uuid){
+							returnUserDetsils['active_system_uuid']=session_result.active_system_uuid;
+						}
+						return cb(returnUserDetsils);
+					}
 				});
 			}else{
 				return cb(null);

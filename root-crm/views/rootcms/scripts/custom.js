@@ -35,6 +35,34 @@ function dataAsJson(name, form){
 	form.submit();
 }
 
+function switchInSystems(id){
+	var jsonRow = backendDirectory+'/swtich_user_system?id='+id;
+	$.getJSON(jsonRow,function(result){
+		if(result.success){
+			window.location.href=backendDirectory+"/index";
+		}
+	});
+}
+
+function fetch_users_sites(){
+	$("#swtich_sites").html('');
+	var jsonRow = backendDirectory+'/fetch_user_systems';
+	$("#loggedInUserSystems").hide();
+	$.getJSON(jsonRow,function(result){
+		if(result.aaData){
+			var contentHtmlStr="", countUserSystems=0;
+			$.each(result.aaData, function(i,item){
+				countUserSystems++;
+				contentHtmlStr+='<li><a href="javascript:void(0)" onClick="switchInSystems(\''+item._id+'\'); return false;">'+item.name+'</li>';     
+			});
+			if(countUserSystems>=1){
+				$("#loggedInUserSystems").show();
+				$(".totalLoggedInUserSystems").html(countUserSystems);
+				$("#swtich_sites").append(contentHtmlStr);
+			}
+		}
+	});
+}
 function load_navigation_data(){
 	$("#dashboard-menu").html('');
 	var jsonRow = backendDirectory+'/load_navigator';
@@ -117,4 +145,5 @@ function load_navigation_data(){
 }
 $(function () {
     load_navigation_data();
+    fetch_users_sites();
 });

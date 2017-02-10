@@ -14,12 +14,12 @@
 	
 	var init = require('./init');
 	var mongodb=init.mongodb;
-
+	var nodemailer = require('nodemailer');
 var self = module.exports = 
 {
   // These functions which will be called in the main file, which is server.js
   	
-  	templateSearch : function (db, templateStr, req, cb){
+  	templateSearch : function (db, templateStr, activeSystemsStr, req, cb){
      	var itemsPerPage = 10, pageNum=1;
 		var outputObj = new Object();
 	
@@ -40,9 +40,16 @@ var self = module.exports =
 					pageNum=1;
 				}
 				
-				var query="{}", fetchFieldsObj="{}", table_name= templateResponse.table ;
+				var definedAdminTablesArr= init.adminTablesArr;
+				
+				var query="{ ";
+				var fetchFieldsObj="{}", table_name= templateResponse.table ;
 				
 				outputObj["table"]   = table_name;
+				
+				if(definedAdminTablesArr.indexOf(table_name)==-1){
+					query+=" 'uuid_system': { $in: ['"+activeSystemsStr+"'] } ";
+				}
 				
 				if (typeof templateResponse.search_columns !== 'undefined' && templateResponse.search_columns !== null && templateResponse.search_columns !== "")	{
 					outputObj["enable_search"]   = true;
@@ -73,11 +80,15 @@ var self = module.exports =
 				}
 				
 				if(req.query.s){
-					query= '{'
+					//query= '{'
 					var searchStr = req.query.s;
 					
 					if(templateResponse.search_columns){
-						var searchColumnArr=JSON.parse(templateResponse.search_columns);
+						if(typeof(templateResponse.search_columns)==="array" || typeof(templateResponse.search_columns)==="object"){
+							var searchColumnArr=templateResponse.search_columns;
+						}else{
+							var searchColumnArr=JSON.parse(templateResponse.search_columns);
+						}
 						if(searchColumnArr.length>=1){
 							
 							var subQueryStr="";
@@ -120,9 +131,10 @@ var self = module.exports =
 							}
 						}
 					}
-					query+="}";
+					
 				}
-				
+				query+="}";
+				//console.log(query);
 				if(templateResponse.listing_columns){
 					eval('var obj='+query);
 					eval('var fetchFieldsobj='+fetchFieldsObj);
@@ -130,12 +142,13 @@ var self = module.exports =
 					var coll= db.collection(table_name);
 					coll.find(obj).count(function (e, count) {
       					total_records= count;
-     				});
-     	
-					coll.find(obj, fetchFieldsobj).sort({Modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+      				});
+     				
+     				
+					coll.find(obj, fetchFieldsobj).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
 						if (err) {
 							outputObj["total"]   = 0;
-      						outputObj["error"]   = 'not found';
+      						outputObj["error"]   = 'Error, please inform developer to fix this!';
 							cb(outputObj);
       					} else if (items) {
       						outputObj["total"]   = total_records;
@@ -167,16 +180,17 @@ var self = module.exports =
 				cb(outputObj);
       		}
 		});**/
+		
 		if(search_id!="" && search_id!="undefined" && search_id!=null){
 			db.collection(collectionName).findOne({_id: new mongodb.ObjectID(search_id)}, function(err, document_details) {
 				if (err) {
 					outputObj["error"]   = err;
-				cb(outputObj);
+					cb(outputObj);
       			} else if (document_details) {
       				outputObj["aaData"]   = document_details;
-					cb(outputObj);
+      				cb(outputObj);
      			}
-			});
+     		});
 		}else{
 			outputObj["error"]   = "Invalid id passed";
 			cb(outputObj);
@@ -221,7 +235,7 @@ var self = module.exports =
 		//if(uniqueFieldNameStr!="" && uniqueFieldValueStr!=""){
 		if(checkForExistenceObj!="" && checkForExistenceObj!=null){
 			if(postContent!="" && postContent!=null){
-				postContent.Modified=self.currentTimestamp();
+				postContent.modified=self.currentTimestamp();
 			}
 			eval('var findStr='+checkForExistenceObj);
 						
@@ -250,7 +264,8 @@ var self = module.exports =
       						outputObj["error"] = "This "+uniqueFieldValueStr+" already exists!"
       						cb(outputObj);
       					}else{
-      						postContent.Created=self.currentTimestamp();
+      						postContent.created=self.currentTimestamp();
+      						postContent.uuid=self.guid();
       						db.collection(collectionStr).save(postContent, (err4, result) => {
       							if (err4) outputObj["error"]  = "Error occurred while saving ["+err4+"], please try after some time!";
     							outputObj["success"]  = "Saved successfully!";
@@ -263,10 +278,15 @@ var self = module.exports =
     			case 'update':
     				db.collection(collectionStr).findOne(findStr, function(searchErr, document) {
         				if(document){
-        					if(document.Created){
-								postContent["Created"]=document.Created;
+        					if(document.created){
+								postContent["created"]=document.Created;
 							}else{
-								postContent['Created']=self.currentTimestamp();
+								postContent['created']=self.currentTimestamp();
+							}
+							if(document.uuid){
+								postContent["uuid"]=document.uuid;
+							}else{
+								postContent['uuid']=self.guid();
 							}
       						db.collection(collectionStr).update(findStr, postContent, (err1	, result) => {
     							if (err1) outputObj["error"]="Error occurred while updating ["+err1+"], please try after some time!";
@@ -283,7 +303,7 @@ var self = module.exports =
        				db.collection(collectionStr).findOne(findStr, function(searchErr, document) {
        					if(document){
 							db.collection(collectionStr).remove(findStr, function(err, result){
-    							if (err1) outputObj["error"]="Error occurred while deleting ["+err+"], please try after some time!";
+    							if (err) outputObj["error"]="Error occurred while deleting ["+err+"], please try after some time!";
     							outputObj["success"]="Deleted successfully!";
     							cb(outputObj);
   							});
@@ -298,7 +318,8 @@ var self = module.exports =
 					cb(outputObj);
 			}
 		}else if(actionStr=='create'){
-			postContent.Created=self.currentTimestamp();
+			postContent.created=self.currentTimestamp();
+			postContent.uuid=self.guid();
       		db.collection(collectionStr).save(postContent, (err4, result) => {
       			if (err4) outputObj["error"]  = "Error occurred while saving ["+err4+"], please try after some time!";
     			outputObj["success"]  = "Saved successfully!";
@@ -325,7 +346,7 @@ var self = module.exports =
 		}
 		
 		var link="";
-		postContent['Modified']=self.currentTimestamp();
+		postContent['modified']=self.currentTimestamp();
 		
 		db.collection(table_nameStr).findOne({_id : findmongoID}, function(err, existingDocument) {
 			var checkForExistenceObj=checkForExistence;	
@@ -348,10 +369,15 @@ var self = module.exports =
 						link+="error_msg=This "+parameterStr+" already exists!"
       					cb(link);
 					}else{
-						if(existingDocument.Created){
-							postContent["Created"]=existingDocument.Created;
+						if(existingDocument.created){
+							postContent["created"]=existingDocument.created;
 						}else{
-							postContent['Created']=self.currentTimestamp();
+							postContent['created']=self.currentTimestamp();
+						}
+						if(existingDocument.uuid){
+							postContent["uuid"]=existingDocument.uuid;
+						}else{
+							postContent['uuid']=self.guid();
 						}
       					db.collection(table_nameStr).update({_id:findmongoID}, postContent, (err1	, result) => {
     						if (err1){
@@ -382,7 +408,7 @@ var self = module.exports =
 						link+="error_msg="+result.error;
       					cb(link);
 					}else if(result.success){
-						link+="success_msg="+result.success;
+						link+="_id="+result._id+"&success_msg="+result.success;
 						cb(link);
       				}
 				});
@@ -396,7 +422,7 @@ var self = module.exports =
       					link+="error_msg=This "+parameterStr+" already exists!"
       					cb(link);
       				}else{
-      					postContent['Created']=self.currentTimestamp();
+      					postContent['created']=self.currentTimestamp();
       					db.collection(table_nameStr).save(postContent, (err4, result) => {
       						if (err4) link+="&error_msg=Error occurred while saving ["+err4+"], please try after some time!";
     						link+="success_msg=Saved successfully!";
@@ -409,6 +435,30 @@ var self = module.exports =
 		
 	},
 	
+	saveSessionBeforeLogin : function(db, user_id, systems_access, cb){
+		var outputObj = new Object();
+		db.collection('sessions').save({"user_id": new mongodb.ObjectID(user_id), "status" : true, "active_system_uuid" : systems_access}, (err, result) => {
+			if (result){
+				db.collection('systems').find({}).count(function (e, count) {
+					//console.log(count)
+      				if(count==0){
+      					outputObj["cookie"]   = result["ops"][0]["_id"];
+      					outputObj["link"]   = '/default_system';
+      					outputObj["success"]   = 'OK';
+      					cb(outputObj);
+      				}else{
+      					outputObj["cookie"]   = result["ops"][0]["_id"];
+      					outputObj["link"]   = '/index';
+      					outputObj["success"]   = 'OK';
+      					cb(outputObj);
+      				}
+     			});
+      		}else{
+      			outputObj["error"]   = 'no';
+      			cb(outputObj);
+    		}
+  		});
+	},
 	currentTimestamp : function (){
 		var timeStampStr=Math.round(new Date().getTime()/1000)
 		return timeStampStr;
@@ -484,6 +534,8 @@ var self = module.exports =
 			table_name="projects";
 		}else if(filename=="customer"){
 			table_name="Companies";
+		}else if(filename=="system"){
+			table_name="systems";
 		}
 		return table_name;
 	},
@@ -496,6 +548,52 @@ var self = module.exports =
    				allKeys.push(key);
    			}
 			return cb(allKeys);
+		});
+	},
+	
+	send_email : function (db, from_email, sender_name, to_email, subject, plaintext, htmlContent, cb){
+  		var outputObj = new Object();
+  		
+  		var emailApiUsername = process.env.emailApiUsername;
+  		var emailApiHost = process.env.emailApiHost;
+		
+		var emailLinkStr= 'smtps://'+emailApiUsername+':'+emailApiHost;
+		console.log(emailLinkStr);
+		
+		// create reusable transporter object using the default SMTP transport 
+		var transporter = nodemailer.createTransport(emailLinkStr);
+
+		// setup e-mail data with unicode symbols 
+		var mailOptions = {
+    		from: from_email, // sender address 
+    		to: to_email, // list of receivers 
+    		subject: subject, // Subject line 
+   			text: plaintext, // plaintext body 
+    		html: htmlContent // html body 
+		};
+ 
+		// send mail with defined transport object 
+		transporter.sendMail(mailOptions, function(error, info){
+			var insertEmail=new Object();
+			insertEmail["sender_name"]=sender_name;
+			insertEmail["sender_email"]=to_email;
+			insertEmail["subject"]=subject;
+			insertEmail["body"]=plaintext;
+			insertEmail["created"]=self.currentTimestamp();
+			insertEmail["modified"]=self.currentTimestamp();
+			insertEmail["recipient"]=from_email;
+  			
+  			if(error){
+        		outputObj["error"]   = error;
+        		insertEmail["status"]=0;
+    		}	else	{
+    			outputObj["success"]   = info.response;
+    			insertEmail["status"]=1;
+    		}
+    		self.crudOpertions(db, 'email_queue', 'create', insertEmail, null, null, null,function(email_response) {
+				cb(outputObj);
+			});
+			
 		});
 	}
 };

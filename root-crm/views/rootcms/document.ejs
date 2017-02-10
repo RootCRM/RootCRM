@@ -120,10 +120,10 @@ var publishedDate = year + '-' + month + '-' + dateNum + ' ' + hour + ':' + min 
     										<label for="" class="col-sm-2 control-label">Status</label>
     										<div class="col-sm-9" style="margin-top:6px;">
     											<div STYLE="float:left; margin-right:10px; display:inline-block;">
-      		  										<label> <input type="radio" id="Status" name="Status" value="1" <% if (typeof contentObj.Status !== 'undefined' && contentObj.Status !== null && (contentObj.Status == 1 || contentObj.Status=="1")) { %>checked<% } %> > <strong style="font-weight:600">Active</strong></label>
+      		  										<label> <input type="radio" id="status" name="status" value="1" <% if (typeof contentObj.status !== 'undefined' && contentObj.status !== null && (contentObj.status == 1 || contentObj.status=="1")) { %>checked<% } %> > <strong style="font-weight:600">Active</strong></label>
     			  								</div>
 				  								<div sTYLE="float:left; display:inline-block;">
-      		  										<label> <input type="radio" id="Status" name="Status" value="0" <% if (typeof contentObj.Status !== 'undefined' && contentObj.Status !== null && contentObj.Status == 0) { %>checked<% } %> > <strong style="font-weight:600">Inactive</strong></label>
+      		  										<label> <input type="radio" id="status" name="status" value="0" <% if (typeof contentObj.status !== 'undefined' && contentObj.status !== null && contentObj.status == 0) { %>checked<% } %> > <strong style="font-weight:600">Inactive</strong></label>
     			  								</div>
 											</div>
 										</div>
@@ -344,33 +344,33 @@ function addNewObject(){
 	htmlStr+='<div class="form-group">';
     htmlStr+='<label for="" class="col-sm-2 control-label">Object Heading<sup class="required">*</sup></label>';
     htmlStr+='<div class="col-sm-9">';
-    htmlStr+='<input type="text" class="form-control" id="obj_heading_'+newUUIDStr+'" name="obj_heading_'+newUUIDStr+'" value="" onblur="generate_code(\'obj_chk_manual_'+newUUIDStr+'\',\'obj_heading_'+newUUIDStr+'\',\'obj_code_'+newUUIDStr+'\')" onkeyup="generate_code(\'obj_chk_manual_'+newUUIDStr+'\',\'obj_heading_'+newUUIDStr+'\',\'obj_code_'+newUUIDStr+'\')">';
+    htmlStr+='<input type="text" class="form-control" id="obj_heading_'+newUUIDStr+'" value="" onblur="generate_code(\'obj_chk_manual_'+newUUIDStr+'\',\'obj_heading_'+newUUIDStr+'\',\'obj_code_'+newUUIDStr+'\')" onkeyup="generate_code(\'obj_chk_manual_'+newUUIDStr+'\',\'obj_heading_'+newUUIDStr+'\',\'obj_code_'+newUUIDStr+'\')">';
     htmlStr+='</div>';
     htmlStr+='</div>';
     htmlStr+='<div class="form-group">';
     htmlStr+='<label for="" class="col-sm-2 control-label">Code<sup class="required">*</sup></label>';
     htmlStr+='<div class="col-sm-9">';
-    htmlStr+='<input type="text" class="form-control" id="obj_code_'+newUUIDStr+'" name="obj_code_'+newUUIDStr+'" placeholder="" readonly value="">';
+    htmlStr+='<input type="text" class="form-control" id="obj_code_'+newUUIDStr+'" placeholder="" readonly value="">';
 	htmlStr+='<span class="help-block" STYLE="font-size:12px;">';
-	htmlStr+='<input name="obj_chk_manual__'+newUUIDStr+'" id="obj_chk_manual_'+newUUIDStr+'" value="0" onChange="generate_code(\'obj_chk_manual_'+newUUIDStr+'\',\'obj_heading_'+newUUIDStr+'\',\'obj_code_'+newUUIDStr+'\')" type="checkbox">';
+	htmlStr+='<input id="obj_chk_manual_'+newUUIDStr+'" value="0" onChange="generate_code(\'obj_chk_manual_'+newUUIDStr+'\',\'obj_heading_'+newUUIDStr+'\',\'obj_code_'+newUUIDStr+'\')" type="checkbox">';
 	htmlStr+='I want to manually enter code</span>';
     htmlStr+='</div>';
     htmlStr+='</div>';
     htmlStr+='<div class="form-group"><label for="" class="col-sm-2 control-label">Object Content</label><div class="col-sm-9">';
-    htmlStr+='<TEXTAREA CLASS="form-control" STYLE="height:220px;" id="obj_content__'+newUUIDStr+'" name="obj_content__'+newUUIDStr+'"></TEXTAREA>';
+    htmlStr+='<TEXTAREA CLASS="form-control" STYLE="height:220px;" id="obj_content__'+newUUIDStr+'" ></TEXTAREA>';
 	htmlStr+='</div></div>';
     htmlStr+='</div>';
     htmlStr+='<div class="col-lg-5">';
     htmlStr+='<div class="form-group"><label for="" class="col-sm-2 control-label">Order By<sup class="required">*</sup></label><div class="col-sm-9">';
-    htmlStr+='<input type="text" class="form-control" id="obj_order__'+newUUIDStr+'" name="obj_order__'+newUUIDStr+'" placeholder="" value="">';
+    htmlStr+='<input type="text" class="form-control" id="obj_order__'+newUUIDStr+'" placeholder="" value="0">';
     htmlStr+='</div></div>';
     htmlStr+='<div class="form-group"><label for="" class="col-sm-2 control-label">Status</label>';
     htmlStr+='<div class="col-sm-9" style="margin-top:6px;">';
 	htmlStr+='<div STYLE="float:left; margin-right:10px;display:inline-block;">';
-    htmlStr+='<label> <input type="radio" id="obj_status__'+newUUIDStr+'" name="obj_status_'+newUUIDStr+'" value="1" checked> <strong style="font-weight:600">Active</strong></label>';
+    htmlStr+='<label> <input type="radio" id="obj_status__'+newUUIDStr+'" value="1" checked> <strong style="font-weight:600">Active</strong></label>';
     htmlStr+='</div>';
 	htmlStr+='<div class="radio" STYLE="float:left;display:inline-block;">';
-    htmlStr+='<label> <input type="radio" id="obj_status_'+newUUIDStr+'" name="obj_status_'+newUUIDStr+'" value="0"> <strong style="font-weight:600">Inactive</strong></label>';
+    htmlStr+='<label> <input type="radio" id="obj_status_'+newUUIDStr+'" value="0"> <strong style="font-weight:600">Inactive</strong></label>';
     htmlStr+='</div>';
 	htmlStr+='</div>';
 	htmlStr+='</div>';
@@ -546,7 +546,11 @@ $(document).ready(function(){
 			validClass: 'valid',
 			errorElement: "em",
 			errorPlacement: function(error, element) {
-				$(element).closest('div').append(error);
+				if (element.attr("name") == "published_date" ) {
+                	$(element).closest('div').after(error);
+            	}else{
+					$(element).closest('div').append(error);
+				}
 			},
 			onfocusout: false,
 			invalidHandler: function(form, validator) {
