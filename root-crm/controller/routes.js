@@ -216,7 +216,7 @@ app.post(backendDirectoryPath+'/forgot_password', (req, res) => {
 					}else{
 						res.redirect(backendDirectoryPath+'/forgot_password?success=OK');
 					}
-				})
+				});
 			});
       	} else {
       		res.redirect(backendDirectoryPath+'/forgot_password?error=not_exist');
@@ -661,15 +661,16 @@ app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res
      			//console.log(query);
      			eval('var queryObj='+query);
      			
-     			coll.find(queryObj).count(function (e, count) {
+     			/**coll.find(queryObj).count(function (e, count) {
       				total_records= count;
-      			});
+      			});**/
 				coll.find(queryObj).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
 					if (err) {
 						outputObj["total"]   = 0;
       					outputObj["error"]   = 'not found';
 						res.send(outputObj);
       				} else if (items) {
+      					total_records=items.length;
       					outputObj["total"]   = total_records;
       					outputObj["aaData"]   = items;
 						res.send(outputObj);
@@ -736,6 +737,224 @@ app.get(backendDirectoryPath+'/collection_details/', requireLogin, function(req,
 		res.send(outputObj);
 	}
 }); 
+
+//players list View
+app.get(backendDirectoryPath+'/players', requireLogin, function(req, res) {
+	if(req.authenticationBool){
+		var queryString= req.query;
+		var keywordStr="";
+	
+		if(queryString.keyword){
+			keywordStr=queryString.keyword;
+		}
+		res.render(accessFilePath+'players', {
+       		currentTemplate : '',
+        	searched_keyword : keywordStr,
+        	authenticatedUser : req.authenticatedUser
+    	});
+		/**initFunctions.crudOpertions(db, "system_templates", 'findOne', null, "code", "players", null, function(result) {
+			if(result.success){
+				res.render(accessFilePath+'players', {
+       	 			currentTemplate : 'players',
+        			searched_keyword : keywordStr,
+        			authenticatedUser : req.authenticatedUser
+    			});
+    		}else{
+    			res.render(accessFilePath+'players', {
+       	 			currentTemplate : '',
+        			searched_keyword : keywordStr,
+        			authenticatedUser : req.authenticatedUser
+    			});
+    		}
+    	});**/
+    }else{
+		res.redirect(backendDirectoryPath+'/sign-in');
+	}
+});
+
+//separate listing api for players to search by various other options
+app.get(backendDirectoryPath+'/api_fetch_players/', requireLogin, function(req, res) {
+	var itemsPerPage = 10, pageNum=1, collectionStr="users";
+	var outputObj = new Object();
+		
+	if(req.authenticationBool){
+		var activeSystemsStr=req.authenticatedUser.active_system_uuid;
+		if (typeof activeSystemsStr !== 'undefined' && activeSystemsStr !== null && activeSystemsStr!="") {
+			
+			if(collectionStr!=""){
+				var coll= db.collection(collectionStr);    			
+     			if(req.query.team){
+     				initFunctions.returnFindOneByMongoID(db, 'teams', req.query.team, function(result) {
+     					if(result.aaData)	{
+     						var teamsData=result.aaData;
+     						var usersListArr=teamsData.players;
+     						
+     						if(usersListArr.length>0){
+     							var selectedUsersID=new Array();
+
+     							for(var i=0; i<usersListArr.length; i++){
+     								var tempID=new mongodb.ObjectID(usersListArr[i].user_uuid);
+     								selectedUsersID.push(tempID);
+     							}
+     							var player_type_uuid="", searchTermStr="";
+     							if(req.query.player_type_uuid){
+									player_type_uuid= req.query.player_type_uuid;
+     							}
+     			
+								if(req.query.s){
+     								searchTermStr=req.query.s;	
+     							}
+     							
+     							if(player_type_uuid!="" && searchTermStr==""){
+     							coll.find({_id : { '$in': selectedUsersID }, player_type_uuid : req.query.player_type_uuid }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+     								if (err) {
+										outputObj["total"]   = 0;
+      									outputObj["error"]   = 'not found';
+										res.send(outputObj);
+      								} else if (items) {
+      									outputObj["total"]   = items.length;
+      									outputObj["aaData"]   = items;
+										res.send(outputObj);
+     								}
+								});
+     							}
+     							else if(player_type_uuid=="" && searchTermStr!=""){
+     							coll.find({_id : { '$in': selectedUsersID }, $text: { '$search': searchTermStr } }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+     								if (err) {
+										outputObj["total"]   = 0;
+      									outputObj["error"]   = 'not found';
+										res.send(outputObj);
+      								} else if (items) {
+      									outputObj["total"]   = items.length;
+      									outputObj["aaData"]   = items;
+										res.send(outputObj);
+     								}
+								});
+     							}
+     							else if(player_type_uuid!="" && searchTermStr!=""){
+     							coll.find({_id : { '$in': selectedUsersID }, player_type_uuid : req.query.player_type_uuid, $text: { '$search': searchTermStr } }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+     								if (err) {
+										outputObj["total"]   = 0;
+      									outputObj["error"]   = 'not found';
+										res.send(outputObj);
+      								} else if (items) {
+      									outputObj["total"]   = items.length;
+      									outputObj["aaData"]   = items;
+										res.send(outputObj);
+     								}
+								});
+     							}
+     							else{
+     							coll.find({_id : { '$in': selectedUsersID } }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+     								if (err) {
+										outputObj["total"]   = 0;
+      									outputObj["error"]   = 'not found';
+										res.send(outputObj);
+      								} else if (items) {
+      									outputObj["total"]   = items.length;
+      									outputObj["aaData"]   = items;
+										res.send(outputObj);
+     								}
+								});
+								}
+							}else{
+								outputObj["total"]   = 0;
+      							outputObj["error"]   = 'not found';
+								res.send(outputObj);
+							}
+     					}	else	{
+     						outputObj["total"]   = 0;
+      						outputObj["error"]   = 'not found';
+							res.send(outputObj);
+     					}
+     				});
+     			}	else	{
+     				var query="{";
+				
+					/**if(definedAdminTablesArr.indexOf(collectionStr)==-1){
+						query+=" 'uuid_system': { $in: ['"+activeSystemsStr+"'] } ";
+					}**/
+								
+					if(req.query.player_type_uuid){
+						if(query!="{"){
+     						query+=",";
+     					}
+     					query+=" 'player_type_uuid' : '"+req.query.player_type_uuid+"' ";
+     				}
+     			
+					if(req.query.s){
+     					//create text index
+     					coll.createIndex({ "$**": "text" },{ name: "TextIndex" });
+     					if(query!="{"){
+     						query+=",";
+     					}
+     					query+=" '$text': { '$search': '"+req.query.s+"' } ";
+     				}
+     				
+     				query+= "}";
+     				
+     				eval('var queryObj='+query);
+     			
+					coll.find(queryObj).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+						if (err) {
+							outputObj["total"]   = 0;
+      						outputObj["error"]   = 'not found';
+							res.send(outputObj);
+      					} else if (items) {
+      						outputObj["total"]   = items.length;
+      						outputObj["aaData"]   = items;
+							res.send(outputObj);
+     					}
+					});
+				}
+			}else{
+				outputObj["total"]   = 0;
+      			outputObj["error"]   = "No such page exists!";
+				res.send(outputObj);
+			}
+			
+		}else{
+			outputObj["total"]   = 0;
+      		outputObj["error"]   = "No such page exists!";
+			res.send(outputObj);
+		}
+	}else{
+		outputObj["total"]   = 0;
+      	outputObj["error"]   = "Authorization error!";
+		res.send(outputObj);
+	}
+}); 
+
+// update players status
+app.get(backendDirectoryPath+'/update_user_status', requireLogin, (req, res) => {
+	var outputObj = new Object();
+	if(req.authenticationBool){
+		var search_id = req.query.id;
+		var allow_web_access = req.query.allow_web_access;
+	
+		if(search_id!="" && allow_web_access!=""){
+			db.collection('users').findAndModify({_id:new mongodb.ObjectID(search_id)}, [['_id','asc']], { $set: {"allow_web_access" : parseInt(allow_web_access)} }, {}, function(err, result) {
+				if(err){
+					outputObj["error"]   = "No such player found!";
+					res.send(outputObj);
+				}	else if (result){
+					if(result.lastErrorObject.updatedExisting){
+						outputObj["success"] ="OK";
+      				}else{
+      					outputObj["error"]   = 'Sorry, can\'t update player info, please try again!';
+					}
+      				res.send(outputObj);
+      			}
+  			});
+		}else{
+			outputObj["error"]   = "Please pass the required fields!";
+			res.send(outputObj);
+		}
+	}else{
+		outputObj["error"]   = "Authorization error!";
+		res.send(outputObj);
+	}
+});
 
 // listing pages ui
 app.get(backendDirectoryPath+'/list/:id', requireLogin, function(req, res) {
@@ -848,7 +1067,7 @@ app.get(backendDirectoryPath+'/:id', requireLogin, function(req, res) {
     }	
 }); 
 
-//generate basic modules
+//generate basic modules (have to add this option)
 app.post(backendDirectoryPath+'/add_basic_modules', requireLogin, (req, res) => {
 	if(req.authenticationBool){
 		
@@ -923,7 +1142,7 @@ app.post(backendDirectoryPath+'/save/:id', requireLogin, (req, res) => {
 	if(req.authenticationBool){
 	var postJson=req.body;
 	
-	var contentJson = JSON.parse(req.body.data);
+	var contentJson = JSON.parse(req.body.data);	//all form content will be posted in field name="data"
 	
 	var idField="", editorFieldName="", editorFieldVal="", checkForExistence="";
 	
@@ -980,9 +1199,7 @@ app.post(backendDirectoryPath+'/save/:id', requireLogin, (req, res) => {
       		contentJson['password'] = passwordHash.generate(contentJson.password);
       	}
       	checkForExistence= '{\''+unique_fieldStr +'\': \''+unique_fieldVal+'\'}';
-      	//eval('var obj='+checkForExistence);
-		//db.collection(table_nameStr).findOne(obj, function(err, document) {
-		
+      	
 		initFunctions.crudOpertions(db, table_nameStr, 'findOne', null, null, null, checkForExistence, function(result) {
 			if (result.success=="OK") {
       			var document=result.aaData;
@@ -992,15 +1209,15 @@ app.post(backendDirectoryPath+'/save/:id', requireLogin, (req, res) => {
       					if (existingDoc.aaData) {
       						var existingDocument=existingDoc.aaData;
       						contentJson["created"]=existingDocument.created;
-      				
+      						
       						var  updaTeContent="{ $set: { ";
       						for(var key in contentJson) {
-								updaTeContent+="'"+key+"' : '"+contentJson[key]+"',";
+      							updaTeContent+="'"+key+"' : '"+contentJson[key]+"',";
 							}
 							updaTeContent = updaTeContent.replace(/,([^,]*)$/,'$1');
 							updaTeContent+="}	} ";
-					 
-							eval('var obj='+updaTeContent);
+							
+					 		eval('var obj='+updaTeContent);
 							db.collection(table_nameStr).update({_id:mongoIDField}, obj, (err, result) => {
 								if (err) {
     								link+="?error_msg=Error occurred while saving ["+err+"], please try after some time!";
@@ -1024,7 +1241,6 @@ app.post(backendDirectoryPath+'/save/:id', requireLogin, (req, res) => {
       			}
       		} else {
       			contentJson.created=initFunctions.currentTimestamp();
-      			
       			
       			initFunctions.returnFindOneByMongoID(db, table_nameStr, mongoIDField, function(existingDoc) {
       				if (existingDoc.aaData) {
@@ -1123,6 +1339,7 @@ var authenticatedUser =function (req, cb) {
 				return cb(null);	
 			}else if(result.aaData) {
 				var session_result= result.aaData;
+				if(session_result.status==true || session_result.status=="true"){
 				var returnUserDetsils = new Array();
 				initFunctions.returnFindOneByMongoID(db, 'users', session_result.user_id, function(userDetails) {
 					if(userDetails.error) return cb(null);
@@ -1134,6 +1351,9 @@ var authenticatedUser =function (req, cb) {
 						return cb(returnUserDetsils);
 					}
 				});
+				}else{
+					return cb(null);
+				}
 			}else{
 				return cb(null);
 			}
