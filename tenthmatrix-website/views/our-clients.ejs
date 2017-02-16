@@ -61,13 +61,8 @@ float: left;
 height: 179px;
 text-align: center;
 margin-bottom: 20px;
-	
-	
 }
-
-	
-	
-	</style>
+</style>
  
 	<div class="breadcrumbs">
       <div class="container">
@@ -97,9 +92,13 @@ margin-bottom: 20px;
            		<div class="col-md-12">
             		<% if (typeof resultData.Objects !== 'undefined' && resultData.Objects !== null ) {	
             			if(resultData.Objects.length>=1){
-            				for(var i=0; i<resultData.Objects.length; i++){	%>
-            				<%- resultData.Objects[i].content %>
-            		<%		}
+            				var objectItems=resultData.Objects;
+            				objectItems.sort(dynamicSort("-order_by"));
+            				for(var i=0; i<objectItems.length; i++){
+            					if(objectItems[i].status=="1" || objectItems[i].status==1){	%>
+            				<%- objectItems[i].content %>
+            		<%			}
+            				}
             			}else{ %>
             				<div class="alert alert-danger">No clients information is provided!</div>
             			<%
@@ -119,9 +118,8 @@ margin-bottom: 20px;
 	<script src="js/mixitup.js"></script>
 	
 	
-	 <!--common script for all pages-->
+	<!--common script for all pages-->
 
-	
 	<script type="text/javascript">
     $('.image-caption a').tooltip();
     $(function () {
