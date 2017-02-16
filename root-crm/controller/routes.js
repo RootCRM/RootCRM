@@ -118,6 +118,90 @@ app.post(backendDirectoryPath+'/savenotes', (req, res) => {
   	}
 });
 
+//post action for sub objects
+app.post(backendDirectoryPath+'/saveplayers', (req, res) => {
+	var myObj = new Object();
+	var postContent= req.body;
+	var table_nameStr="teams", tableID="", actionStr="", subObject;
+	
+	if(postContent.id){
+		tableID=postContent.id;
+		delete postContent['id']; 
+	}
+		
+	if(postContent.action){
+		actionStr=postContent.action;
+		delete postContent['action']; 
+	}
+	
+	if(postContent.aaData){
+		subObject=JSON.parse(postContent.aaData);
+		delete postContent['aaData']; 
+	}
+		
+	if(tableID!=""){
+		var mongoIDField= new mongodb.ObjectID(tableID);
+		
+		if(actionStr=="create"){
+			initFunctions.returnFindOneByMongoID(db, table_nameStr, tableID, function(resultObject) {
+				if(resultObject.aaData){
+					var teamsData=resultObject.aaData;
+					var playersArr=teamsData.players;
+					
+					var playersUUIDArr= new Array();
+					var sortOrderNum=1;
+					
+					if(playersArr.length>0){
+						for(var i=0; i<playersArr.length; i++){
+							playersUUIDArr.push(playersArr[i].user_uuid);
+							if(playersArr[i].sort_order >= sortOrderNum){
+								sortOrderNum=parseInt(playersArr[i].sort_order);
+							}
+						}
+					}
+					
+					if(subObject.length>0){
+						for(var i=0; i<subObject.length; i++){
+							var userUUIDSTR=subObject[i].user_uuid;
+							if(playersUUIDArr.indexOf(userUUIDSTR)!==-1){
+								//console.log('update');
+							} else{
+								subObject[i].sort_order=sortOrderNum+1;
+								playersArr.push(subObject[i]);
+							}
+						}
+						
+						db.collection(table_nameStr).update({_id:mongoIDField}, { $set: { "players": playersArr } }, (err, result) => {
+    						if(result){
+    							myObj["success"]   = "Players added successfully!";
+								res.send(myObj);
+    						}else{
+    							myObj["error"]   = "Error while adding players, please try again later!!!";
+								res.send(myObj);
+    						}
+    					});
+					}else{
+						myObj["error"]   = "Error occured, please try again later!!!";
+						res.send(myObj);
+					}
+				}
+				else{
+					myObj["error"]   = "Error occured, please try again later!!!";
+					res.send(myObj);
+				}
+	 		});
+	 	}
+  		else if(actionStr=="update"){
+			myObj["error"]   = "Work in progress";
+			res.send(myObj);
+  		}
+  		else if(actionStr=="delete"){
+  			myObj["error"]   = "Work in progress";
+			res.send(myObj);
+  		}
+  	}
+});
+
 //post action of reset password
 app.post(backendDirectoryPath+'/reset_password', (req, res) => {
 	var postJson=req.body;

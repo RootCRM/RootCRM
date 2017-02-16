@@ -1,0 +1,227 @@
+<% include include/main-header %>
+
+<link rel="stylesheet" href="css/basictable.css">
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+	<div class="wrapper">	
+   		<!-- Header Starts here-->
+  		<% include include/header %>
+  		<!-- Header Ends here-->
+  		
+  		<!-- Sidebar Starts Here-->
+  			<% include include/sidebar %>
+    	<!-- Sidebar Ends Here-->
+		<div class="content-wrapper">
+    	  	<!-- Content Header (Page header) -->
+    		<section class="content-header">
+      			<h1>Team <small><% if (typeof contentObj.name !== 'undefined' && contentObj.name !== null) { %><%= contentObj.name %><% } else{	%>Add new<% }%></small></h1>
+      			<ol class="breadcrumb">
+        			<li><a href="<%= backendDirectory %>/index"><i class="fa fa-dashboard"></i> Home</a></li>
+        			<li class="active">Team</li>
+      			</ol>
+    		</section>	
+    		<section class="content">
+      			<div class="row">
+      		<% if (typeof queryStr !== 'undefined' && queryStr !== null) {
+    				if(queryStr.error_msg) {	%>
+			<div class="col-sm-12"><div class="alert alert-danger alert-dismissable">
+             	<button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                	<%= queryStr.error_msg %>
+            </div> </div>
+            <% }
+           		if(queryStr.success_msg) {	%>
+					<div class="col-sm-12"><div class="alert alert-success alert-dismissable">
+             		<button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                		<%= queryStr.success_msg %>
+            		</div></div>
+            <%	}
+            }	%>
+            				<div class="panel-body no-padding-top bg-white"> 
+            					
+            					<form class="form-horizontal" action="<%= backendDirectory %>/save/team" method="POST" id="contentForm">
+            						<input type="hidden" class="form-control" id="table_name" name="table_name" value="teams">
+      								<input type="hidden" class="form-control" id="unique_field" name="unique_field" value="name">
+      								<input type="hidden" class="form-control" id="id" name="id" value="<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %><%= contentObj._id %><% } %>">
+      								<input type="hidden" class="form-control" id="editorField" name="editorField" value="<% if (typeof editorField !== 'undefined' && editorField !== null) { %><%= editorField %><% }else{ %>_id<% } %>">
+      								<input type="hidden" class="form-control" id="editorValue" name="editorValue" value="<% if (typeof editorValue !== 'undefined' && editorValue !== null) { %><%= editorValue %><% } %>">
+            						<input type="hidden" class="form-control" id="data" name="data" value="">
+            						
+            						<div class="form-group">
+                  						<label class="control-label col-md-2" for="first-name">Name<span class="required">*</span></label>
+                  						<div class="col-md-6 col-lg-4">
+                    						<input type="text" required="required" id="name" name="name" class="form-control col-md-5 col-xs-12" value="<% if (typeof contentObj.name !== 'undefined' && contentObj.name !== null) { %><%= contentObj.name %><% } %>">
+                  						</div>
+                					</div>
+                					<input type="hidden" class="form-control" id="players" name="players" value="">
+                					
+              						<div class="form-group">
+                  						<label class="control-label col-md-2" for="first-name">Players</label>
+                  						<div class="col-md-10">
+                  							<div class="table-responsive table-full-width">
+		 										<div class="table-responsive" style="border:none;" >
+                                					<table class="table table-striped  table-bordered table-hover custom-tbl-st bt" id="table-breakpoint"  style="background-color: rgb(255, 255, 255); border-radius: 4px;" >
+                                						<thead>
+                                       						<th>Player name</th>
+                                       						<th>Email</th>
+                                       						<th>Qualities</th>
+                                       						<th>Order By</th>
+                                       						<th>Details</th>
+                                    					</thead>
+                                   						<tbody id="documents_data">
+                                    	
+                                    					</tbody>
+                                					</table>
+                   								</div>
+											</div>
+                  						</div>
+                  					</div>
+                					<div class="form-group">
+                   						<div class="col-md-9 col-lg-6" align="CENTER">
+               								<div class="submit-btn-setting"> <button type="submit" class="btn btn-primary btn-color margin-right-5 btn-sm">Submit</button>
+               								<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) {	%>
+               									<a href="<%= backendDirectory %>/list/teams" class="btn btn-danger btn-sm">Cancel</a>
+               								<%	}else{	%>
+               									<button type="reset" class="btn btn-danger btn-sm">Reset</button>
+               								<% } %>
+               								</div>
+               							</div>
+                					</div>
+              					</form>
+              				</div>
+            	</div>
+      		</section>
+    		<!--//body content--> 
+  		</div>
+  		<!--//Main Content--> 
+	
+		<!-- Footer Starts Here-->
+			<% include include/footer %>
+		<!-- Footer Ends Here-->
+</div>
+<!-- Page-Level Plugin Scripts-->
+
+<script src="js/basictable.js"></script>
+<script src="js/jquery.validate.js"></script>
+<script>
+function generateObjectJson(){
+	var createArr=new Array();
+	var i=0;
+	$('.teamsTRClass').each(function(){
+		var createObject={};
+		createObject['uuid']=$(this).find('#uuid').val();
+  		createObject['user_uuid']=$(this).find('#user_uuid').val();
+  		createObject['sort_order']=$(this).find('#sort_order').val();
+  		createArr[i]=createObject;
+  		i++;
+  	});
+  	
+  	$("#players").val(JSON.stringify(createArr));
+}
+$(document).ready(function(){
+
+	load_data();
+	
+		// validate form on keyup and submit
+		$("#contentForm").validate({
+			ignore: "",
+			onkeyup: false,
+			errorClass: 'error',
+			validClass: 'valid',
+			errorElement: "em",
+			errorPlacement: function(error, element) {
+				$(element).closest('div').append(error);
+			},
+			onfocusout: false,
+			invalidHandler: function(form, validator) {
+				var errors = validator.numberOfInvalids();
+				if (errors) {                    
+					validator.errorList[0].element.focus();
+				}
+			},
+			rules: {
+				name: { required: true },
+				code: { required: true }
+			},
+			submitHandler: function(form) {
+				generateObjectJson();
+				
+ 				dataAsJson('contentForm', form);
+ 			}
+		});	
+});
+function removeItem(e){
+	$("#tr_"+e).remove();
+}
+function generate_code(name,code){
+	var val=document.getElementById(name).value;
+	var patt=/[^A-Za-z0-9_-]/g;
+	var result=val.replace(patt,' ');
+	result=result.replace(/\s+/g, ' ');
+	result = result.replace(/^\s+|\s+$/g,'');
+	result=result.replace(/\s/g, '-');
+	result=result.toLowerCase();
+	document.getElementById(code).value=result;
+}
+	
+	function load_data(){
+		$(".alert-messages").remove();
+		if($("#id").val()!=""){
+		var jsonRow=backendDirectory+"/api_fetch_players?start=0&limit=100&s=";
+		jsonRow+="&team="+$("#id").val();
+
+		$.getJSON(jsonRow,function(html){
+			if(html.error){
+				$("#table-breakpoint").before('<div class="alert alert-danger alert-messages">No more records found!</div>');
+			}else{
+				var existingMembersArr=new Array();
+				<% if (typeof contentObj.players !== 'undefined' && contentObj.players !== null  && contentObj.players !== "") {	%>
+					var tempselectedSearchArr=<%- JSON.stringify(contentObj.players) %>;
+					if(typeof(tempselectedSearchArr)=="object" || typeof(tempselectedSearchArr)=="array"){
+						existingMembersArr = tempselectedSearchArr;
+					}	else	{
+						existingMembersArr = JSON.parse(tempselectedSearchArr);
+					}
+				<% } %>
+				
+				var contentHtml="";
+				if(html.aaData.length>0){
+					$.each(html.aaData, function(i,row){
+						var uniqueIDStr=row._id;
+						var sortNum=0, row_uuid="";
+						
+						for(var j=0; j<existingMembersArr.length; j++){
+							if(uniqueIDStr==existingMembersArr[i].user_uuid){
+								sortNum = existingMembersArr[i].sort_order;
+								row_uuid = existingMembersArr[i].uuid;
+								break;
+							}
+						}
+						contentHtml+="<tr class='teamsTRClass' id='tr_"+uniqueIDStr+"'>";
+						
+						contentHtml+='<td>'+row.firstname+' '+row.lastname+'</td>';
+						contentHtml+='<td>'+row.email+'</td>';
+						contentHtml+='<td>'+row.player_qualities+'</td>';
+						contentHtml+='<td><input id="sort_order" value="'+sortNum+'" class="form-control" type="text"><input type="hidden" id="uuid" value="'+row_uuid+'"><input type="hidden" id="user_uuid" value="'+row._id+'"></td>';
+						contentHtml+='<td class="actions-list"><a href="user?_id='+uniqueIDStr+'" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;<a href="javascript:void(0)" onClick="removeItem(\''+uniqueIDStr+'\')" title="Remove"><i class="fa fa-trash"></i></a></td>';
+						contentHtml+="</tr>";
+					});
+					$("#documents_data").append(contentHtml);
+					
+     				
+     			}else{
+     				$("#documents_data").html("");
+					$("#table-breakpoint").before('<div class="alert alert-danger alert-messages">No more records found!</div>');
+     			}
+			}
+			
+			//initialize table
+			$('#table').basictable();
+	  		$('#table-breakpoint').basictable({
+        		breakpoint: 751
+     		});
+		});
+		}
+	}
+</script>
+</body>
+</html>

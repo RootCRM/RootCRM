@@ -226,6 +226,21 @@ var self = module.exports =
 	crudOpertions: function(db, collectionStr, actionStr, postContent, uniqueFieldNameStr, uniqueFieldValueStr, checkForExistenceStr, cb){
 		var outputObj = new Object();
 		
+		for(var key in postContent) {
+			var contentStr=postContent[key];
+			if(typeof(contentStr)=="string")	{
+				if(contentStr.charAt(0)=="["){
+					try{
+        				postContent[key]=JSON.parse(contentStr);
+        			}
+    				catch (error){
+       					postContent[key]=contentStr;
+    				}
+				}	
+			}else{
+				postContent[key]=contentStr;
+			}		
+		}
 		if (typeof checkForExistenceStr !== 'undefined' && checkForExistenceStr != "null" && checkForExistenceStr !== null && checkForExistenceStr!=""){
 			var checkForExistenceObj=checkForExistenceStr;
 		}else if((uniqueFieldNameStr!="" && uniqueFieldValueStr!="") || (uniqueFieldNameStr!=null && uniqueFieldValueStr!=null)){
@@ -500,6 +515,8 @@ var self = module.exports =
   		return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 	},
 	
+	// every time add a entry page for a table please create a entry here, mention the page name as "filename" and its related collection name 
+	// (This is hard coded right now, will make this option dynamic from system_templates)
 	fetchTableName : function (filename){
 		var table_name="";
 		if(filename=="document"  || filename=="document_list" || filename=="documents_test"){
@@ -536,6 +553,8 @@ var self = module.exports =
 			table_name="Companies";
 		}else if(filename=="system"){
 			table_name="systems";
+		}else if(filename=="team"){
+			table_name="teams";
 		}
 		return table_name;
 	},

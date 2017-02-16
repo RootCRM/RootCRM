@@ -443,6 +443,7 @@ function add_new_team(){
 				var subObject={};
 				subObject['sort_order']=i+1;
 				subObject['user_uuid']=selectedPlayersArr[i];
+				subObject['uuid']=guid();
 				playersSortOrder[i]=subObject;
 			}
 			var selectedPlayersStr= JSON.stringify(playersSortOrder);
@@ -473,7 +474,44 @@ function add_new_team(){
 }
 
 function add_to_existing_team(){
-	alert('Work in progress');
+	var selectedTeamStr= $("#teams_list").val();
+	
+	if(selectedTeamStr!="" && selectedTeamStr!=null && selectedTeamStr!="undefined"){
+		var selectedRowsStr= $("#selectedRows").val();
+		if(selectedRowsStr!=""){
+			var	selectedPlayersArr=selectedRowsStr.toString().split(",");
+			var playersSortOrder=new Array();
+			for(var i=0; i<selectedPlayersArr.length; i++){
+				var subObject={};
+				subObject['sort_order']=i+1;
+				subObject['user_uuid']=selectedPlayersArr[i];
+				subObject['uuid']=guid();
+				playersSortOrder[i]=subObject;
+			}
+			var selectedPlayersStr= JSON.stringify(playersSortOrder);
+			
+			var postContentURL=backendDirectory+"/saveplayers";
+    		$.ajax({
+				type: "POST",
+				dataType: "json",
+				url: postContentURL,
+				data: {"action" : "create", "subObjectName" : "players", "id" : selectedTeamStr, "aaData" : selectedPlayersStr},
+				success: function(response){
+					if(response.success){
+						$('#add_new_team').val('');
+						$('#ex_msg_suc').html(response.success);
+						load_teams();
+					}else if(response.error){
+						$('#ex_msg_err').html(response.error);
+					}
+				}
+			});
+		}else{
+			$('#ex_msg_err').html('Please select player(s) to add to team');
+		}
+	}else{
+		$('#ex_msg_err').html('Please select team!');
+	}
 }
 </script>
 

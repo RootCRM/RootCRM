@@ -34,7 +34,7 @@ var publishedDate = year + '-' + month + '-' + dateNum + ' ' + hour + ':' + min 
     		<section class="content">
       			
 		<div class="row">
-		<% if (typeof queryStr !== 'undefined' && queryStr !== null) {
+			<% if (typeof queryStr !== 'undefined' && queryStr !== null) {
     				if(queryStr.error_msg) {	%>
 			<div class="col-sm-12"><div class="alert alert-danger alert-dismissable">
              	<button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>

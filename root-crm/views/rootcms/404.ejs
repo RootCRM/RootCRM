@@ -1,0 +1,501 @@
+<% include include/main-header %>
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+   	<div class="wrapper">
+   		<!-- Header Starts here-->
+  		<% include include/header %>
+  		<!-- Header Ends here-->
+  		
+  		<!-- Sidebar Starts Here-->
+  			<% include include/sidebar %>
+    		<!-- Sidebar Ends Here-->
+    		
+    	<div class="content-wrapper">
+    	  	<!-- Content Header (Page header) -->
+    		<section class="content-header">
+      			<h1>404</h1>
+      			<ol class="breadcrumb">
+        			<li><a href="<%= backendDirectory %>/index"><i class="fa fa-dashboard"></i> Home</a></li>
+        			<li class="active">Not found</li>
+      			</ol>
+    		</section>	
+    		<section class="content">
+      			<div class="row">
+      					<div class="panel-body no-padding-top bg-white">
+      						<h1>Sorry, no such page found!</h1>
+      					</div>
+      			</div>
+    		</section>
+    		<!--//body content--> 
+  		</div>
+  		
+
+<!-- Footer Starts Here-->
+	<% include include/footer %>
+<!-- Footer Ends Here-->
+<!--//Main Content--> 
+	</div>
+<!-- Page-Level Plugin Scripts-->
+<script src="plugins/combobox/autocomplete-ui.js"></script>
+<script src="js/chosen.jquery.js" type="text/javascript"></script>
+<script src="js/jquery.validate.js"></script>
+<script src="js/jquery.tag-editor.min.js"></script>
+<script src="js/jquery.caret.min.js"></script>
+<script>
+var configDropDown = {
+	'.chosen-select'           : {},
+	'.chosen-select-deselect'  : {allow_single_deselect:true},
+	'.chosen-select-no-single' : {disable_search_threshold:10},
+	'.chosen-select-no-results': {no_results_text:'Oops, nothing found!'},
+	'.chosen-select-width'     : {width:"95%"}
+}
+
+function generate_code(name,code){
+	var val=document.getElementById(name).value;
+	var patt=/[^A-Za-z0-9_-]/g;
+	var result=val.replace(patt,' ');
+	result=result.replace(/\s+/g, ' ');
+	result = result.replace(/^\s+|\s+$/g,'');
+	result=result.replace(/\s/g, '-');
+	result=result.toLowerCase();
+	document.getElementById(code).value=result;
+}
+
+function load_systems(e){
+	$("#select_systems").html("");
+	var onLoadBool = typeof e !== 'undefined';
+	
+	var defaultAssignedVal=$("#uuid_default_system").val();
+	var jsonRow=backendDirectory+"/api_fetch_list?start=0&limit=100&collection=systems";
+	
+	$.getJSON(jsonRow,function(response){
+		var contentHtml="", defaultContentHTML="";
+		if(response.aaData.length>0){
+			var selectedSearchArr = new Array();
+			<% if (typeof contentObj.uuid_default_system !== 'undefined' && contentObj.uuid_default_system !== null && contentObj.uuid_default_system !== "") { %>
+				defaultAssignedVal="<%= contentObj.uuid_default_system %>";
+			<% } %>
+			
+			<% if (typeof contentObj.user_systems !== 'undefined' && contentObj.user_systems !== null && contentObj.user_systems !== "") { %>
+				var tempselectedSearchArr=<%- JSON.stringify(contentObj.user_systems) %>;
+				if(typeof(tempselectedSearchArr)=="object" || typeof(tempselectedSearchArr)=="array"){
+					selectedSearchArr = tempselectedSearchArr;
+				}	else	{
+					selectedSearchArr = JSON.parse(tempselectedSearchArr);
+				}
+			<% } %>	
+			
+			$.each(response.aaData, function(i,row){
+				if(defaultAssignedVal!="" && defaultAssignedVal==row._id){
+					var tempcontentHtml="<option value='"+row._id+"' selected >"+row.name+"</option>"; 
+					defaultContentHTML+=tempcontentHtml;
+				}else{
+					var tempcontentHtml="<option value='"+row._id+"' ";
+					if(selectedSearchArr.length>0){
+						if($.inArray( row._id, selectedSearchArr)!==-1){
+							tempcontentHtml+="selected";
+						}
+					}
+					tempcontentHtml+=" >"+row.name+"</option>";
+					contentHtml+=tempcontentHtml;
+					defaultContentHTML+="<option value='"+row._id+"' >"+row.name+"</option>"; 
+				}
+			});
+     	}
+     	if(onLoadBool){
+     		$("#uuid_default_system").html(defaultContentHTML);
+     		$('#uuid_default_system').combobox();
+     	}
+     	$("#select_systems").html(contentHtml);
+     	
+     	for (var selector in configDropDown) {
+      		$(selector).chosen(configDropDown[selector]);
+   		}
+   		$("#select_systems").trigger("chosen:updated");
+	});
+}
+
+
+	function load_user_types(){
+		var userType="";
+		<% if (typeof contentObj.player_type_uuid !== 'undefined' && contentObj.player_type_uuid !== null && contentObj.player_type_uuid !== "") { %>
+			userType="<%= contentObj.player_type_uuid %>";
+		<% } %>
+		
+		var jsonRow=backendDirectory+"/api_fetch_list?start=0&limit=100&collection=user_types",
+		xhrStatus=$.getJSON(jsonRow,function(html){
+			if(html.error){
+				
+			}else{
+				if(html.total){
+					totalNum=parseInt(html.total);
+				}
+				var contentHtml="";
+				$.each(html.aaData, function(i,row){
+					contentHtml+='<option value="'+row.name+'" ';
+					if(userType==row._id){
+						contentHtml+=' selected ';
+					}
+					contentHtml+='>'+row.name+'</option>';
+				});
+				$("#player_type_uuid").html(contentHtml);
+				load_player_types();
+			}
+		});
+	}
+	function generate_code(passStr){
+		var val=passStr;
+		var patt=/[^A-Za-z0-9_-]/g;
+		var result=val.replace(patt,' ');
+		result=result.replace(/\s+/g, ' ');
+		result = result.replace(/^\s+|\s+$/g,'');
+		result=result.replace(/\s/g, '-');
+		var resultStr=result.toLowerCase();
+		return resultStr;
+	}
+	
+	function generate_new_player_type(val){
+		var codeStr=generate_code(val);
+    	var postContentURL=backendDirectory+"/api_crud_get";
+    	var uuidSystemStr=	"<% if (typeof authenticatedUser.active_system_uuid !== 'undefined' && authenticatedUser.active_system_uuid !== null && authenticatedUser.active_system_uuid !== "") {	 %><%= authenticatedUser.active_system_uuid %><% } %>";
+		$.ajax({
+			type: "GET",
+			dataType: "json",
+			url: postContentURL,
+			data: {"collection" : "player_types", "action" : "create", "fieldName" : "code", "fieldValue" : codeStr, "name" : val, "code" : codeStr, "user_type_uuid" : $("#player_type_uuid").val(), "uuid_system" : uuidSystemStr},
+			success: function(response){
+				console.log(response);
+			}
+		});
+	}
+	
+	function load_player_types(){
+		var userSelectedOptions=new Array();
+		<% if (typeof contentObj.player_qualities !== 'undefined' && contentObj.player_qualities !== null && contentObj.player_qualities !== "") {	 %>
+			var tempSelectedStr='<%= contentObj.player_qualities %>';
+			userSelectedOptions= tempSelectedStr.split(",");
+			
+		<% } %>
+		
+		var e=$("#player_type_uuid").val();
+		var jsonRow=backendDirectory+"/api_fetch_list?start=0&limit=100&collection=player_types",
+		xhrStatus=$.getJSON(jsonRow,function(html){
+			if(html.error){
+				//
+			}else{
+				if(html.total){
+					totalNum=parseInt(html.total);
+				}
+				var contentArr=new Array();
+				var allTagsArr= new Array();
+				var selectedArr=new Array();
+				$.each(html.aaData, function(i,row){
+					allTagsArr.push(row.name);
+					if($.inArray( row.name, userSelectedOptions)!==-1){
+						selectedArr.push(row.name);
+					}else{
+						contentArr.push(row.name);
+					}
+				});
+				$('#selected_qualities').tagEditor({
+					initialTags: selectedArr,
+    				autocomplete: {
+       					delay: 0, // show suggestions immediately
+        				position: { collision: 'flip' }, // automatic menu position up/down
+        				source: contentArr
+    				},
+    				forceLowercase: false,
+    				placeholder: 'Add Qualities',
+    				beforeTagSave: function(field, editor, tags, tag, val) {
+    					if($.inArray( val, allTagsArr)==-1){
+    						generate_new_player_type(val);
+        				}
+    				}
+				});
+			}
+		});
+	}
+	
+$(document).ready(function() {
+	load_systems(true);
+	load_user_types();
+	// validate form on keyup and submit
+		$("#contentForm").validate({
+			ignore: "",
+			onkeyup: false,
+			errorClass: 'error',
+			validClass: 'valid',
+			errorElement: "em",
+			errorPlacement: function(error, element) {
+				if (element.attr("name") == "access_right" || element.attr("name") == "status" ) {
+      				$(element).closest('div').after(error);
+   				} else {
+					$(element).closest('div').append(error);
+				}
+			},
+			onfocusout: false,
+			invalidHandler: function(form, validator) {
+				var errors = validator.numberOfInvalids();
+				if (errors) {                    
+					validator.errorList[0].element.focus();
+				}
+			},
+			rules: {
+				uuid_default_system: { required: true },
+				username: { required: true },
+				firstname: { required: true },
+				lastname: { required: true },
+				email: { required: true, email : true },
+				access_right: { required: true },
+				password: { required: true },
+				status: { required: true }
+			},
+			submitHandler: function(form) {
+				var userSystemsStr= $('#select_systems').val();  
+				
+				var uuid_default_system= $('#uuid_default_system').val();  
+				if(userSystemsStr!="" && userSystemsStr!=null && userSystemsStr!="undefined"){
+					var	userSystemsArr=userSystemsStr.toString().split(",");
+					userSystemsArr.push(uuid_default_system);
+					var selectedSystemsStr= JSON.stringify(userSystemsArr);
+					
+					$('#user_systems').val(selectedSystemsStr);
+					$('#select_systems').remove();
+				}
+				
+				/**var	userQualitiesArr=$('#selected_qualities').val().split(",");
+				var userQualitiesObj=new Array();
+				for(var i=0; i<=userQualitiesArr.length; i++){
+					if(userQualitiesArr[i]!=null){
+						userQualitiesObj.push(userQualitiesArr[i]);
+					}
+				}
+				$('#player_qualities').val(JSON.stringify(userQualitiesObj));**/
+				var selectedQuastr=$('#selected_qualities').val();
+				$('#player_qualities').val(selectedQuastr);
+				
+				var selectedPlayerTypeStr=$("#player_type_uuid option:selected").text();
+				$("#player_type").val(selectedPlayerTypeStr);
+				
+				dataAsJson('contentForm', form);
+ 			}
+		});	
+	$("#change_password").click(function() {
+    	if ($('#change_password').is(':checked')) {
+      		$('#password').removeAttr('disabled');
+      	} else {
+      		$('#password').attr('disabled', true);
+    	}
+    });
+    
+    $("#web_access").click(function() {
+    	if ($('#web_access').is(':checked')) {
+      		$('#allow_web_access').val(1);
+      	} else {
+      		$('#allow_web_access').val(0);
+    	}
+    });
+});
+var xhr;
+(function( $ ) {
+	$.widget( "custom.combobox", {
+		_create: function() {
+				this.wrapper = $( "<span>" )
+				.addClass( "custom-combobox" )
+				.insertAfter( this.element );
+
+				this.element.hide();
+				this._createAutocomplete();
+				this._createShowAllButton();
+				},
+
+				_createAutocomplete: function() {
+				var ele_select= this.element;
+				var selected = this.element.children( ":selected" ),
+				value = selected.val() ? selected.text() : "";
+
+				this.input = $( "<input>" )
+				.appendTo( this.wrapper )
+				.val( value )
+				.attr( "title", "" )
+				.addClass( "custom-combobox-input ui-widget ui-widget-content ui-state-default ui-corner-left" )
+				.autocomplete({
+				delay: 0,
+				minLength: 0,
+				source: $.proxy( this, "_source" )
+				})
+				.tooltip({
+				tooltipClass: "ui-state-highlight"
+				});
+
+				this._on( this.input, {
+				autocompleteselect: function( event, ui ) {
+				//alert("show all");
+				ui.item.option.selected = true;
+
+				this._trigger( "select", event, {
+				  item: ui.item.option
+				});
+				
+				ele_select.trigger('change');
+					if(ele_select.attr('id')=='uuid_default_system'){
+						load_systems();
+					}
+				},
+
+				autocompletechange: "_removeIfInvalid"
+				});
+				},
+
+				_createShowAllButton: function() {
+				var input = this.input,
+				wasOpen = false;
+
+				$( "<a>" )
+				.attr( "tabIndex", -1 )
+				.attr( "title", "Show All Items" )
+				.tooltip()
+				.appendTo( this.wrapper )
+				.button({
+				icons: {
+				  primary: "ui-icon-triangle-1-s"
+				},
+				text: false
+				})
+				.removeClass( "ui-corner-all" )
+				.addClass( "custom-combobox-toggle ui-corner-right" )
+				.mousedown(function() {
+				wasOpen = input.autocomplete( "widget" ).is( ":visible" );
+				})
+				.click(function() {
+				input.focus();
+
+				// Close if already visible
+				if ( wasOpen ) {
+				  return;
+				}
+
+				// Pass last search string as value to search for, displaying last results
+				input.autocomplete( "search", 'SHOWALL' );
+				});
+				},
+
+				_source: function( request, response ) {
+				//var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+				var ele_select= this.element;
+				if(request.term=='SHOWALL'){
+				response(ele_select.children( "option" ).map(function() {
+				var text = $( this ).text();
+				var value= $( this ).val();
+				//if ( this.value && ( !request.term || matcher.test(text) ) )
+				return {
+				  label: text,
+				  value: text,
+				  option: this
+				};
+				}) );
+
+				}
+				else
+				{
+				
+				var jsonRow = '<%= backendDirectory %>/api_fetch_list?start=0&limit=20&collection=systems&s='+request.term;
+				
+				if(xhr) xhr.abort();
+				xhr=$.getJSON(jsonRow,function(result){
+					
+				if(result.error){
+					var html='<option value=""></option>';
+					ele_select.html(html);
+					response(ele_select.children( "option" ).map(function() {
+					var text = $( this ).text();
+					var value= $( this ).val();
+					//if ( this.value && ( !request.term || matcher.test(text) ) )
+					return {
+				  		label: text,
+				  		value: text,
+				  		option: this
+					};
+					}) );
+				}else{
+					var html='<option value=""></option>';
+					if(result.aaData.length>=1){
+						$.each(result.aaData, function(i,row){
+							html+='<option value="'+row._id+'">'+row.name+'</option>';
+						});
+					}
+					
+					ele_select.html(html);
+					
+					
+					response(ele_select.children( "option" ).map(function() {
+				var text = $( this ).text();
+				var value= $( this ).val();
+				//if ( this.value && ( !request.term || matcher.test(text) ) )
+				return {
+				  label: text,
+				  value: text,
+				  option: this
+				};
+				}) );
+					
+					
+				}
+				});
+
+				} 
+
+				},
+
+				_removeIfInvalid: function( event, ui ) {
+
+					// Selected an item, nothing to do
+					if ( ui.item ) {
+
+					return;
+					}
+
+					// Search for a match (case-insensitive)
+					var value = this.input.val(),
+					valueLowerCase = value.toLowerCase(),
+					valid = false;
+					var ele_select= this.element;
+					this.element.children( "option" ).each(function() {
+					if ( $( this ).text().toLowerCase() === valueLowerCase ) {
+						this.selected = valid = true;	
+						if(ele_select.attr('id')=='uuid_default_system'){
+							load_systems();
+						}
+						ele_select.trigger('change');
+
+						return false;
+					}
+					});
+
+					// Found a match, nothing to do
+					if ( valid ) {
+					return;
+					}
+
+					// Remove invalid value
+					this.input
+					.val( "" )
+					.attr( "title", value + " didn't match any item" )
+					.tooltip( "open" );
+					this.element.val( "" );
+					this._delay(function() {
+					this.input.tooltip( "close" ).attr( "title", "" );
+					}, 2500 );
+					this.input.data( "ui-autocomplete" ).term = "";
+				},
+
+				_destroy: function() {
+					this.wrapper.remove();
+					this.element.show();
+				}
+			});
+			})( jQuery );
+</script>
+</body>
+</html>
