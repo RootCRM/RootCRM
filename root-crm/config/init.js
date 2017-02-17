@@ -18,7 +18,7 @@
 	// Connection URL. This is where your mongodb server is running.
 	var url = 'mongodb://localhost:27017/root_cms';
 	var _db;
-	var definedAdminTablesArr= new Array("groups", "users", "modules", "system_templates", "systems", "teams");
+	var definedAdminTablesArr= new Array("groups", "users", "modules", "system_templates", "systems", "player_types", "teams", "Country");
 	module.exports = {
     	mongodb : mongodbRe,
     	MongoClient : MongoClient,

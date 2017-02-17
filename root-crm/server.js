@@ -59,6 +59,20 @@ app.locals.timeConverter = function(UNIX_timestamp) {
   return time;
 }
 
+app.locals.dateTimeFromUnix = function(UNIX_timestamp) {
+	var a = new Date(UNIX_timestamp * 1000);
+    
+	var year = a.getFullYear();
+	var month = a.getMonth()+1;
+	var dateNum = a.getDate();
+	var hour = a.getHours();
+	var min = a.getMinutes();
+	var sec = a.getSeconds();
+	var time = year + '-' + month + '-' + dateNum + ' ' + hour + ':' + min ;
+
+	return time;
+}
+
 app.locals.dynamicSort = function(property) {
     var sortOrder = 1;
     if(property[0] === "-") {

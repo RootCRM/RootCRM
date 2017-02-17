@@ -715,7 +715,15 @@ app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res
 	if(req.query.collection){
 		collectionStr=req.query.collection;
 	}
-	
+	if(req.query.start){
+		pageNum=parseInt(req.query.start);
+	}
+	if(req.query.limit){
+		itemsPerPage=parseInt(req.query.limit);
+	}
+	if(pageNum==0){
+		pageNum=1;
+	}
 	if(req.authenticationBool){
 		var activeSystemsStr=req.authenticatedUser.active_system_uuid;
 		if (typeof activeSystemsStr !== 'undefined' && activeSystemsStr !== null && activeSystemsStr!="") {

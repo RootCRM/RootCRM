@@ -147,7 +147,58 @@
                 					
                             		</div></div>
                             		</div></div></div>
-							        <div class="col-xs-6"><div class="box box-primary">
+							        
+                					<div class="col-xs-6"><div class="box box-primary">
+            						<h4>Contact Details</h4>
+            						<div class="box-body"><div class="row"><div class=" col-sm-12 col-lg-11">
+            						                					
+                					<div class="form-group">
+    									<label for="" class="col-sm-3 control-label">Address Line 1</label>
+    									<div class="col-sm-9">
+    										<textarea name="address_line_1" id="address_line_1" class="form-control"><% if (typeof contentObj.address_line_1 !== 'undefined' && contentObj.address_line_1 !== null) { %><%= contentObj.address_line_1  %><% } %></textarea>
+      		  							</div>
+									</div>
+                					
+                					<div class="form-group">
+    									<label for="" class="col-sm-3 control-label">Address Line 2</label>
+    									<div class="col-sm-9">
+    										<textarea name="address_line_2" id="address_line_2" class="form-control"><% if (typeof contentObj.address_line_2 !== 'undefined' && contentObj.address_line_2 !== null) { %><%= contentObj.address_line_2  %><% } %></textarea>
+      		  							</div>
+									</div>
+                					<div class="form-group">
+                  						<label class="control-label col-md-3" for="">State</label>
+                  						<div class="col-md-6 col-lg-7">
+                   							<input type="text" class="form-control col-md-5 col-xs-12" id="state" name="state" value="<% if (typeof contentObj.state !== 'undefined' && contentObj.state !== null) { %><%= contentObj.state %><% } %>">
+                  						</div>
+                					</div>
+                					<div class="form-group">
+                  						<label class="control-label col-md-3" for="">Postcode</label>
+                  						<div class="col-md-6 col-lg-7">
+                   							<input type="text" class="form-control col-md-5 col-xs-12" id="postcode" name="postcode" value="<% if (typeof contentObj.postcode !== 'undefined' && contentObj.postcode !== null) { %><%= contentObj.postcode %><% } %>">
+                  						</div>
+                					</div>
+                					
+                					<div class="form-group">
+                  						<label class="control-label col-md-3" for="first-name">Country</label>
+                  						<div class="col-md-3 col-lg-7">
+                  							<select id="country" name="country" class="form-control">
+                    						
+                    						</select>
+                  						</div>
+                					</div>
+                					<div class="form-group">
+                  						<label class="control-label col-md-3" for="">Contact number</label>
+                  						<div class="col-md-6 col-lg-7">
+                   							<input type="text" class="form-control col-md-5 col-xs-12" id="mobile" name="mobile" value="<% if (typeof contentObj.mobile !== 'undefined' && contentObj.mobile !== null) { %><%= contentObj.mobile %><% } %>">
+                  						</div>
+                					</div>
+                					
+                            		</div></div>
+                            		</div></div></div>
+                					</div>
+                					<div class="row">
+            						
+                					<div class="col-xs-6"><div class="box box-primary">
 							        <h4>Access Control</h4>
             						<div class="box-body"><div class="row"><div class=" col-sm-12 col-lg-11">
             						<% if (typeof authenticatedUser.access_right !== 'undefined' && authenticatedUser.access_right !== null  && authenticatedUser.access_right == "11"  && authenticatedUser.access_right == 11) {	%>
@@ -205,9 +256,7 @@
 									</div>
 									</div></div>
                 					</div></div></div>
-                					</div>
-                					<div class="row">
-            						<div class="col-xs-6"><div class="box box-primary">
+                					<div class="col-xs-6"><div class="box box-primary">
             						<h4>Qualities</h4>
             						<div class="box-body"><div class="row"><div class=" col-sm-12 col-lg-11">
             						                					
@@ -349,7 +398,27 @@ function load_systems(e){
 	});
 }
 
-
+function load_countries(){
+		var countrySelectedStr= "<% if (typeof contentObj.country !== 'undefined' && contentObj.country !== null) {	%><%= contentObj.country %><%	}	%>";
+		var jsonRow=backendDirectory+"/api_fetch_list?start=0&limit=300&collection=Country",
+		xhrStatus=$.getJSON(jsonRow,function(html){
+			if(html.error){
+				
+			}else{
+				
+				var contentHtml="";
+				$.each(html.aaData, function(i,row){
+					if(row.Name==countrySelectedStr){
+						contentHtml+='<option value="'+row.Name+'" selected>'+row.Name+'</option>';
+					}else{
+						contentHtml+='<option value="'+row.Name+'">'+row.Name+'</option>';
+					}
+				});
+				$("#country").html(contentHtml);
+				$("#country").val(countrySelectedStr);
+			}
+		});
+	}
 	function load_user_types(){
 		var userType="";
 		<% if (typeof contentObj.player_type_uuid !== 'undefined' && contentObj.player_type_uuid !== null && contentObj.player_type_uuid !== "") { %>
@@ -366,7 +435,7 @@ function load_systems(e){
 				}
 				var contentHtml="";
 				$.each(html.aaData, function(i,row){
-					contentHtml+='<option value="'+row.name+'" ';
+					contentHtml+='<option value="'+row._id+'" ';
 					if(userType==row._id){
 						contentHtml+=' selected ';
 					}
@@ -417,9 +486,7 @@ function load_systems(e){
 			if(html.error){
 				//
 			}else{
-				if(html.total){
-					totalNum=parseInt(html.total);
-				}
+				
 				var contentArr=new Array();
 				var allTagsArr= new Array();
 				var selectedArr=new Array();
@@ -453,6 +520,8 @@ function load_systems(e){
 $(document).ready(function() {
 	load_systems(true);
 	load_user_types();
+	load_countries();
+	
 	// validate form on keyup and submit
 		$("#contentForm").validate({
 			ignore: "",

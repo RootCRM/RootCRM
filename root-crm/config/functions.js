@@ -555,6 +555,10 @@ var self = module.exports =
 			table_name="systems";
 		}else if(filename=="team"){
 			table_name="teams";
+		}else if(filename=="venue"){
+			table_name="venue";
+		}else{
+			table_name=filename+"s";
 		}
 		return table_name;
 	},

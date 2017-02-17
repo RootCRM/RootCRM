@@ -3,6 +3,17 @@ function __alertModalBox(msg){
 	$("#globalMessage").html(msg);
 	$('#globalPrompt').modal('show');
 }
+function getTimestampFromDateTime(dateString){
+	var dateTimeParts = dateString.split(' '),
+	timeParts = dateTimeParts[1].split(':'),
+	dateParts = dateTimeParts[0].split('-'),
+	date;
+
+	date = new Date(dateParts[0], parseInt(dateParts[1], 10) - 1, dateParts[2], timeParts[0], timeParts[1]);
+	date= date.getTime();
+	date= parseInt(date)/1000;
+	return date;
+}
 function guid() {
   function s4() {
     return Math.floor((1 + Math.random()) * 0x10000)
