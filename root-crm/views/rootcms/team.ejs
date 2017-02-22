@@ -1,6 +1,31 @@
 <% include include/main-header %>
 
 <link rel="stylesheet" href="css/basictable.css">
+<link rel="stylesheet" href="plugins/combobox/autocomplete-ui.css"/>
+<link rel="stylesheet" href="css/jquery.tag-editor.css">
+<style>
+	.custom-combobox {
+		position: relative;
+		display: inline-block;
+	}
+	.custom-combobox-toggle {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		margin-left: -1px;
+		padding: 0;
+	}
+	.custom-combobox-input {
+		margin: 0;
+		padding: 5px 10px;
+	}
+	.ui-widget-overlay {
+		position: fixed;
+	}
+	.ui-widget{
+		z-index: 99999 !important;
+	}
+</style>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
 	<div class="wrapper">	
@@ -64,7 +89,8 @@
                                        						<th>Player name</th>
                                        						<th>Email</th>
                                        						<th>Qualities</th>
-                                       						<th>Order By</th>
+                                       						<th>Batting Order</th>
+                                       						<th>Bowling Order</th>
                                        						<th>Details</th>
                                     					</thead>
                                    						<tbody id="documents_data">
@@ -74,6 +100,12 @@
                    								</div>
 											</div>
                   						</div>
+                  					</div>
+                  					<div class="form-group">
+                  						<label class="control-label col-md-2" for="first-name">&nbsp;</label>
+                  						<div class="col-md-10">
+                  							<button type="button" class="btn btn-primary btn-color margin-right-5 btn-sm" data-toggle="modal" data-target="#addPlayer">Add players to team</button>
+										</div>
                   					</div>
                   					<div class="form-group">
     									<label for="" class="col-sm-2 control-label">Status</label>
@@ -108,29 +140,150 @@
 		<!-- Footer Starts Here-->
 			<% include include/footer %>
 		<!-- Footer Ends Here-->
+
+<div id="addPlayer" class="modal fade" role="dialog" style="display: none;" data-backdrop="static" data-keyboard="false" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<!-- Modal content-->
+    	<div class="modal-content">
+     		<div class="modal-header">
+        		<button type="button" class="close" data-dismiss="modal" onClick="$('#user_id').val(''); clearModalBox();">×</button>
+        		<h3 class="modal-title">Add player to team</h3>
+      		</div>
+      		<div class="modal-body">
+       				<div class="row">
+        				<div class="col-md-12" id="n_msg_err" style="color:#FF0000;"></div>
+        				<div class="col-md-12" id="n_msg_suc" style="color:#006600;"></div>
+        			</div>
+					<div class="row">
+						<div class="col-md-12 ui-widget">
+                   			<select class="combobox form-control" id="user_id" >
+                             					
+							</select>
+						</div>
+						
+					</div>
+      		</div>
+      		<div class="modal-footer">
+      			<button type="button" class="btn btn-info sm-btn" onclick="add_newPlayer();">Add new</button>
+      			<button type="button" class="btn btn-default" data-dismiss="modal" onClick="$('#user_id').val(''); clearModalBox();">Close</button>
+      		</div>
+    	</div>
+	</div>
+</div>
+
 </div>
 <!-- Page-Level Plugin Scripts-->
 
 <script src="js/basictable.js"></script>
 <script src="js/jquery.validate.js"></script>
+<script src="plugins/combobox/autocomplete-ui.js"></script>
+<script src="js/jquery.tag-editor.min.js"></script>
+
+<script src="js/jquery.caret.min.js"></script>
 <script>
+
+var loadDefinedPlayertypes= new Array();
+function clearModalBox(){
+	$("#n_msg_err").html('');
+	$("#n_msg_suc").html('');
+	$('.ui-autocomplete-input').val("");
+	loadPlayers();
+}
+
+function add_newPlayer(){
+	$(".alert-messages").remove();
+	var selectedUserStr=$("#user_id").val();
+	if(selectedUserStr!=""){
+		var jsonRow=backendDirectory+"/collection_details?collection=users&id="+selectedUserStr;
+		$.getJSON(jsonRow,function(html){
+			if(html.aaData){
+				var row=html.aaData;
+				var uniqueIDStr=row._id;
+				var battingOrderNum=1, bowlingOrderNum=1, row_uuid=guid(), checkForExistence=false;
+				
+				$('.teamsTRClass').each(function(){
+					if(uniqueIDStr==$(this).find('#user_uuid').val()){
+						checkForExistence=true;
+					}else{
+						if(battingOrderNum<=$(this).find('#batting_order').val()){
+							battingOrderNum=parseInt($(this).find('#batting_order').val())+1;
+						}
+						if(bowlingOrderNum<=$(this).find('#bowling_order').val()){
+							bowlingOrderNum=parseInt($(this).find('#bowling_order').val())+1;
+						}
+					}
+  				});
+  				
+  				if(checkForExistence){
+  					$("#n_msg_err").html('This player is already in team!');
+  				}else{
+					contentHtml="<tr class='teamsTRClass' id='tr_"+uniqueIDStr+"'>";
+					contentHtml+='<td>'+row.firstname+' '+row.lastname+'</td>';
+					contentHtml+='<td>'+row.email+'</td>';
+					//contentHtml+='<td>'+row.player_qualities+'</td>';
+					contentHtml+='<td><textarea id="user_roles" class="form-control selected_qualities">'+row.player_qualities+'</textarea></td>';
+						
+					contentHtml+='<td><input id="batting_order" value="'+battingOrderNum+'" class="form-control" type="text"><input type="hidden" id="uuid" value="'+row_uuid+'"><input type="hidden" id="user_uuid" value="'+row._id+'"></td>';
+					contentHtml+='<td><input id="bowling_order" value="'+bowlingOrderNum+'" class="form-control" type="text"></td>';
+					contentHtml+='<td class="actions-list"><a href="user?_id='+uniqueIDStr+'" title="View player details" target="_blank"><i class="fa fa-link"></i></a>&nbsp;<a href="javascript:void(0)" onClick="removeItem(\''+uniqueIDStr+'\')" title="Remove"><i class="fa fa-trash"></i></a></td>';
+					contentHtml+="</tr>";
+					$("#documents_data").append(contentHtml);
+					
+					$("#addPlayer").modal('hide');
+					clearModalBox();
+					$('#table-breakpoint').basictable({
+        				breakpoint: 751
+     				});
+     				
+     				$('.selected_qualities').tagEditor('destroy');
+
+     				$('.selected_qualities').tagEditor({
+     					autocomplete: {
+       						delay: 0, // show suggestions immediately
+        					position: { collision: 'flip' }, // automatic menu position up/down
+        					source: loadDefinedPlayertypes
+    					},
+    					forceLowercase: false,
+    					placeholder: 'Add Qualities',
+    					beforeTagSave: function(field, editor, tags, tag, val) {
+    						if($.inArray( val, loadDefinedPlayertypes)==-1){
+    							generate_new_player_type(val);
+        					}
+    					}
+					});
+				}
+			}else{
+				$("#n_msg_err").html('No such player found!');
+			}
+		});
+	}	else{	
+		$("#n_msg_err").html('Please select player to add to team');
+	}
+}
+
 function generateObjectJson(){
 	var createArr=new Array();
 	var i=0;
 	$('.teamsTRClass').each(function(){
 		var createObject={};
 		createObject['uuid']=$(this).find('#uuid').val();
-  		createObject['user_uuid']=$(this).find('#user_uuid').val();
-  		createObject['sort_order']=$(this).find('#sort_order').val();
+  		createObject['user_mongo_id']=$(this).find('#user_uuid').val();
+  		createObject['batting_order']=$(this).find('#batting_order').val();
+  		createObject['bowling_order']=$(this).find('#bowling_order').val();
+  		createObject['roles']=$(this).find('#user_roles').val();
   		createArr[i]=createObject;
   		i++;
   	});
-  	
   	$("#players").val(JSON.stringify(createArr));
 }
 $(document).ready(function(){
-
-	load_data();
+	<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %>
+		load_data();
+	<% } %>
+	
+	loadPlayers();
+	
+	load_player_types();
 	
 		// validate form on keyup and submit
 		$("#contentForm").validate({
@@ -173,6 +326,44 @@ function generate_code(name,code){
 	result=result.toLowerCase();
 	document.getElementById(code).value=result;
 }
+
+	function load_player_types(){
+		loadDefinedPlayertypes= new Array();
+		var jsonRow=backendDirectory+"/api_fetch_list?limit=all&collection=player_types",
+		xhrStatus=$.getJSON(jsonRow,function(html){
+			if(html.error){
+				//
+			}else{
+				$.each(html.aaData, function(i,row){
+					loadDefinedPlayertypes.push(row.name);
+				});
+			}
+		});
+	}	
+	function generate_code(passStr){
+		var val=passStr;
+		var patt=/[^A-Za-z0-9_-]/g;
+		var result=val.replace(patt,' ');
+		result=result.replace(/\s+/g, ' ');
+		result = result.replace(/^\s+|\s+$/g,'');
+		result=result.replace(/\s/g, '-');
+		var resultStr=result.toLowerCase();
+		return resultStr;
+	}
+	function generate_new_player_type(val){
+		var codeStr=generate_code(val);
+    	var postContentURL=backendDirectory+"/api_crud_get";
+    	var uuidSystemStr=	"<% if (typeof authenticatedUser.active_system_uuid !== 'undefined' && authenticatedUser.active_system_uuid !== null && authenticatedUser.active_system_uuid !== "") {	 %><%= authenticatedUser.active_system_uuid %><% } %>";
+		$.ajax({
+			type: "GET",
+			dataType: "json",
+			url: postContentURL,
+			data: {"collection" : "player_types", "action" : "create", "fieldName" : "code", "fieldValue" : codeStr, "name" : val, "code" : codeStr, "user_type_uuid" : $("#player_type_uuid").val(), "uuid_system" : uuidSystemStr},
+			success: function(response){
+				console.log(response);
+			}
+		});
+	}
 	
 	function load_data(){
 		$(".alert-messages").remove();
@@ -182,7 +373,7 @@ function generate_code(name,code){
 
 		$.getJSON(jsonRow,function(html){
 			if(html.error){
-				$("#table-breakpoint").before('<div class="alert alert-danger alert-messages">No more records found!</div>');
+				$("#table-breakpoint").before('<div class="alert alert-danger alert-messages">No players in team!</div>');
 			}else{
 				var existingMembersArr=new Array();
 				<% if (typeof contentObj.players !== 'undefined' && contentObj.players !== null  && contentObj.players !== "") {	%>
@@ -193,32 +384,69 @@ function generate_code(name,code){
 						existingMembersArr = JSON.parse(tempselectedSearchArr);
 					}
 				<% } %>
-				
+								
 				var contentHtml="";
+				var createNewUsersJson= new Array();
+				
 				if(html.aaData.length>0){
 					$.each(html.aaData, function(i,row){
+						var subObject= row;
 						var uniqueIDStr=row._id;
-						var sortNum=0, row_uuid="";
+						var battingOrderNum=0, bowlingOrderNum=0, row_uuid="", roles= row.player_qualities;
 						
 						for(var j=0; j<existingMembersArr.length; j++){
-							if(uniqueIDStr==existingMembersArr[i].user_uuid){
-								sortNum = existingMembersArr[i].sort_order;
-								row_uuid = existingMembersArr[i].uuid;
+							if(uniqueIDStr==existingMembersArr[j].user_mongo_id){
+								battingOrderNum = existingMembersArr[j].batting_order;
+								if(existingMembersArr[j].bowling_order){
+									bowlingOrderNum = existingMembersArr[j].bowling_order;
+								}
+								row_uuid = existingMembersArr[j].uuid;
+								if(existingMembersArr[j].roles){
+									roles = existingMembersArr[j].roles;
+								}
 								break;
 							}
 						}
+						subObject['player_roles']=roles;
+						subObject['batting_order']=battingOrderNum;
+						subObject['bowling_order']=bowlingOrderNum;
+						subObject['team_player_uuid']=row_uuid;
+						createNewUsersJson[i]=subObject;
+					});
+					
+					createNewUsersJson.sort(dynamicSort("batting_order"));
+					
+					$.each(createNewUsersJson, function(i,row){
+						var uniqueIDStr=row._id;
+						var row_uuid=row.team_player_uuid;
+			
 						contentHtml+="<tr class='teamsTRClass' id='tr_"+uniqueIDStr+"'>";
-						
 						contentHtml+='<td>'+row.firstname+' '+row.lastname+'</td>';
 						contentHtml+='<td>'+row.email+'</td>';
-						contentHtml+='<td>'+row.player_qualities+'</td>';
-						contentHtml+='<td><input id="sort_order" value="'+sortNum+'" class="form-control" type="text"><input type="hidden" id="uuid" value="'+row_uuid+'"><input type="hidden" id="user_uuid" value="'+row._id+'"></td>';
-						contentHtml+='<td class="actions-list"><a href="user?_id='+uniqueIDStr+'" title="Edit"><i class="fa fa-pencil"></i></a>&nbsp;<a href="javascript:void(0)" onClick="removeItem(\''+uniqueIDStr+'\')" title="Remove"><i class="fa fa-trash"></i></a></td>';
+						contentHtml+='<td><textarea id="user_roles" class="form-control selected_qualities">'+row.player_roles+'</textarea></td>';
+						contentHtml+='<td><input id="batting_order" value="'+row.batting_order+'" class="form-control" type="text"><input type="hidden" id="uuid" value="'+row_uuid+'"><input type="hidden" id="user_uuid" value="'+row._id+'"></td>';
+						contentHtml+='<td><input id="bowling_order" value="'+row.bowling_order+'" class="form-control" type="text"></td>';
+						contentHtml+='<td class="actions-list"><a href="user?_id='+uniqueIDStr+'" title="View player details" target="_blank"><i class="fa fa-link"></i></a>&nbsp;<a href="javascript:void(0)" onClick="removeItem(\''+uniqueIDStr+'\')" title="Remove"><i class="fa fa-trash"></i></a></td>';
 						contentHtml+="</tr>";
+						
+						
 					});
+				
 					$("#documents_data").append(contentHtml);
-					
-     				
+					$('.selected_qualities').tagEditor({
+						autocomplete: {
+       						delay: 0, // show suggestions immediately
+        					position: { collision: 'flip' }, // automatic menu position up/down
+        					source: loadDefinedPlayertypes
+    					},
+    					forceLowercase: false,
+    					placeholder: 'Add Qualities',
+    					beforeTagSave: function(field, editor, tags, tag, val) {
+    						if($.inArray( val, loadDefinedPlayertypes)==-1){
+    							generate_new_player_type(val);
+        					}
+    					}
+					});
      			}else{
      				$("#documents_data").html("");
 					$("#table-breakpoint").before('<div class="alert alert-danger alert-messages">No more records found!</div>');
@@ -226,13 +454,230 @@ function generate_code(name,code){
 			}
 			
 			//initialize table
-			$('#table').basictable();
-	  		$('#table-breakpoint').basictable({
+			$('#table-breakpoint').basictable({
         		breakpoint: 751
      		});
 		});
 		}
 	}
+	
+function loadPlayers(){
+	$.getJSON("api_fetch_players?start=0&limit=20&s=",function(result){
+		var dropdownStr='<option value=""></option>';
+		if(result.aaData.length>=1){
+			$.each(result.aaData, function(i,row){
+				var nameStr=row.firstname;
+				if(row.lastname){
+					nameStr+=" "+row.lastname;
+				}
+				dropdownStr+='<option value="'+row._id+'">'+nameStr+'</option>';
+			});
+		}
+		$("#user_id").html(dropdownStr);
+		$('.combobox').combobox();
+	});	
+}
+
+
+var xhr;
+(function( $ ) {
+	$.widget( "custom.combobox", {
+		_create: function() {
+				this.wrapper = $( "<span>" )
+				.addClass( "custom-combobox" )
+				.insertAfter( this.element );
+
+				this.element.hide();
+				this._createAutocomplete();
+				this._createShowAllButton();
+				},
+
+				_createAutocomplete: function() {
+				var ele_select= this.element;
+				var selected = this.element.children( ":selected" ),
+				value = selected.val() ? selected.text() : "";
+
+				this.input = $( "<input>" )
+				.appendTo( this.wrapper )
+				.val( value )
+				.attr( "title", "" )
+				.addClass( "custom-combobox-input ui-widget ui-widget-content ui-state-default ui-corner-left" )
+				.autocomplete({
+				delay: 0,
+				minLength: 0,
+				source: $.proxy( this, "_source" )
+				})
+				.tooltip({
+				tooltipClass: "ui-state-highlight"
+				});
+
+				this._on( this.input, {
+				autocompleteselect: function( event, ui ) {
+				//alert("show all");
+				ui.item.option.selected = true;
+
+				this._trigger( "select", event, {
+				  item: ui.item.option
+				});
+				
+				ele_select.trigger('change');
+					
+				},
+
+				autocompletechange: "_removeIfInvalid"
+				});
+				},
+
+				_createShowAllButton: function() {
+				var input = this.input,
+				wasOpen = false;
+
+				$( "<a>" )
+				.attr( "tabIndex", -1 )
+				.attr( "title", "Show All Items" )
+				.tooltip()
+				.appendTo( this.wrapper )
+				.button({
+				icons: {
+				  primary: "ui-icon-triangle-1-s"
+				},
+				text: false
+				})
+				.removeClass( "ui-corner-all" )
+				.addClass( "custom-combobox-toggle ui-corner-right" )
+				.mousedown(function() {
+				wasOpen = input.autocomplete( "widget" ).is( ":visible" );
+				})
+				.click(function() {
+				input.focus();
+
+				// Close if already visible
+				if ( wasOpen ) {
+				  return;
+				}
+
+				// Pass last search string as value to search for, displaying last results
+				input.autocomplete( "search", 'SHOWALL' );
+				});
+				},
+
+				_source: function( request, response ) {
+				//var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+				var ele_select= this.element;
+				if(request.term=='SHOWALL'){
+				response(ele_select.children( "option" ).map(function() {
+				var text = $( this ).text();
+				var value= $( this ).val();
+				//if ( this.value && ( !request.term || matcher.test(text) ) )
+				return {
+				  label: text,
+				  value: text,
+				  option: this
+				};
+				}) );
+
+				}
+				else
+				{
+				
+				var jsonRow = '<%= backendDirectory %>/api_fetch_players?start=0&limit=20&s='+request.term;
+				
+				if(xhr) xhr.abort();
+				xhr=$.getJSON(jsonRow,function(result){
+					
+				if(result.error){
+					var html='<option value=""></option>';
+					ele_select.html(html);
+					response(ele_select.children( "option" ).map(function() {
+					var text = $( this ).text();
+					var value= $( this ).val();
+					//if ( this.value && ( !request.term || matcher.test(text) ) )
+					return {
+				  		label: text,
+				  		value: text,
+				  		option: this
+					};
+					}) );
+				}else{
+					var html='<option value=""></option>';
+					if(result.aaData.length>=1){
+						$.each(result.aaData, function(i,row){
+							var nameStr=row.firstname;
+							if(row.lastname){
+								nameStr+=" "+row.lastname;
+							}
+							html+='<option value="'+row._id+'">'+nameStr+'</option>';
+						});
+					}
+					
+					ele_select.html(html);
+					
+					
+					response(ele_select.children( "option" ).map(function() {
+				var text = $( this ).text();
+				var value= $( this ).val();
+				//if ( this.value && ( !request.term || matcher.test(text) ) )
+				return {
+				  label: text,
+				  value: text,
+				  option: this
+				};
+				}) );
+					
+					
+				}
+				});
+
+				} 
+
+				},
+
+				_removeIfInvalid: function( event, ui ) {
+
+					// Selected an item, nothing to do
+					if ( ui.item ) {
+
+					return;
+					}
+
+					// Search for a match (case-insensitive)
+					var value = this.input.val(),
+					valueLowerCase = value.toLowerCase(),
+					valid = false;
+					var ele_select= this.element;
+					this.element.children( "option" ).each(function() {
+					if ( $( this ).text().toLowerCase() === valueLowerCase ) {
+						this.selected = valid = true;	
+						
+						ele_select.trigger('change');
+
+						return false;
+					}
+					});
+
+					// Found a match, nothing to do
+					if ( valid ) {
+					return;
+					}
+
+					// Remove invalid value
+					this.input
+					.val( "" )
+					.attr( "title", value + " didn't match any item" )
+					.tooltip( "open" );
+					this.element.val( "" );
+					this._delay(function() {
+					this.input.tooltip( "close" ).attr( "title", "" );
+					}, 2500 );
+					this.input.data( "ui-autocomplete" ).term = "";
+				},
+
+				_destroy: function() {
+					this.wrapper.remove();
+					this.element.show();
+				}
+			});
+			})( jQuery );
 </script>
 </body>
 </html>

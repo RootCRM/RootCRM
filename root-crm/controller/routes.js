@@ -149,24 +149,25 @@ app.post(backendDirectoryPath+'/saveplayers', (req, res) => {
 					var playersArr=teamsData.players;
 					
 					var playersUUIDArr= new Array();
-					var sortOrderNum=1;
+					var sortOrderNum=0;
 					
 					if(playersArr.length>0){
 						for(var i=0; i<playersArr.length; i++){
-							playersUUIDArr.push(playersArr[i].user_uuid);
-							if(playersArr[i].sort_order >= sortOrderNum){
-								sortOrderNum=parseInt(playersArr[i].sort_order);
+							playersUUIDArr.push(playersArr[i].user_mongo_id);
+							if(playersArr[i].batting_order >= sortOrderNum){
+								sortOrderNum=parseInt(playersArr[i].batting_order);
 							}
 						}
 					}
 					
 					if(subObject.length>0){
 						for(var i=0; i<subObject.length; i++){
-							var userUUIDSTR=subObject[i].user_uuid;
+							var userUUIDSTR=subObject[i].user_mongo_id;
 							if(playersUUIDArr.indexOf(userUUIDSTR)!==-1){
 								//console.log('update');
 							} else{
-								subObject[i].sort_order=sortOrderNum+1;
+								subObject[i].batting_order=sortOrderNum+1;
+								sortOrderNum++;
 								playersArr.push(subObject[i]);
 							}
 						}
@@ -449,6 +450,51 @@ app.get(backendDirectoryPath+'/save_task_scheduler', (req, res) => {
 	}
 })
 
+//save notifications
+app.post(backendDirectoryPath+'/save_notification/', requireLogin, function(req, res) {
+	var uniqueFieldNameStr = "", uniqueFieldValueStr="_id", actionStr="", collectionStr="notifications", notification_type="", notificationStr="";
+	var outputObj = new Object();
+	
+	if(req.authenticationBool){
+		var postContent=req.body;
+		
+		if(req.body.action){
+			actionStr=req.body.action;
+			delete postContent['action']; 
+		}
+	
+		if(req.body.fieldName){
+			uniqueFieldNameStr=req.body.fieldName;
+			delete postContent['fieldName']; 
+		}
+	
+		if(req.body.fieldValue){
+			uniqueFieldValueStr=req.body.fieldValue;
+			delete postContent['fieldValue']; 
+		}
+		if(req.body.notification_type){
+			notification_type=req.body.notification_type;
+			delete postContent['notification_type']; 
+		}
+		
+		if(notification_type=="membership_fee"){
+			notificationStr="Please pay your membership fee!";
+		}
+		postContent['message']=notificationStr;
+		
+		if(actionStr=="update"){
+			
+		}else{
+			initFunctions.crudOpertions(db, collectionStr, actionStr, postContent, uniqueFieldNameStr, null, null, function(result) {
+				res.send(result);
+			});	
+		}
+	}else{
+		outputObj["error"]   = "Authorization error!";
+		res.send(outputObj);
+	}
+}); 
+
 //post api of CRUD
 app.post(backendDirectoryPath+'/api_crud_post/', requireLogin, function(req, res) {
 	var uniqueFieldNameStr = "", uniqueFieldValueStr="", actionStr="", collectionStr="";
@@ -707,7 +753,7 @@ app.get(backendDirectoryPath+'/load_navigator/', requireLogin, function(req, res
 
 //GENERIC: fetch listing depending upon collection or template passed
 app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res) {
-	var itemsPerPage = 10, pageNum=1, templateStr="", collectionStr="";
+	var itemsPerPage = 10, pageNum=1, templateStr="", collectionStr="", returnAllResults="", findFieldNameStr="", findFieldValueStr="";
 	var outputObj = new Object();
 	if(req.query.templateStr){
 		templateStr=req.query.templateStr;
@@ -719,11 +765,22 @@ app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res
 		pageNum=parseInt(req.query.start);
 	}
 	if(req.query.limit){
-		itemsPerPage=parseInt(req.query.limit);
+		if(parseInt(req.query.limit)!=="NaN"){
+			itemsPerPage=parseInt(req.query.limit);
+		}else{
+			returnAllResults="all";
+		}
 	}
 	if(pageNum==0){
 		pageNum=1;
 	}
+	if(req.query.findFieldName){
+		findFieldNameStr=req.query.findFieldName;
+	}
+	if(req.query.findFieldValue){
+		findFieldValueStr=req.query.findFieldValue;
+	}
+	
 	if(req.authenticationBool){
 		var activeSystemsStr=req.authenticatedUser.active_system_uuid;
 		if (typeof activeSystemsStr !== 'undefined' && activeSystemsStr !== null && activeSystemsStr!="") {
@@ -739,6 +796,19 @@ app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res
 				if(definedAdminTablesArr.indexOf(collectionStr)==-1){
 					query+=" 'uuid_system': { $in: ['"+activeSystemsStr+"'] } ";
 				}
+				//search by criteria passed
+				if(findFieldValueStr!="" && findFieldNameStr!=""){
+					if(query!="{"){
+     					query+=",";
+     				}
+     				console.log(parseInt(findFieldValueStr))
+					if(parseInt(findFieldValueStr)!=="NaN"){
+						query+=" '"+findFieldNameStr+"': { $in: ["+parseInt(findFieldValueStr)+", '"+findFieldValueStr+"'] } ";
+					}else{
+						query+=" '"+findFieldNameStr+"': { $in: ['"+findFieldValueStr+"'] } ";
+					}
+				}
+	
 				var total_records=0;
 				var coll= db.collection(collectionStr);
 				if(req.query.s){
@@ -750,12 +820,26 @@ app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res
      				query+=" '$text': { '$search': '"+req.query.s+"' } ";
      			}
      			query+= "}";
-     			//console.log(query);
+//     			console.log(query);
      			eval('var queryObj='+query);
      			
      			/**coll.find(queryObj).count(function (e, count) {
       				total_records= count;
       			});**/
+      			if(returnAllResults=="all"){
+      				coll.find(queryObj).sort({modified: -1}).toArray(function(err, items) {
+						if (err) {
+							outputObj["total"]   = 0;
+      						outputObj["error"]   = 'not found';
+							res.send(outputObj);
+      					} else if (items) {
+      						total_records=items.length;
+      						outputObj["total"]   = total_records;
+      						outputObj["aaData"]   = items;
+							res.send(outputObj);
+     					}
+					});
+      			}else{
 				coll.find(queryObj).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
 					if (err) {
 						outputObj["total"]   = 0;
@@ -768,6 +852,7 @@ app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res
 						res.send(outputObj);
      				}
 				});
+				}
 			}else{
 				outputObj["total"]   = 0;
       			outputObj["error"]   = "No such page exists!";
@@ -877,6 +962,7 @@ app.get(backendDirectoryPath+'/api_fetch_players/', requireLogin, function(req, 
 				var coll= db.collection(collectionStr);    			
      			if(req.query.team){
      				initFunctions.returnFindOneByMongoID(db, 'teams', req.query.team, function(result) {
+     					
      					if(result.aaData)	{
      						var teamsData=result.aaData;
      						var usersListArr=teamsData.players;
@@ -885,7 +971,7 @@ app.get(backendDirectoryPath+'/api_fetch_players/', requireLogin, function(req, 
      							var selectedUsersID=new Array();
 
      							for(var i=0; i<usersListArr.length; i++){
-     								var tempID=new mongodb.ObjectID(usersListArr[i].user_uuid);
+     								var tempID=new mongodb.ObjectID(usersListArr[i].user_mongo_id);
      								selectedUsersID.push(tempID);
      							}
      							var player_type_uuid="", searchTermStr="";
@@ -896,9 +982,9 @@ app.get(backendDirectoryPath+'/api_fetch_players/', requireLogin, function(req, 
 								if(req.query.s){
      								searchTermStr=req.query.s;	
      							}
-     							
+     							//console.log(player_type_uuid+ " "+searchTermStr);
      							if(player_type_uuid!="" && searchTermStr==""){
-     							coll.find({_id : { '$in': selectedUsersID }, player_type_uuid : req.query.player_type_uuid }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+     							coll.find({_id : { '$in': selectedUsersID }, user_type: 'member', player_type_uuid : req.query.player_type_uuid }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
      								if (err) {
 										outputObj["total"]   = 0;
       									outputObj["error"]   = 'not found';
@@ -911,7 +997,7 @@ app.get(backendDirectoryPath+'/api_fetch_players/', requireLogin, function(req, 
 								});
      							}
      							else if(player_type_uuid=="" && searchTermStr!=""){
-     							coll.find({_id : { '$in': selectedUsersID }, $text: { '$search': searchTermStr } }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+     							coll.find({_id : { '$in': selectedUsersID }, user_type: 'member', $text: { '$search': searchTermStr } }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
      								if (err) {
 										outputObj["total"]   = 0;
       									outputObj["error"]   = 'not found';
@@ -924,7 +1010,7 @@ app.get(backendDirectoryPath+'/api_fetch_players/', requireLogin, function(req, 
 								});
      							}
      							else if(player_type_uuid!="" && searchTermStr!=""){
-     							coll.find({_id : { '$in': selectedUsersID }, player_type_uuid : req.query.player_type_uuid, $text: { '$search': searchTermStr } }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+     							coll.find({_id : { '$in': selectedUsersID }, user_type: 'member', player_type_uuid : req.query.player_type_uuid, $text: { '$search': searchTermStr } }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
      								if (err) {
 										outputObj["total"]   = 0;
       									outputObj["error"]   = 'not found';
@@ -937,7 +1023,7 @@ app.get(backendDirectoryPath+'/api_fetch_players/', requireLogin, function(req, 
 								});
      							}
      							else{
-     							coll.find({_id : { '$in': selectedUsersID } }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+     							coll.find({_id : { '$in': selectedUsersID }, user_type: 'member' }).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
      								if (err) {
 										outputObj["total"]   = 0;
       									outputObj["error"]   = 'not found';
@@ -962,7 +1048,7 @@ app.get(backendDirectoryPath+'/api_fetch_players/', requireLogin, function(req, 
      				});
      			}	else	{
      				var query="{";
-				
+					query+=" 'user_type': 'member' ";
 					/**if(definedAdminTablesArr.indexOf(collectionStr)==-1){
 						query+=" 'uuid_system': { $in: ['"+activeSystemsStr+"'] } ";
 					}**/

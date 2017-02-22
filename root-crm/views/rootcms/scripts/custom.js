@@ -3,6 +3,29 @@ function __alertModalBox(msg){
 	$("#globalMessage").html(msg);
 	$('#globalPrompt').modal('show');
 }
+function dateTimeFromUnix(UNIX_timestamp){
+	var a = new Date(UNIX_timestamp * 1000);
+    
+	var year = a.getFullYear();
+	var month = a.getMonth()+1;
+	var dateNum = a.getDate();
+	var hour = a.getHours();
+	var min = a.getMinutes();
+	var sec = a.getSeconds();
+	var time = year + '-' + month + '-' + dateNum + ' ' + hour + ':' + min ;
+
+	return time;
+}
+
+function getTimestampFromDate(dateString){
+	var dateParts = dateString.split('/'),	date;
+	var newDate=dateParts[1]+"/"+dateParts[0]+"/"+dateParts[2];
+	date = new Date(newDate);
+	date= date.getTime();
+	date= parseInt(date)/1000;
+	return date;
+}
+
 function getTimestampFromDateTime(dateString){
 	var dateTimeParts = dateString.split(' '),
 	timeParts = dateTimeParts[1].split(':'),

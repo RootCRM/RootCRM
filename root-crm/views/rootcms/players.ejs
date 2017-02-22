@@ -372,7 +372,7 @@ function allowWebAccess(e){
 						contentHtml+='<td>'+row.player_type+'</td>';
 						contentHtml+='<td>'+row.player_qualities+'</td>';
 						var checkedStr="";
-						if(row.player_qualities==1 || row.player_qualities=="1"){
+						if(row.allow_web_access==1 || row.allow_web_access=="1"){
 							checkedStr="checked";
 						}
 						contentHtml+='<td><input id="web_access_'+uniqueIDStr+'" type="checkbox" '+checkedStr+' class="toggleCheckbox" onChange="allowWebAccess(\''+uniqueIDStr+'\')"></td>';
@@ -441,8 +441,8 @@ function add_new_team(){
 			var playersSortOrder=new Array();
 			for(var i=0; i<selectedPlayersArr.length; i++){
 				var subObject={};
-				subObject['sort_order']=i+1;
-				subObject['user_uuid']=selectedPlayersArr[i];
+				subObject['batting_order']=i;
+				subObject['user_mongo_id']=selectedPlayersArr[i];
 				subObject['uuid']=guid();
 				playersSortOrder[i]=subObject;
 			}
@@ -454,7 +454,7 @@ function add_new_team(){
 				type: "GET",
 				dataType: "json",
 				url: postContentURL,
-				data: {"collection" : "teams", "action" : "create", "fieldName" : "name", "fieldValue" : teamNameStr, "name" : teamNameStr, "players" : selectedPlayersStr, "uuid_system" : uuidSystemStr},
+				data: {"collection" : "teams", "action" : "create", "fieldName" : "name", "fieldValue" : teamNameStr, "name" : teamNameStr, "players" : selectedPlayersStr, "status" : 0, "uuid_system" : uuidSystemStr},
 				success: function(response){
 					if(response.success){
 						$('#add_new_team').val('');
@@ -483,8 +483,8 @@ function add_to_existing_team(){
 			var playersSortOrder=new Array();
 			for(var i=0; i<selectedPlayersArr.length; i++){
 				var subObject={};
-				subObject['sort_order']=i+1;
-				subObject['user_uuid']=selectedPlayersArr[i];
+				subObject['batting_order']=i+1;
+				subObject['user_mongo_id']=selectedPlayersArr[i];
 				subObject['uuid']=guid();
 				playersSortOrder[i]=subObject;
 			}

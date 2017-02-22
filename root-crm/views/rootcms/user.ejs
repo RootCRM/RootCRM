@@ -2,6 +2,8 @@
 <link rel="stylesheet" href="plugins/combobox/autocomplete-ui.css"/>
 <link rel="stylesheet" href="css/chosen.css">
 <link rel="stylesheet" href="css/jquery.tag-editor.css">
+
+<link rel="stylesheet" href="css/bootstrap.datepicker.css">
 <style>
 .custom-combobox {
 		position: relative;
@@ -51,7 +53,21 @@
     		</section>	
     		<section class="content">
       			<div class="row">
-      					<div class="panel-body no-padding-top bg-white"> 
+      				<div class="panel-body no-padding-top bg-white"> 
+      					<form class="form-horizontal" action="<%= backendDirectory %>/save/user" method="POST" id="contentForm">
+      					<div class="nav-tabs-custom">
+      						<ul class="nav nav-tabs pull-left">
+            					<li class="active"><a href="#first" data-toggle="tab">Details</a></li>
+            					<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %>
+            						<% if (typeof contentObj.user_type !== 'undefined' && contentObj.user_type !== null && contentObj.user_type == "member") { %>
+            							<li><a href="#second" data-toggle="tab">Membership fee details</a></li>
+            						<% } %>
+            					<li><a href="#third" data-toggle="tab">Avalability</a></li>
+            					<% } %>
+							</ul>
+							<div class="tab-content ">
+								
+								<div class="chart tab-pane active" id="first" ><div STYLE="margin-top:10px;">
             					<% if (typeof queryStr !== 'undefined' && queryStr !== null) {
     								if(queryStr.error_msg) {	%>
 									<div class="alert alert-danger alert-dismissable">
@@ -67,7 +83,7 @@
             						<%	}
             					}	%>
             					
-            					<form class="form-horizontal" action="<%= backendDirectory %>/save/user" method="POST" id="contentForm">
+            					
             						<input type="hidden" class="form-control" id="editorField" name="editorField" value="<% if (typeof editorField !== 'undefined' && editorField !== null) { %><%= editorField %><% }else{ %>_id<% } %>">
       								<input type="hidden" class="form-control" id="editorValue" name="editorValue" value="<% if (typeof editorValue !== 'undefined' && editorValue !== null) { %><%= editorValue %><% } %>">
       								<input type="hidden" class="form-control" id="data" name="data" value="">
@@ -254,6 +270,16 @@
     			  							</div>
 										</div>
 									</div>
+									<div class="form-group">
+                  						<label class="control-label col-md-3" for="first-name">Type</label>
+                  						<div class="col-md-3 col-lg-7">
+                  							<select id="user_type" name="user_type" class="form-control">
+                    							<option value="admin" <% if (typeof contentObj.user_type !== 'undefined' && contentObj.user_type !== null && contentObj.user_type == "admin") { %>selected<% } %>>Backend Administrator</option>
+                    							<option value="member" <% if (typeof contentObj.user_type !== 'undefined' && contentObj.user_type !== null && contentObj.user_type == "member") { %>selected<% } %>>Member</option>
+                    							<option value="employer" <% if (typeof contentObj.user_type !== 'undefined' && contentObj.user_type !== null && contentObj.user_type == "employer") { %>selected<% } %>>Employer</option>
+                    						</select>
+                  						</div>
+                					</div>
 									</div></div>
                 					</div></div></div>
                 					<div class="col-xs-6"><div class="box box-primary">
@@ -291,22 +317,141 @@
                             		</div></div>
                             		</div></div></div>
                 					</div>
-                					<div class="row">
-                					<div class="form-group">
-                   						<div class="col-md-12 col-lg-12" align="center">
-               								<div class="submit-btn-setting"> <button type="submit" class="btn btn-primary btn-color margin-right-5 btn-sm">Submit</button>
-               								<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) {	%>
-               									<a href="<%= backendDirectory %>/list/users" class="btn btn-danger btn-sm">Cancel</a>
-               								<%	}else{	%>
-               									<button type="reset" class="btn btn-danger btn-sm">Reset</button>
-               								<% } %>
-               								</div>
-               							</div>
-                					</div>
-                					</div>
                 					
-              					</form>
+              					
+              					</div></div>
+              					<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %>
+              					<% if (typeof contentObj.user_type !== 'undefined' && contentObj.user_type !== null && contentObj.user_type == "member") { %>
+              					<div class="chart tab-pane" id="second" >
+              						<div class="row" STYLE="margin-top:10px;">
+              							<div class="form-group">
+                  							<label class="control-label col-md-2" for="">Fee to be paid</label>
+                  							<div class="col-md-6 col-lg-5">
+                   								<select class="form-control" id="membership_type" name="membership_type">
+                   									<option value="">--Select--</option>
+                   									<option value="half-yearly" <% if (typeof contentObj.membership_type !== 'undefined' && contentObj.membership_type !== null && contentObj.membership_type == "half-yearly") { %>selected<% } %>>6 months</option>
+                   									<option value="yearly" <% if (typeof contentObj.membership_type !== 'undefined' && contentObj.membership_type !== null && contentObj.membership_type == "yearly") { %>selected<% } %>>Annually</option>
+                   								</select>
+                  							</div>
+                						</div>
+                						<div class="form-group">
+                  							<label class="control-label col-md-2" for="">Fee to be paid</label>
+                  							<div class="col-md-6 col-lg-5">
+                   								<input type="text" class="form-control col-md-5 col-xs-12" id="membership_fee" name="membership_fee" value="<% if (typeof contentObj.membership_fee !== 'undefined' && contentObj.membership_fee !== null) { %><%= contentObj.membership_fee %><% } %>">
+                  							</div>
+                  							<div class="col-sm-3">
+							 					<button type="button" class="btn btn-primary btn-color margin-right-5 btn-sm" onClick="notifyUserToPay('<%= contentObj._id %>'); return false;">Notify User to pay membership fee</button>
+							 				</div>
+                						</div>
+                						<div class="form-group" id="amount_paidDiv">
+                  							<label class="control-label col-md-2" for="">Fee Paid On</label>
+                  							<div class="col-md-3">
+                   								<input type="text" class="form-control col-md-5 col-xs-12 datepicker" id="paid_date" readonly  data-date-format="dd/mm/yyyy" value="">
+                  							</div>
+                  							<label class="control-label col-md-1" for="">Amount paid</label>
+                  							<div class="col-md-3">
+                   								<input type="text" class="form-control col-md-5 col-xs-12" id="new_amount_paid" value="">
+                  							</div>
+                  							<div class="col-sm-3">
+							 					<button type="button" class="btn btn-primary btn-color margin-right-5 btn-sm" onClick="payMemberShip('<%= contentObj._id %>'); return false;">Save</button>
+							 				</div>
+                						</div>
+              						</div>
+              					</div>
+              					<% } %>
+              					<div class="chart tab-pane" id="third" >
+              						<div class="row" STYLE="margin-top:10px;">
+              							<% if (typeof contentObj.availability !== 'undefined' && contentObj.availability !== null) {	
+											var tempSelectedArr= JSON.stringify(contentObj.availability);
+											if(typeof(tempSelectedArr)=="object" || typeof(tempSelectedArr)=="array"){
+												//tempSelectedArr = tempSelectedArr;
+											}	else	{
+												tempSelectedArr = JSON.parse(tempSelectedArr);
+											}
+											
+										%>
+											<% for(var i=0; i<tempSelectedArr.length; i++){	%>
+											<div class="row blogCommentsClass" style="background-color: aliceblue; padding: 20px; margin: 5px 5px 20px; border-radius: 5px;">
+                					<div class="col-sm-10  col-md-12 col-lg-10">
+                						<input type="hidden" class="span10" name="uuid" id="uuid" value="<%=  tempSelectedArr[i].uuid %>" />
+										
+										<div class="form-group">
+                              				<label for="" class="col-sm-2 control-label">Start Date</label>
+                             				<div class="col-sm-4">
+                              					<input type="text" readonly class="form-control" id="start_date" reaodnly value="<%=  tempSelectedArr[i].start_date %>">
+                             				</div>
+                        				
+                              				<label for="" class="col-sm-2 control-label">End Date</label>
+                             				<div class="col-sm-4">
+                              					<input type="text" readonly class="form-control" id="end_date" reaodnly value="<%=  tempSelectedArr[i].end_date %>">
+                             				</div>
+                        				</div>
+                        				<% if (typeof tempSelectedArr[i].comments !== 'undefined' && tempSelectedArr[i].comments !== null) {	
+											var tempCommentsArr= JSON.stringify(tempSelectedArr[i].comments);
+											if(typeof(tempCommentsArr)=="object" || typeof(tempCommentsArr)=="array"){
+												tempCommentsArr = temtempCommentsArrpSelectedArr;
+											}	else	{
+												tempCommentsArr = JSON.parse(tempCommentsArr);
+											}
+											for(var j=0; j<tempCommentsArr.length; j++){
+												
+										%>          				
+                        				<div class="form-group">
+                              				<label for="" class="col-sm-2 control-label">Comment</label>
+                             				<div class="col-sm-10">
+                             					<TEXTAREA CLASS="form-control" <% if(tempCommentsArr[j].access_right==0){ %>readonly<% } %>><%=  tempCommentsArr[j].comment	%></TEXTAREA>
+							 				</div>
+                        				</div>
+                        					<% }	 
+                        				} %>
+                        				<!--<div class="form-group">
+                              				<label for="" class="col-sm-2 control-label">Add Comment</label>
+                             				<div class="col-sm-7">
+                             					<TEXTAREA CLASS="form-control" id="<%=  tempSelectedArr[i].uuid %>" ></TEXTAREA>
+							 				</div>
+							 				<div class="col-sm-3">
+							 					<button type="button" class="btn btn-primary btn-color margin-right-5 btn-sm" onClick="addComment('<%=  tempSelectedArr[i].uuid %>'); return false;">Save</button>
+							 				</div>
+                        				</div>-->
+                        			</div>
+                     				<div class="col-lg-2">
+                     					<div class="form-group">
+                     						<div class="small-box bg-aqua"><div class="icon">
+            
+                              				<%  if(tempSelectedArr[i].available=="no"){ %>
+                             					<i class="fa fa-remove"></i>
+                             				<% } else{ %>
+                             					<i class="fa fa-check-square-o"></i>
+                             				<% } %>
+                             				</div> </div>
+                        				</div>
+                     				</div>
+                     				
+                				</div><% } %>
+										<% } %>
+              						</div>
+              					</div>
+              					<% } %>
+              					
               				</div>
+              			</div>
+              			
+              			<div class="row">
+            				<div class="form-group">
+            					<div class="col-md-12 col-lg-12" align="center">
+               						<div class="submit-btn-setting"> <button type="submit" class="btn btn-primary btn-color margin-right-5 btn-sm">Submit</button>
+               							<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) {	%>
+               								<a href="<%= backendDirectory %>/list/users" class="btn btn-danger btn-sm">Cancel</a>
+               							<%	}else{	%>
+               								<button type="reset" class="btn btn-danger btn-sm">Reset</button>
+               							<% } %>
+               						</div>
+               					</div>
+                			</div>
+                		</div>
+                					
+              			</form>
+              		</div>
       			</div>
     		</section>
     		<!--//body content--> 
@@ -324,6 +469,7 @@
 <script src="js/jquery.validate.js"></script>
 <script src="js/jquery.tag-editor.min.js"></script>
 <script src="js/jquery.caret.min.js"></script>
+<script src="js/bootstrap.datepicker.js"></script>
 <script>
 var configDropDown = {
 	'.chosen-select'           : {},
@@ -344,12 +490,73 @@ function generate_code(name,code){
 	document.getElementById(code).value=result;
 }
 
+function notifyUserToPay(e){
+	 var postContentURL=backendDirectory+"/save_notification";
+   		$.ajax({
+			type: "POST",
+			dataType: "json",
+			url: postContentURL,
+			data: {"action" : "create", "user_id" : e, "notification_type" : "membership_fee"},
+			success: function(response){
+				load_payments();
+			}
+		});
+}
+
+function load_payments(){
+	$(".membershipFeeClass").remove();
+	var id=$("#id").val();
+	var jsonRow=backendDirectory+"/api_fetch_list?limit=all&collection=membership_fee_details&findFieldName=user_mongo_id&findFieldValue="+id;
+	$.getJSON(jsonRow,function(html){
+		if(html.aaData){
+			var tableContentArr=html.aaData;
+			var contentHtmlStr="";
+			for(var i=0; i<tableContentArr.length; i++){
+				contentHtmlStr+='<div class="form-group membershipFeeClass">';
+                contentHtmlStr+='<label class="control-label col-md-2" for="">Paid on ('+dateTimeFromUnix(tableContentArr[i].paid_on_timestamp)+')</label>';
+                contentHtmlStr+='<div class="col-md-6 col-lg-5">';
+                contentHtmlStr+='<input type="text" class="form-control col-md-5 col-xs-12" id="amount_paid" value="'+tableContentArr[i].amount_paid+'" readonly>';
+                contentHtmlStr+='</div>';
+                contentHtmlStr+='</div>';
+			}	
+			$("#amount_paidDiv").before(contentHtmlStr);
+		}
+	});
+}
+
+function payMemberShip(e){
+	$(".membershipFeeAlert").remove();
+	
+	var amountPaid=$("#new_amount_paid").val();
+	var paid_date=getTimestampFromDate($("#paid_date").val());
+    var postContentURL=backendDirectory+"/api_crud_post";
+    if(amountPaid!="" && paid_date!=""){
+   		$.ajax({
+			type: "POST",
+			dataType: "json",
+			url: postContentURL,
+			data: {"collection" : "membership_fee_details", "action" : "create", "fieldName": "_id", "fieldValue" : "", "user_mongo_id" : e, "amount_paid" : amountPaid, "paid_on_timestamp" : paid_date},
+			success: function(response){
+				$("#new_amount_paid").val('');
+				$("#paid_date").val('');
+				load_payments();
+			}
+		});
+	}else{
+		$("#amount_paidDiv").before('<div class="alert alert-danger membershipFeeAlert">Please enter both the fields!</div>');
+	}
+}
+
+function addComment(e){
+	var commentStr= $("#"+e).val();
+}
+
 function load_systems(e){
 	$("#select_systems").html("");
 	var onLoadBool = typeof e !== 'undefined';
 	
 	var defaultAssignedVal=$("#uuid_default_system").val();
-	var jsonRow=backendDirectory+"/api_fetch_list?start=0&limit=100&collection=systems";
+	var jsonRow=backendDirectory+"/api_fetch_list?limit=all&collection=systems";
 	
 	$.getJSON(jsonRow,function(response){
 		var contentHtml="", defaultContentHTML="";
@@ -400,7 +607,7 @@ function load_systems(e){
 
 function load_countries(){
 		var countrySelectedStr= "<% if (typeof contentObj.country !== 'undefined' && contentObj.country !== null) {	%><%= contentObj.country %><%	}	%>";
-		var jsonRow=backendDirectory+"/api_fetch_list?start=0&limit=300&collection=Country",
+		var jsonRow=backendDirectory+"/api_fetch_list?limit=all&collection=Country",
 		xhrStatus=$.getJSON(jsonRow,function(html){
 			if(html.error){
 				
@@ -425,7 +632,7 @@ function load_countries(){
 			userType="<%= contentObj.player_type_uuid %>";
 		<% } %>
 		
-		var jsonRow=backendDirectory+"/api_fetch_list?start=0&limit=100&collection=user_types",
+		var jsonRow=backendDirectory+"/api_fetch_list?limit=all&collection=user_types",
 		xhrStatus=$.getJSON(jsonRow,function(html){
 			if(html.error){
 				
@@ -521,7 +728,11 @@ $(document).ready(function() {
 	load_systems(true);
 	load_user_types();
 	load_countries();
+	load_payments();
 	
+	$('.datepicker').datepicker().on('changeDate', function (ev) {
+		$(this).datepicker('hide');
+	});
 	// validate form on keyup and submit
 		$("#contentForm").validate({
 			ignore: "",
