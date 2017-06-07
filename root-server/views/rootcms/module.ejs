@@ -39,12 +39,13 @@
             							</div>
             						<%	}
             					}	%>
-            					<form class="form-horizontal" action="<%= backendDirectory %>/save/module" method="POST">
+            					<form class="form-horizontal" action="<%= backendDirectory %>/save/module" method="POST" id="contentForm">
             						<input type="hidden" class="form-control" id="table_name" name="table_name" value="modules">
       								<input type="hidden" class="form-control" id="unique_field" name="unique_field" value="code">
       								<input type="hidden" class="form-control" id="editorField" name="editorField" value="<% if (typeof editorField !== 'undefined' && editorField !== null) { %><%= editorField %><% }else{ %>_id<% } %>">
       								<input type="hidden" class="form-control" id="editorValue" name="editorValue" value="<% if (typeof editorValue !== 'undefined' && editorValue !== null) { %><%= editorValue %><% } %>">
       								<input type="hidden" class="form-control" id="id" name="id" value="<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %><%= contentObj._id %><% } %>">
+            						<input type="hidden" class="form-control" id="data" name="data" value="">
             						<div class="form-group">
                   						<label class="control-label col-md-1" for="first-name">Name<span class="required">*</span></label>
                   						<div class="col-md-6 col-lg-3">
@@ -70,20 +71,19 @@
                   						<label class="control-label col-md-1" for="">Table</label>
                   						<div class="col-md-6 col-lg-3">
                   							<select id="table" name="table" class="form-control col-md-5 col-xs-12" required="required">
-                   								<option value="">--Select Table--</option>
-                  								<% if (typeof collectionsArr !== 'undefined' && collectionsArr !== null && collectionsArr.length>=1) {
-                  										for(var i=0; i< collectionsArr.length; i++){
-                  									%>
-                  									<option value="<%= collectionsArr[i] %>" <% if (typeof contentObj.table !== 'undefined' && contentObj.table !== null && contentObj.table == collectionsArr[i]) { %>selected<% } %>><%= collectionsArr[i] %></option>
-                  									<%	}
-                  								} %>
+                   								
                     						</select>
                     					</div>
+                    					<div class="col-sm-3">
+    										<div class="checkbox" STYLE="float:left; margin-right:10px;">
+      		  									<label> <input type="checkbox" id="displayOnDashboard" name="displayOnDashboard" value="1" <% if (typeof contentObj.displayOnDashboard !== 'undefined' && contentObj.displayOnDashboard !== null && contentObj.displayOnDashboard == 1) { %>checked<% } %> > <strong style="font-weight:600">Display On Dashboard</strong></label>
+    			  							</div>
+										</div>
                 					</div>
                 					<div class="form-group">
                   						<label class="control-label col-md-1" for="">Sort Order</label>
                   						<div class="col-md-6 col-lg-3">
-                   							<input type="text" class="form-control col-md-5 col-xs-12" id="sort_order" name="sort_order" value="<% if (typeof contentObj.sort_order !== 'undefined' && contentObj.code !== null) { %><%= contentObj.sort_order %><% } %>">
+                   							<input type="text" class="form-control col-md-5 col-xs-12" id="sort_order" name="sort_order" value="<% if (typeof contentObj.sort_order !== 'undefined' && contentObj.code !== null) { %><%= contentObj.sort_order %><% }else{ %>0<%	} %>">
                   						</div>
                 				
     									<div class="col-sm-3">
@@ -108,6 +108,7 @@
 										   		<table class="table table-striped  table-bordered table-hover custom-tbl-st bt" id="table-breakpoint">
 													<thead>
 												  		<tr class="item">
+												  			<th>&nbsp;</th>
 												  			<th>Label</th>
 													  		<th>Link</th>
 													 		<th>Sort Order</th>
@@ -118,9 +119,14 @@
 											  	</thead>
 											  	<tbody id="link_items">
 											  		<% if (typeof contentObj.module_items !== 'undefined' && contentObj.module_items !== null  && contentObj.module_items != "") { 	
-											  			var module_items = JSON.parse(contentObj.module_items);    
+											  			try{
+															var module_items = JSON.parse(contentObj.module_items); 
+        												}	catch (error){
+       														var module_items =  contentObj.module_items; 
+    													} 
 											  			for(var i=0; i< module_items.length; i++){	%>
 											  			<tr class="itemClass item_<%= module_items[i].uuid %>">
+											  				<td><input type="checkbox" value="<%= module_items[i].uuid %>" id="Select" class="check itemtr_<%= module_items[i].uuid %>" name="Select"></td>
 											  				<td id="label"><%= module_items[i].label %></td>
 											  				<td id="link"><%= module_items[i].link %></td>
 											  				<td id="sort_order"><%= module_items[i].item_sort_order %></td>
@@ -237,16 +243,56 @@
 <!-- Footer Ends Here-->
 </div>
 <!-- Page-Level Plugin Scripts-->
+<script src="js/jquery.validate.js"></script>
 <script>
-function generate_code(name,code){
-	var val=document.getElementById(name).value;
-	var patt=/[^A-Za-z0-9_-]/g;
-	var result=val.replace(patt,' ');
-	result=result.replace(/\s+/g, ' ');
-	result = result.replace(/^\s+|\s+$/g,'');
-	result=result.replace(/\s/g, '-');
-	result=result.toLowerCase();
-	document.getElementById(code).value=result;
+$(document).ready(function(){
+	returnAllCollections();
+	// validate form on keyup and submit
+		$("#contentForm").validate({
+			ignore: "",
+			onkeyup: false,
+			errorClass: 'error',
+			validClass: 'valid',
+			errorElement: "em",
+			errorPlacement: function(error, element) {
+				$(element).closest('div').append(error);
+			},
+			onfocusout: false,
+			invalidHandler: function(form, validator) {
+				var errors = validator.numberOfInvalids();
+				if (errors) {                    
+					validator.errorList[0].element.focus();
+				}
+			},
+			rules: {
+				name: { required: true },
+				code: { required: true }
+			},
+			submitHandler: function(form) {
+				generateObjectJson();
+ 				dataAsJson('contentForm', form);
+ 			}
+		});		
+});
+function returnAllCollections(){
+	$("#table").html('');
+	var jsonRow=backendDirectory+"/api_fetch_collections";
+	var sVal="<% if (typeof contentObj.table !== 'undefined' && contentObj.table !== null) { %><%= contentObj.table %><% } %>";
+	
+		$.getJSON(jsonRow,function(aaData){
+			var contentHtml="<option value=''>--Select--</option>";
+			if(aaData.length>0){
+					$.each(aaData, function(i,row){
+						contentHtml+="<option value='"+row+"' ";
+						if(sVal==row){
+							contentHtml+="selected";
+						}
+						contentHtml+=" >"+row+"</option>";
+					});
+     		}
+			$("#table").html(contentHtml);
+
+		});
 }
 
 function generateObjectJson(){
@@ -269,7 +315,6 @@ function generateObjectJson(){
   		createArr[i]=createObject;
   		i++;
   	});
-  	console.log(JSON.stringify(createArr))
   	$("#module_items").val(JSON.stringify(createArr));
 }
 function remove_item(e){
@@ -291,16 +336,6 @@ function edit_item(e){
 	}
 }
 
-function guid() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-  }
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-    s4() + '-' + s4() + s4() + s4();
-}
-
 function savelinkitem(){
 	$("#msgSpan").remove();
 	var item_uuid=$("#item_uuid").val();
@@ -318,7 +353,7 @@ function savelinkitem(){
 		}
 			if(item_uuid==""){
 				item_uuid=guid();
-				var htmlStr='<tr class="itemClass item_'+item_uuid+'"><td id="label">'+item_label+'</td><td id="link">'+item_link+'</td><td id="sort_order">'+item_sort_order+'</td>';
+				var htmlStr='<tr class="itemClass item_'+item_uuid+'"><td><input type="checkbox" value="'+item_uuid+'" id="Select" class="check itemtr_'+item_uuid+'" name="Select"></td><td id="label">'+item_label+'</td><td id="link">'+item_link+'</td><td id="sort_order">'+item_sort_order+'</td>';
 				htmlStr+='<td id="target">'+item_target+'</td><td id="status">'+itemStatus+'</td><td><a href="javascript:void(0)" title="Edit" onClick="edit_item(\''+item_uuid+'\')"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" onClick="remove_item(\''+item_uuid+'\')" title="Remove"><i class="fa fa-trash"></i></a></td></tr>';
 			
 				$("#link_items").append(htmlStr);

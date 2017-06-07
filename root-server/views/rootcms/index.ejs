@@ -26,132 +26,8 @@
     <!-- Main content -->
     <section class="content">
       <!-- Small boxes (Stat box) -->
-      <div class="row">
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-aqua">
-            <div class="inner">
-              <h3>150</h3>
-
-              <p>New Task</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-tasks"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-green">
-            <div class="inner">
-              <h3>53<sup style="font-size: 20px">%</sup></h3>
-
-              <p>Invoices</p>
-            </div>
-            <div class="icon">
-              <i CLASS="fa fa-book"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-yellow">
-            <div class="inner">
-              <h3>44</h3>
-
-              <p>User Registrations</p>
-            </div>
-            <div class="icon">
-              <i class="ion ion-person-add"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-red">
-            <div class="inner">
-              <h3>20</h3>
-
-              <p>Locations</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-map-marker"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-      </div>
-	  
-	  
-	  
-	  <div class="row">
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-aqua">
-            <div class="inner">
-              <h3>150</h3>
-
-              <p>New Task</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-tasks"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-green">
-            <div class="inner">
-              <h3>53<sup style="font-size: 20px">%</sup></h3>
-
-              <p>Invoices</p>
-            </div>
-            <div class="icon">
-              <i CLASS="fa fa-book"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-yellow">
-            <div class="inner">
-              <h3>44</h3>
-
-              <p>User Registrations</p>
-            </div>
-            <div class="icon">
-              <i class="ion ion-person-add"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-red">
-            <div class="inner">
-              <h3>20</h3>
-
-              <p>Locations</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-map-marker"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-        <!-- ./col -->
+      <div class="row" id="dashboard_items">
+			<h1 style="margin-left:20px;">Welcome to Control Panel</h1>
       </div>
       <!-- /.row -->
       <!-- Main row -->
@@ -170,5 +46,58 @@
 	<!-- Footer Ends Here-->
 
 </div>
+<script>
+function fetchDashboardItems(){
+	var jsonRow = backendDirectory+'/load_navigator';
+	$.getJSON(jsonRow,function(result){
+		if(result.aaData){
+			var contentStr ="", tableArr= new Array();
+			var styleClassArr=new Array("bg-blue", "bg-yellow", "bg-red", "bg-green");
+			
+			$.each(result.aaData, function(i,row){
+				if(row.displayOnDashboard==1 || row.displayOnDashboard=="1"){
+				
+				var iconNameStr='';
+				if(row.icon_class!=""){
+					iconNameStr='<i class="'+row.icon_class+'"></i>';
+				}
+				if(row.icon_path!=""){
+					iconNameStr='<img width="24" height="24" src="'+row.icon_path+'" alt="">';
+				}
+				var styleItem = styleClassArr[Math.floor(Math.random()*styleClassArr.length)];
+				contentStr+='<div class="col-lg-3 col-xs-6"><div class="small-box '+styleItem+'">';
+				
+				if(row.name.toLowerCase()=="players"){
+					contentStr+='<div class="inner"><h3 class="players_count">0</h3><p>'+row.name.toUpperCase()+'</p></div>';
+					tableArr.push('players');
+            	}else{
+            		contentStr+='<div class="inner"><h3 class="'+row.table+'_count">0</h3><p>'+row.name.toUpperCase()+'</p></div>';
+            		tableArr.push(row.table);
+            	}
+            	contentStr+='<div class="icon">	'+iconNameStr+'</div>';
+            	contentStr+='<a href="<%= backendDirectory %>/list/'+row.table+'" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>';
+          		contentStr+='</div></div>';
+          		}
+			});
+			$("#dashboard_items").html(contentStr);
+			
+			$.each(tableArr, function(i,row){
+				loadCollectionCount(row);
+			});
+		}
+	});
+}
+function loadCollectionCount(collectionStr){
+	var jsonRow = backendDirectory+'/api_get_count?collection='+collectionStr;
+	$.getJSON(jsonRow,function(result){
+		if(result.total){
+			$("."+collectionStr+"_count").html(result.total);
+		}
+	});
+}
+$(function () {
+	fetchDashboardItems();
+});
+</script>
 </body>
 </html>

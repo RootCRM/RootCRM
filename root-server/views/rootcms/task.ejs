@@ -46,12 +46,13 @@
             							</div>
             						<%	}
             					}	%>
-            					<form class="form-horizontal" action="<%= backendDirectory %>/save/task" method="POST">
+            					<form class="form-horizontal" action="<%= backendDirectory %>/save/task" method="POST" id="contentForm">
             						<input type="hidden" class="form-control" id="table_name" name="table_name" value="tasks">
-      								<input type="hidden" class="form-control" id="unique_field" name="unique_field" value="code">
+      								<input type="hidden" class="form-control" id="unique_field" name="unique_field" value="_id">
       								<input type="hidden" class="form-control" id="id" name="id" value="<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %><%= contentObj._id %><% } %>">
       								<input type="hidden" class="form-control" id="editorField" name="editorField" value="<% if (typeof editorField !== 'undefined' && editorField !== null) { %><%= editorField %><% }else{ %>_id<% } %>">
       								<input type="hidden" class="form-control" id="editorValue" name="editorValue" value="<% if (typeof editorValue !== 'undefined' && editorValue !== null) { %><%= editorValue %><% } %>">
+            						<input type="hidden" class="form-control" id="data" name="data" value="">
             						
             						<div class="row">
             						<div class="col-xs-6"><div class="box box-primary">
@@ -70,7 +71,7 @@
                   						</div>
                 					</div>
                 					<div class="form-group">
-                  						<label class="control-label col-md-3" for="">Project</label>
+                  						<label class="control-label col-md-3" for="">Project<span class="required">*</span></label>
                   						<div class="col-md-6 col-lg-7">
                   							<select required="required" class="form-control col-md-5 col-xs-12" name="project" id="project"></select>
                   						</div>
@@ -103,10 +104,10 @@
     									<label for="" class="col-sm-3 control-label">Status</label>
     									<div class="col-sm-7" style="margin-top:6px;">
     										<div STYLE="margin-right:10px;display:inline-block;">
-      		  									<label> <input type="radio" id="Status" name="Status" value="1" <% if (typeof contentObj.Status !== 'undefined' && contentObj.Status !== null && contentObj.Status == 1) { %>checked<% } %> > <strong style="font-weight:600">Active</strong></label>
+      		  									<label> <input type="radio" id="status" name="status" value="1" <% if (typeof contentObj.status !== 'undefined' && contentObj.status !== null && contentObj.status == 1) { %>checked<% } %> > <strong style="font-weight:600">Active</strong></label>
     			  							</div>
 				  							<div STYLE="display:inline-block;">
-      		  									<label> <input type="radio" id="Status" name="Status" value="0" <% if (typeof contentObj.Status !== 'undefined' && contentObj.Status !== null && contentObj.Status == 0) { %>checked<% } %> > <strong style="font-weight:600">Inactive</strong></label>
+      		  									<label> <input type="radio" id="status" name="status" value="0" <% if (typeof contentObj.status !== 'undefined' && contentObj.status !== null && contentObj.status == 0) { %>checked<% } %> > <strong style="font-weight:600">Inactive</strong></label>
     			  							</div>
 										</div>
 									</div>
@@ -128,7 +129,7 @@
 										<label class="col-sm-3 control-label">Task Start </label>
 										<div class="col-md-8 col-lg-7">
 										<div class="input-group date form_datetime " style="max-width:300px;">
-                    						<input class="form-control col-md-5 col-xs-12" required type="text" id="start_date" name="start_date" value="<% if (typeof contentObj.start_date !== 'undefined' && contentObj.start_date !== null) { %><%= contentObj.start_date %><% } %>" readonly>
+                    						<input class="form-control col-md-5 col-xs-12" type="text" id="start_date" name="start_date" value="<% if (typeof contentObj.start_date !== 'undefined' && contentObj.start_date !== null) { %><%= contentObj.start_date %><% } %>" readonly>
                     						<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                 						</div>
                 						</div>
@@ -137,7 +138,7 @@
 										<label class="col-sm-3 control-label">Due Date </label>
 										<div class="col-md-6 col-lg-7">
 											<div class="input-group date form_datetime " style="max-width:300px;" >
-                    							<input class="form-control col-md-5 col-xs-12" required type="text" id="due_date" name="due_date" value="<% if (typeof contentObj.due_date !== 'undefined' && contentObj.due_date !== null) { %><%= contentObj.due_date %><% } %>" readonly>
+                    							<input class="form-control col-md-5 col-xs-12" type="text" id="due_date" name="due_date" value="<% if (typeof contentObj.due_date !== 'undefined' && contentObj.due_date !== null) { %><%= contentObj.due_date %><% } %>" readonly>
                     							<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                 							</div>
                             			</div>
@@ -171,7 +172,9 @@
 		<!-- Footer Ends Here-->
 </div>
 <!-- Page-Level Plugin Scripts-->
+<script src="js/jquery.validate.js"></script>
 <script type="text/javascript" src="plugins/datetime-picker/bootstrap-datetimepicker.js" charset="UTF-8"></script>
+
 <script type="text/javascript">
 	$('.form_datetime').datetimepicker({
 		weekStart: 1,
@@ -187,6 +190,35 @@
 
 $(function () {
 	load_projects();
+	// validate form on keyup and submit
+		$("#contentForm").validate({
+			ignore: "",
+			onkeyup: false,
+			errorClass: 'error',
+			validClass: 'valid',
+			errorElement: "em",
+			errorPlacement: function(error, element) {
+				$(element).closest('div').append(error);
+			},
+			onfocusout: false,
+			invalidHandler: function(form, validator) {
+				var errors = validator.numberOfInvalids();
+				
+				if (errors) {                    
+					validator.errorList[0].element.focus();
+				}
+			},
+			rules: {
+				name: { required: true },
+				reported_by: { required: true },
+				project: { required: true },
+				assigned_to: { required: true }
+			},
+			submitHandler: function(form) {
+				//save data as json in data field, use dataAsJson function to populate that field
+ 				dataAsJson('contentForm', form);
+ 			}
+		});	
 });
 function load_projects(){
 		var jsonRow=backendDirectory+"/api_fetch_list?start=0&limit=100&collection=projects";

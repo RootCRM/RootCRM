@@ -41,12 +41,13 @@
             							</div>
             						<%	}
             					}	%>
-            					<form class="form-horizontal" action="<%= backendDirectory %>/save/system_template" method="POST">
+            					<form class="form-horizontal" action="<%= backendDirectory %>/save/system_template" method="POST" id="contentForm">
             						<input type="hidden" class="form-control" id="table_name" name="table_name" value="system_templates">
       								<input type="hidden" class="form-control" id="unique_field" name="unique_field" value="code">
       								<input type="hidden" class="form-control" id="editorField" name="editorField" value="<% if (typeof editorField !== 'undefined' && editorField !== null) { %><%= editorField %><% }else{ %>_id<% } %>">
       								<input type="hidden" class="form-control" id="editorValue" name="editorValue" value="<% if (typeof editorValue !== 'undefined' && editorValue !== null) { %><%= editorValue %><% } %>">
       								<input type="hidden" class="form-control" id="id" name="id" value="<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %><%= contentObj._id %><% } %>">
+            						<input type="hidden" class="form-control" id="data" name="data" value="">
             						
               						<div class="form-group">
                   						<label class="control-label col-md-3" for="">Code<span class="required">*</span></label>
@@ -55,13 +56,13 @@
                   						</div>
                   						
                   						<% if (typeof contentObj.code !== 'undefined' && contentObj.code !== null) { %>
-                  						<div class="col-md-6 col-lg-4">
+                  						<div class="col-md-6 col-lg-4" style="padding-top:5px;overflow: hidden;">
                   							<a class="btn btn-primary btn-color margin-right-5 btn-sm" href="<%= backendDirectory %>/list/<%= contentObj.code %>" target="_blank">View Page</a>
                   						</div>
                   						<% } %>
                 					</div>
                 					<div class="form-group">
-                  						<label class="control-label col-md-3" for="">Content<span class="required">*</span></label>
+                  						<label class="control-label col-md-3" for="">Table<span class="required">*</span></label>
                   						<div class="col-md-6 col-lg-4">
                    							<select id="table" name="table" class="form-control col-md-5 col-xs-12" required="required">
                    								<option value="">--Select Table--</option>
@@ -73,7 +74,7 @@
                   								} %>
                     						</select>
                    						</div>
-                   						<div class="col-md-6 col-lg-4">
+                   						<div class="col-md-6 col-lg-3">
                    							<!--<label class="checkbox" STYLE="float:left; margin-right:10px;">
                                                 <span class="icons"><span class="first-icon fa fa-square-o"></span><span class="second-icon fa fa-check-square-o"></span></span><input value="" data-toggle="checkbox" type="checkbox" id="status" name="status" value="1" <% if (typeof contentObj.status !== 'undefined' && contentObj.status !== null && contentObj.status == 1) { %>checked<% } %> > <strong style="font-weight:600">Active</strong>
                                             </label>-->
@@ -81,6 +82,10 @@
       		  									<label> <input type="checkbox" id="status" name="status" value="1" <% if (typeof contentObj.status !== 'undefined' && contentObj.status !== null && contentObj.status == 1) { %>checked<% } %> > <strong style="font-weight:600">Active</strong></label>
     			  							</div>
 				  						</div>
+				  						<!--
+				  						<div class="col-md-6 col-lg-2">
+                   							<button type="button" class="btn btn-primary btn-color margin-right-5 btn-sm">Add a new table</button>
+				  						</div>-->
                 					</div>
                 					<div class="form-group">
                   						<label class="control-label col-md-3" for="">Type <span class="required">*</span></label>
@@ -172,7 +177,31 @@
 <!--//Main Content--> 
 <!-- Page-Level Plugin Scripts-->
 <script src="plugins/jquery-ui.min.js"></script>
+<script src="js/jquery.validate.js"></script>
 <script>
+function returnAllCollections(){
+	$("#table").html('');
+	var jsonRow=backendDirectory+"/api_fetch_collections";
+	var sVal="<% if (typeof contentObj.table !== 'undefined' && contentObj.table !== null) { %><%= contentObj.table %><% } %>";
+	
+		$.getJSON(jsonRow,function(aaData){
+			var contentHtml="<option value=''>--Select--</option>";
+			if(aaData.length>0){
+					$.each(aaData, function(i,row){
+						contentHtml+="<option value='"+row+"' ";
+						if(sVal==row){
+							contentHtml+="selected";
+						}
+						contentHtml+=" >"+row+"</option>";
+					});
+     		}
+			$("#table").html(contentHtml);
+			<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %>
+				table_options();
+			<% } %>
+		});
+}
+
 function __chooseDetailView(){
 	var e=$("#template_type").val();
 	if(e=="list_view"){
@@ -204,7 +233,11 @@ function table_options(){
 				
 				<% if (typeof contentObj.search_columns !== 'undefined' && contentObj.search_columns !== null && contentObj.search_columns !== "") { %>
 					var tempselectedSearchArr=<%- JSON.stringify(contentObj.search_columns) %>;
-					var selectedSearchArr = JSON.parse(tempselectedSearchArr);
+					if(typeof(tempselectedSearchArr)=="object" || typeof(tempselectedSearchArr)=="array"){
+						var selectedSearchArr = tempselectedSearchArr;
+					}	else	{
+						var selectedSearchArr = JSON.parse(tempselectedSearchArr);
+					}
 				<% } %>
 				
 				<% if (typeof contentObj.editor_field !== 'undefined' && contentObj.editor_field !== null && contentObj.editor_field !== "") { %>
@@ -276,39 +309,8 @@ function table_options(){
 }
 
 $(document).ready(function() {
+	returnAllCollections();
 	$("#template_type").trigger('change');
-	
-	$('.save_exit').on("click", function(){
-		var selectedSearchFieldsArr=new Array;
-		var selectedIndexFieldsArr=new Array;
-		var i=0, j=0;
-		$('.search_fields').each(function(){
-			var valStr= $(this).val();
-			if( $('#search_fields_'+valStr+':checked').length ){
-				var searchClause= $("#"+valStr+"_clause").val();
-				var searchObj={};
-				searchObj[valStr]= searchClause;
-				selectedSearchFieldsArr[i]= searchObj;
-				selectedIndexFieldsArr[i]=valStr;
-				i++;
-			}
-		});
-		var selectedSearchFieldsStr= JSON.stringify(selectedSearchFieldsArr);
-		$("#search_columns").val(selectedSearchFieldsStr);
-		
-		$("#index_columns").val(JSON.stringify(selectedIndexFieldsArr));
-		
-		var selectedListFieldsArr=new Array();
-		$('.list_fields').each(function(){
-			var valStr= $(this).val();
-			if( $('#list_fields_'+valStr+':checked').length ){
-				selectedListFieldsArr[j]= valStr;
-				j++;
-			}
-		});
-		var selectedListFieldsStr= selectedListFieldsArr.join();
-		$("#listing_columns").val(selectedListFieldsStr);
-	});
 	
 	$(document).on("click","#all_list_field",function(e){
 		if( $('#all_list_field:checked').length ){
@@ -336,14 +338,69 @@ $(document).ready(function() {
 			}
 		});
 	});	
-	<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %>
-		table_options();
-	<% } %>
-	
-	
+		
 	$('#table').change(function(){
 		table_options();
 	});		
+	
+	// validate form on keyup and submit
+		$("#contentForm").validate({
+			ignore: "",
+			onkeyup: false,
+			errorClass: 'error',
+			validClass: 'valid',
+			errorElement: "em",
+			errorPlacement: function(error, element) {
+				$(element).closest('div').append(error);
+			},
+			onfocusout: false,
+			invalidHandler: function(form, validator) {
+				var errors = validator.numberOfInvalids();
+				if (errors) {                    
+					validator.errorList[0].element.focus();
+				}
+			},
+			rules: {
+				code: { required: true },
+				table: { required: true },
+				template_type: { required: true },
+				editor_filename: { required: true }
+			},
+			submitHandler: function(form) {
+				var selectedSearchFieldsArr=new Array;
+				var selectedIndexFieldsArr=new Array;
+				var i=0, j=0;
+				$('.search_fields').each(function(){
+					var valStr= $(this).val();
+					if( $('#search_fields_'+valStr+':checked').length ){
+						var searchClause= $("#"+valStr+"_clause").val();
+						var searchObj={};
+						searchObj[valStr]= searchClause;
+						selectedSearchFieldsArr[i]= searchObj;
+						selectedIndexFieldsArr[i]=valStr;
+						i++;
+					}
+				});
+				var selectedSearchFieldsStr= JSON.stringify(selectedSearchFieldsArr);
+				$("#search_columns").val(selectedSearchFieldsStr);
+		
+				$("#index_columns").val(JSON.stringify(selectedIndexFieldsArr));
+		
+				var selectedListFieldsArr=new Array();
+				$('.list_fields').each(function(){
+					var valStr= $(this).val();
+					if( $('#list_fields_'+valStr+':checked').length ){
+						selectedListFieldsArr[j]= valStr;
+						j++;
+					}
+				});
+				var selectedListFieldsStr= selectedListFieldsArr.join();
+				$("#listing_columns").val(selectedListFieldsStr);
+				
+				//save data as json in data field, use dataAsJson function to populate that field
+ 				dataAsJson('contentForm', form);
+ 			}
+		});	
 });
 
 </script>

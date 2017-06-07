@@ -27,10 +27,10 @@ font-size: 20px;
   		<div class="content-wrapper">
     		<!-- Content Header (Page header) -->
     		<section class="content-header">
-      			<h1> <% if (typeof contentObj.name !== 'undefined' && contentObj.name !== null) { %><%= contentObj.name %><% } else{	%>Add new<% }%><small>Project</small></h1>
+      			<h1> <% if (typeof contentObj.name !== 'undefined' && contentObj.name !== null) { %><%= contentObj.name %><% } else{	%>Add new<% }%><small>Company</small></h1>
       			<ol class="breadcrumb">
         			<li><a href="<%= backendDirectory %>/index"><i class="fa fa-dashboard"></i> Home</a></li>
-        			<li class="active">Project</li>
+        			<li class="active">Company</li>
       			</ol>
     		</section>
     		<!-- Main content -->
@@ -68,6 +68,7 @@ font-size: 20px;
       								<input type="hidden" class="form-control" id="id" name="id" value="<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %><%= contentObj._id %><% } %>">
       								<input type="hidden" class="form-control" id="editorField" name="editorField" value="<% if (typeof editorField !== 'undefined' && editorField !== null) { %><%= editorField %><% }else{ %>_id<% } %>">
       								<input type="hidden" class="form-control" id="editorValue" name="editorValue" value="<% if (typeof editorValue !== 'undefined' && editorValue !== null) { %><%= editorValue %><% } %>">
+            						<input type="hidden" class="form-control" id="data" name="data" value="">
             						
 									<div class="row" STYLE="margin-top:10px;">
 										<div class="col-xs-6">
@@ -436,6 +437,7 @@ function savenote(uuid,actionStr, note){
 		<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %>
 		fetchNotes();
 		<%	}	%>
+		
 		// validate form on keyup and submit
 		$("#contentForm").validate({
 			ignore: "",
@@ -458,6 +460,9 @@ function savenote(uuid,actionStr, note){
 				account_Number: { required: true },
 				address_line_1: { required: true }
 			},
+			submitHandler: function(form) {
+ 				dataAsJson('contentForm', form);
+ 			}
 		});			
 		
             // datepicker plugin

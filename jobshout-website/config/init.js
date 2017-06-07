@@ -22,5 +22,5 @@
     	mongodb : mongodbRe,
     	MongoClient : MongoClient,
     	mongoConnUrl : url,
-    	port : 3000
+    	port : 3002
 	};

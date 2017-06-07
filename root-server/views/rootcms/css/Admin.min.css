@@ -324,7 +324,8 @@ color:#ccc
 	font-size: 15px;
 	display: inline-block;
 	padding-left: 4px;
-	font-weight: 300
+	font-weight: 500;
+	color: #3c8dbc;
 }
 .content-header>.breadcrumb {
 	float: right;
@@ -2046,6 +2047,7 @@ opacity:1
 border-bottom: 3px solid #038bc8;
 border-top:none;
 border-left:none;
+/**margin-top: 10px;**/
 }
 .btn-primary:hover, .btn-primary:active, .btn-primary.hover {
 	background-color: #05a2e9;
@@ -4904,8 +4906,22 @@ table > tbody > tr > td {
 }
 
 
+.active2{
+	 background-color:#0456AE;
+	 color:#fff;
+ }
+ 
+ .active2 a{
+color:#fff!important;
+ }
+ 
+  .active2 a:hover{
+	  color:#000000!important;
+
+  }
 
 
-
-
+.pdngtp10{
+	padding-top:10px;
+}
 

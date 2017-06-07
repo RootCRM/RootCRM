@@ -28,8 +28,7 @@ if (typeof authenticatedUser !== 'undefined' && authenticatedUser !== null) {
         <div class="input-group">
           <input type="text" id="menuSearchBox" class="form-control" placeholder="Search...">
               <span class="input-group-btn">
-                <button type="submit" id="search-btn" class="btn btn-flat" STYLE="border-left:none;line-height: 12px;"><i class="fa fa-search"></i>
-                </button>
+                <button id="search-btn" class="btn btn-flat" STYLE="border-left:none;line-height: 12px;" onClick="load_navigation_data(); return false;"><i class="fa fa-search"></i></button>
               </span>
         </div>
       </form>

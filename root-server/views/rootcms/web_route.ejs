@@ -24,11 +24,12 @@
     		<section class="content">	
     		   				<div class="row">
             				<div class="col-sm-12">
-            					<form class="form-horizontal" action="<%= backendDirectory %>/save/web_route" method="POST">
+            					<form class="form-horizontal" action="<%= backendDirectory %>/save/web_route" method="POST" id="contentForm">
             						<input type="hidden" class="form-control" id="table_name" name="table_name" value="web_routes">
       								<input type="hidden" class="form-control" id="unique_field" name="unique_field" value="route_url">
       								<input type="hidden" class="form-control" id="id" name="id" value="<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %><%= contentObj._id %><% } %>">
-      								
+      								<input type="hidden" class="form-control" id="data" name="data" value="">
+            						
       								<input type="hidden" class="form-control" id="editorField" name="editorField" value="<% if (typeof editorField !== 'undefined' && editorField !== null) { %><%= editorField %><% }else{ %>_id<% } %>">
       								<input type="hidden" class="form-control" id="editorValue" name="editorValue" value="<% if (typeof editorValue !== 'undefined' && editorValue !== null) { %><%= editorValue %><% } %>">
       								
@@ -71,10 +72,10 @@
     									<div class="col-sm-9">
     										
     										<div class="radio" STYLE="float:left; margin-right:10px;">
-      		  									<label> <input type="radio" id="Status" name="Status" value="1" <% if (typeof contentObj.Status !== 'undefined' && contentObj.Status !== null && contentObj.Status == 1) { %>checked<% } %> > <strong style="font-weight:600">Active</strong></label>
+      		  									<label> <input type="radio" id="status" name="status" value="1" <% if (typeof contentObj.status !== 'undefined' && contentObj.status !== null && contentObj.status == 1) { %>checked<% } %> > <strong style="font-weight:600">Active</strong></label>
     			  							</div>
 				  							<div class="radio" STYLE="float:left;">
-      		  									<label> <input type="radio" id="Status" name="Status" value="0" <% if (typeof contentObj.Status !== 'undefined' && contentObj.Status !== null && contentObj.Status == 0) { %>checked<% }else if(typeof contentObj.Status !== 'undefined' && contentObj.Status !== null && contentObj.Status == 1){ }else{	%>checked<% } %> > <strong style="font-weight:600">Inactive</strong></label>
+      		  									<label> <input type="radio" id="status" name="status" value="0" <% if (typeof contentObj.status !== 'undefined' && contentObj.status !== null && contentObj.status == 0) { %>checked<% }else if(typeof contentObj.status !== 'undefined' && contentObj.status !== null && contentObj.status == 1){ }else{	%>checked<% } %> > <strong style="font-weight:600">Inactive</strong></label>
     			  							</div>
 										</div>
 									</div>

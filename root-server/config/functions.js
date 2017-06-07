@@ -14,12 +14,13 @@
 	
 	var init = require('./init');
 	var mongodb=init.mongodb;
-
+	var nodemailer = require('nodemailer');
+	
 var self = module.exports = 
 {
   // These functions which will be called in the main file, which is server.js
   	
-  	templateSearch : function (db, templateStr, req, cb){
+  	templateSearch : function (db, templateStr, activeSystemsStr, req, cb){
      	var itemsPerPage = 10, pageNum=1;
 		var outputObj = new Object();
 	
@@ -40,9 +41,17 @@ var self = module.exports =
 					pageNum=1;
 				}
 				
-				var query="{}", fetchFieldsObj="{}", table_name= templateResponse.table ;
+				var definedAdminTablesArr= init.adminTablesArr;
+				
+				var query="{";
+				var fetchFieldsObj="{}", table_name= templateResponse.table ;
 				
 				outputObj["table"]   = table_name;
+				
+				if(definedAdminTablesArr.indexOf(table_name)==-1){
+					//query+=" 'uuid_system': { $in: ['"+activeSystemsStr+"'] } ";
+					query+=" $or: [ { 'uuid_system' : { $in: ['"+activeSystemsStr+"'] } }, { 'shared_systems': { $in: ['"+activeSystemsStr+"'] } } ] ";
+				}
 				
 				if (typeof templateResponse.search_columns !== 'undefined' && templateResponse.search_columns !== null && templateResponse.search_columns !== "")	{
 					outputObj["enable_search"]   = true;
@@ -73,11 +82,14 @@ var self = module.exports =
 				}
 				
 				if(req.query.s){
-					query= '{'
 					var searchStr = req.query.s;
 					
 					if(templateResponse.search_columns){
-						var searchColumnArr=JSON.parse(templateResponse.search_columns);
+						if(typeof(templateResponse.search_columns)==="array" || typeof(templateResponse.search_columns)==="object"){
+							var searchColumnArr=templateResponse.search_columns;
+						}else{
+							var searchColumnArr=JSON.parse(templateResponse.search_columns);
+						}
 						if(searchColumnArr.length>=1){
 							
 							var subQueryStr="";
@@ -110,6 +122,9 @@ var self = module.exports =
     							} 
 							}
 							if(subQueryStr!=""){
+								if(query!="{") {
+									query+= ', ';
+								}
 								if(templateResponse.search_condition=="and" || templateResponse.search_condition=="AND" ){
 									query+= '$and:[';
 								}else{
@@ -120,36 +135,44 @@ var self = module.exports =
 							}
 						}
 					}
-					query+="}";
+					
 				}
-				
+				query+="}";
 				if(templateResponse.listing_columns){
 					eval('var obj='+query);
 					eval('var fetchFieldsobj='+fetchFieldsObj);
 					var total_records=0;
 					var coll= db.collection(table_name);
+					
+					if(req.query.s){
+						coll.createIndex({ "$**": "text" },{ name: "TextIndex" });
+					}
 					coll.find(obj).count(function (e, count) {
       					total_records= count;
-     				});
-     	
-					coll.find(obj, fetchFieldsobj).sort({Modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
+      				});
+     				
+					coll.find(obj, fetchFieldsobj).sort({modified: -1}).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, items) {
 						if (err) {
 							outputObj["total"]   = 0;
-      						outputObj["error"]   = 'not found';
+							outputObj["iTotalRecordsReturned"]   = 0;
+      						outputObj["error"]   = 'Error, please inform developer to fix this!';
 							cb(outputObj);
       					} else if (items) {
       						outputObj["total"]   = total_records;
+      						outputObj["iTotalRecordsReturned"]   = items.length;
       						outputObj["aaData"]   = items;
 							cb(outputObj);
      					}
 					});
 				}else{
 					outputObj["total"]   = 0;
+					outputObj["iTotalRecordsReturned"]   = 0;
       				outputObj["error"]   = 'No columns to display!';
 					cb(outputObj);
 				}
       		}else{
 				outputObj["total"]   = 0;
+				outputObj["iTotalRecordsReturned"]   = 0;
       			outputObj["error"]   = "No such page exists!";
 				cb(outputObj);
 			}
@@ -158,22 +181,30 @@ var self = module.exports =
 	
 	returnFindOneByMongoID : function (db, collectionName, search_id, cb){
 		var outputObj = new Object();
-		db.collection(collectionName).findOne({_id: new mongodb.ObjectID(search_id)}, function(err, document_details) {
-			if (err) {
-				outputObj["error"]   = err;
-				cb(outputObj);
-      		} else if (document_details) {
-      			outputObj["aaData"]   = document_details;
-				cb(outputObj);
-     		}
-		});
+		if(search_id!="" && search_id!="undefined" && search_id!=null){
+			db.collection(collectionName).findOne({_id: new mongodb.ObjectID(search_id)}, function(err, document_details) {
+				if (err) {
+					outputObj["error"]   = err;
+					cb(outputObj);
+      			} else if (document_details) {
+      				outputObj["aaData"]   = document_details;
+      				cb(outputObj);
+     			}
+     		});
+		}else{
+			outputObj["error"]   = "Invalid id passed";
+			cb(outputObj);
+		}
 	},
 	
 	createIndexes : function (db, collectionName, columnsArr, cb){
 		var outputObj = new Object();
 		var fetchFieldsObj="";
-		columnsArr = columnsArr.replace(/'/g, '"');
-		columnsArr = JSON.parse(columnsArr);
+		if(typeof(columnsArr)!=="object"){
+			columnsArr = columnsArr.replace(/'/g, '"');
+			columnsArr = JSON.parse(columnsArr);
+		}
+		
 		if(columnsArr.length>0){
 			for(var l_count=0; l_count< columnsArr.length; l_count++){
 				if(l_count==0){
@@ -187,21 +218,166 @@ var self = module.exports =
 				fetchFieldsObj+="}";
 				
 				eval('var fetchFieldsobj='+fetchFieldsObj);
-				console.log(fetchFieldsobj);
 				db.collection(collectionName).createIndex(fetchFieldsobj);
 			}
 		}
 	},
 	
+	crudOpertions: function(db, collectionStr, actionStr, postContent, uniqueFieldNameStr, uniqueFieldValueStr, checkForExistenceStr, cb){
+		var outputObj = new Object();
+		
+		for(var key in postContent) {
+			var contentStr=postContent[key];
+			if(typeof(contentStr)=="string")	{
+				if(contentStr.charAt(0)=="["){
+					try{
+        				postContent[key]=JSON.parse(contentStr);
+        			}
+    				catch (error){
+       					postContent[key]=contentStr;
+    				}
+				}	
+			}else{
+				postContent[key]=contentStr;
+			}		
+		}
+		if (typeof checkForExistenceStr !== 'undefined' && checkForExistenceStr != "null" && checkForExistenceStr !== null && checkForExistenceStr!=""){
+			var checkForExistenceObj=checkForExistenceStr;
+		}else if((uniqueFieldNameStr!="" && uniqueFieldValueStr!="") || (uniqueFieldNameStr!=null && uniqueFieldValueStr!=null)){
+			var checkForExistenceObj= '{'+uniqueFieldNameStr +': \''+uniqueFieldValueStr+'\'}';
+			if(postContent && (postContent!=="" || postContent!==null) && (postContent['uuid_system'] && postContent['uuid_system']!= "")){
+				checkForExistenceObj= '{'+uniqueFieldNameStr +': \''+uniqueFieldValueStr+'\', "uuid_system" : \''+postContent['uuid_system']+'\'}';
+			}
+		}
+				
+		//if(uniqueFieldNameStr!="" && uniqueFieldValueStr!=""){
+		if(checkForExistenceObj!="" && checkForExistenceObj!=null){
+			if(postContent!="" && postContent!=null){
+				postContent.modified=self.currentTimestamp();
+			}
+			eval('var findStr='+checkForExistenceObj);
+						
+			switch (actionStr) {
+    			case 'findOne':
+        			db.collection(collectionStr).findOne(findStr, function(searchErr, document) {
+        				if (searchErr) {
+							outputObj["error"]   = searchErr;
+							cb(outputObj);
+      					} else if(document){
+      						outputObj["success"] = "OK";
+      						outputObj["aaData"] = document;
+      						cb(outputObj);
+      					}else{
+      						outputObj["error"]   = "No results found!";
+							cb(outputObj);
+      					}
+					});
+        			break;
+        		case 'create':
+        			db.collection(collectionStr).findOne(findStr, function(searchErr, document) {
+        				if (searchErr) {
+        					outputObj["error"]   = "Error occurred while saving ["+searchErr+"], please try after some time!";
+							cb(outputObj);
+      					}else if(document){
+      						outputObj["error"] = "This "+uniqueFieldValueStr+" already exists!"
+      						cb(outputObj);
+      					}else{
+      						postContent.created=self.currentTimestamp();
+      						postContent.uuid=self.guid();
+      						db.collection(collectionStr).save(postContent, (err4, result) => {
+      							if (err4) outputObj["error"]  = "Error occurred while saving ["+err4+"], please try after some time!";
+    							outputObj["success"]  = "Saved successfully!";
+    							if(result && result["ops"][0]["_id"]){
+    								outputObj["_id"]  = result["ops"][0]["_id"];
+    							}
+    							cb(outputObj);
+  							});
+      					}
+					});
+        			break;
+    			case 'update':
+    				db.collection(collectionStr).findOne(findStr, function(searchErr, document) {
+        				if(document){
+        					if(document.created){
+								postContent["created"]=document.Created;
+							}else{
+								postContent['created']=self.currentTimestamp();
+							}
+							if(document.uuid){
+								postContent["uuid"]=document.uuid;
+							}else{
+								postContent['uuid']=self.guid();
+							}
+      						db.collection(collectionStr).update(findStr, postContent, (err1	, result) => {
+    							if (err1) outputObj["error"]="Error occurred while updating ["+err1+"], please try after some time!";
+    							outputObj["success"]= "Updated successfully!";
+    							cb(outputObj);
+  							});
+						}else{
+							outputObj["error"]   = "Error occurred while updating ["+searchErr+"], please try after some time!";
+							cb(outputObj);
+						}
+					});
+       				break;
+       			case 'delete':
+       				db.collection(collectionStr).findOne(findStr, function(searchErr, document) {
+       					if(document){
+							db.collection(collectionStr).remove(findStr, function(err, result){
+    							if (err) outputObj["error"]="Error occurred while deleting ["+err+"], please try after some time!";
+    							outputObj["success"]="Deleted successfully!";
+    							cb(outputObj);
+  							});
+						}else {
+							outputObj["error"]   = "Error occurred while deleting, please try after some time!";
+							cb(outputObj);
+						}
+					});
+       				break;
+    			default:
+        			outputObj["error"]   = "Please specify the action!";
+					cb(outputObj);
+			}
+		}else if(actionStr=='create'){
+			postContent.created=self.currentTimestamp();
+			postContent.uuid=self.guid();
+      		db.collection(collectionStr).save(postContent, (err4, result) => {
+      			if (err4) outputObj["error"]  = "Error occurred while saving ["+err4+"], please try after some time!";
+    			outputObj["success"]  = "Saved successfully!";
+    			outputObj["_id"]  = result["ops"][0]["_id"];
+    			cb(outputObj);
+  			});
+      	}else{
+			outputObj["error"]   = "Please specify unique field name and its value!";
+			cb(outputObj);
+		}
+	},
+	
 	saveEntry : function(db, table_nameStr, checkForExistence, postContent, parameterStr, findmongoID, unique_fieldStr, unique_fieldVal, cb){
+		for(var key in postContent) {
+			var contentStr=postContent[key];
+			if(contentStr.charAt(0)=="["){
+				try{
+        			postContent[key]=JSON.parse(contentStr);
+        		}
+    			catch (error){
+       				postContent[key]=contentStr;
+    			}
+			}			
+		}
+		
 		var link="";
+		postContent['modified']=self.currentTimestamp();
 		
 		db.collection(table_nameStr).findOne({_id : findmongoID}, function(err, existingDocument) {
 			var checkForExistenceObj=checkForExistence;	
 			if (existingDocument) {
 				if (typeof checkForExistenceObj === 'undefined' || checkForExistenceObj === null || checkForExistenceObj==""){
 					checkForExistenceObj= '{'+unique_fieldStr +': \''+unique_fieldVal+'\'}';
+					if(postContent['uuid_system'] && postContent['uuid_system']!= ""){
+						checkForExistenceObj= '{'+unique_fieldStr +': \''+unique_fieldVal+'\', "uuid_system" : \''+postContent['uuid_system']+'\'}';
+					}
 				}
+				
 				eval('var findObj='+checkForExistenceObj);
 				
 				db.collection(table_nameStr).find(findObj, {"_id" : 1}).toArray(function(err, items) {
@@ -217,44 +393,71 @@ var self = module.exports =
 						link+="error_msg=This "+parameterStr+" already exists!"
       					cb(link);
 					}else{
-						if(existingDocument.Created){
-							postContent["Created"]=existingDocument.Created;
+						if(existingDocument.created){
+							postContent["created"]=existingDocument.created;
 						}else{
-							postContent['Created']=self.currentTimestamp();
+							postContent['created']=self.currentTimestamp();
+						}
+						if(existingDocument.uuid){
+							postContent["uuid"]=existingDocument.uuid;
+						}else{
+							postContent['uuid']=self.guid();
 						}
       					db.collection(table_nameStr).update({_id:findmongoID}, postContent, (err1	, result) => {
-    						if (err1) link+="error_msg=Error occurred while saving ["+err1+"], please try after some time!";
-    						link+="success_msg=Updated successfully!";
+    						if (err1){
+    							link+="error_msg=Error occurred while saving ["+err1+"], please try after some time!";	
+    						}else{
+    							link+="success_msg=Updated successfully!";
+    						}
     						cb(link);
   						});
 					}
 				});
 			} else{
 				if (typeof checkForExistenceObj === 'undefined' || checkForExistenceObj === null || checkForExistenceObj==""){
-					var checkForExistenceObj= '{'+unique_fieldStr +': \''+unique_fieldVal+'\'}';
+					checkForExistenceObj= '{'+unique_fieldStr +': \''+unique_fieldVal+'\'}';
+					if(postContent['uuid_system'] && postContent['uuid_system']!= ""){
+						checkForExistenceObj= '{'+unique_fieldStr +': \''+unique_fieldVal+'\', "uuid_system" : \''+postContent['uuid_system']+'\'}';
+					}
 				}
-				eval('var findStr='+checkForExistenceObj);
 				
-				db.collection(table_nameStr).findOne(findStr, function(err3, document) {
-					if (err3) {
-        				if (err3) link+="error_msg=Error occurred while saving ["+err3+"], please try after some time!";
+				self.crudOpertions(db, table_nameStr, 'create', postContent, unique_fieldStr, unique_fieldVal, checkForExistenceObj,function(result) {
+					if(result.error){
+						link+="error_msg="+result.error;
       					cb(link);
-      				}else if(document){
-      					link+="error_msg=This "+parameterStr+" already exists!"
-      					cb(link);
-      				}else{
-      					postContent['Created']=self.currentTimestamp();
-      					db.collection(table_nameStr).save(postContent, (err4, result) => {
-      						if (err4) link+="&error_msg=Error occurred while saving ["+err4+"], please try after some time!";
-    						link+="success_msg=Saved successfully!";
-    						cb(link);
-  						});
+					}else if(result.success){
+						link+="_id="+result._id+"&success_msg="+result.success;
+						cb(link);
       				}
 				});
 			}	
 		});
+		
 	},
 	
+	saveSessionBeforeLogin : function(db, user_id, systems_access, cb){
+		var outputObj = new Object();
+		db.collection('sessions').save({"user_id": new mongodb.ObjectID(user_id), "status" : true, "active_system_uuid" : systems_access}, (err, result) => {
+			if (result){
+				db.collection('systems').find({}).count(function (e, count) {
+					if(count==0){
+      					outputObj["cookie"]   = result["ops"][0]["_id"];
+      					outputObj["link"]   = '/default_system';
+      					outputObj["success"]   = 'OK';
+      					cb(outputObj);
+      				}else{
+      					outputObj["cookie"]   = result["ops"][0]["_id"];
+      					outputObj["link"]   = '/index';
+      					outputObj["success"]   = 'OK';
+      					cb(outputObj);
+      				}
+     			});
+      		}else{
+      			outputObj["error"]   = 'no';
+      			cb(outputObj);
+    		}
+  		});
+	},
 	currentTimestamp : function (){
 		var timeStampStr=Math.round(new Date().getTime()/1000)
 		return timeStampStr;
@@ -268,7 +471,7 @@ var self = module.exports =
 	},
 	
 	returnActiveCategories : function (db, cb){
-		db.collection('categories').find({"Status": { $in: [ 1, "1" ] } }, {"name" : 1, "code" : 1}).toArray(function(err, tokens_result) {
+		db.collection('categories').find({"status": { $in: [ 1, "1" ] } }, {"name" : 1, "code" : 1}).toArray(function(err, tokens_result) {
 			if(err) return cb(null)
 			cb(tokens_result);
 		});
@@ -296,38 +499,24 @@ var self = module.exports =
   		return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 	},
 	
+	// every time add a entry page for a table please create a entry here, mention the page name as "filename" and its related collection name 
+	// (This is hard coded right now, will make this option dynamic from system_templates)
 	fetchTableName : function (filename){
 		var table_name="";
 		if(filename=="document"  || filename=="document_list" || filename=="documents_test"){
 			table_name="documents";
-		}else if(filename=="template" || filename=="templates"){
-			table_name="templates";
-		}else if(filename=="token" || filename=="tokens"){
-			table_name="tokens";
-		}else if(filename=="web_route" || filename=="web_routes"){
-			table_name="web_routes";
 		}else if(filename=="category" || filename=="categories"){
 			table_name="categories";
-		}else if(filename=="bookmark" || filename=="bookmarks"){
-			table_name="bookmarks";
 		}else if(filename=="emails" || filename=="email"){
 			table_name="email_queue";
-		}else if(filename=="users" || filename=="user"){
-			table_name="users";
-		}else if(filename=="contacts" || filename=="contact"){
-			table_name="contacts";
-		}else if(filename=="system_templates" || filename=="system_template"){
-			table_name="system_templates";
-		}else if(filename=="leads" || filename=="lead"){
-			table_name="leads";
-		}else if(filename=="modules" || filename=="module"){
-			table_name="modules";
 		}else if(filename=="task" || filename=="calendar" || filename=="test"){
 			table_name="tasks";
-		}else if(filename=="project"){
-			table_name="projects";
 		}else if(filename=="customer"){
 			table_name="Companies";
+		}else if(filename=="venue"){
+			table_name="venue";
+		}else{
+			table_name=filename+"s";
 		}
 		return table_name;
 	},
@@ -341,5 +530,183 @@ var self = module.exports =
    			}
 			return cb(allKeys);
 		});
+	},
+	
+	send_email : function (db, from_email, sender_name, to_email, subject, plaintext, htmlContent, cb){
+  		var outputObj = new Object();
+  		
+  		var emailApiUsername = process.env.emailApiUsername;
+  		var emailApiHost = process.env.emailApiHost;
+  		        
+		var emailLinkStr= 'smtps://'+emailApiUsername+':'+emailApiHost;
+		
+		// create reusable transporter object using the default SMTP transport 
+		var transporter = nodemailer.createTransport(emailLinkStr);
+
+		// setup e-mail data with unicode symbols 
+		var mailOptions = {
+    		from: from_email, // sender address 
+    		to: to_email, // list of receivers 
+    		subject: subject, // Subject line 
+   			text: plaintext, // plaintext body 
+    		html: htmlContent // html body 
+		};
+ 
+		// send mail with defined transport object 
+		transporter.sendMail(mailOptions, function(error, info){
+			var insertEmail=new Object();
+			insertEmail["sender_name"]=sender_name;
+			insertEmail["sender_email"]=to_email;
+			insertEmail["subject"]=subject;
+			insertEmail["body"]=plaintext;
+			insertEmail["created"]=self.currentTimestamp();
+			insertEmail["modified"]=self.currentTimestamp();
+			insertEmail["recipient"]=from_email;
+  			
+  			if(error){
+        		outputObj["error"]   = error;
+        		insertEmail["status"]=0;
+    		}	else	{
+    			outputObj["success"]   = info.response;
+    			insertEmail["status"]=-1;
+    		}
+    		self.crudOpertions(db, 'email_queue', 'create', insertEmail, null, null, null,function(email_response) {
+				cb(outputObj);
+			});
+			
+		});
+	},
+	
+	// this function is used to add/update entry in notifications table
+	// notify_to means user mongo _id
+	// read_status 0 means unread, 1 means read
+	// link_id will be used to redirect to that page	
+	send_notification : function (db, uniqueId, notify_to, message_type, message, read_status, table_name, table_id, cb){
+  		var outputObj = new Object();
+  		
+  		var tablenameStr='notifications';
+  		var postContentArr={};
+  		postContentArr["notify_to"]= new mongodb.ObjectID(notify_to);
+  		postContentArr["message_type"]= message_type;
+  		postContentArr["read_status"]= read_status;
+  		postContentArr["message"]= message;
+  		postContentArr["collection_link_id"]= table_id;
+  		postContentArr["collection_linked"]= table_name;
+  		
+  		self.returnFindOneByMongoID(db, tablenameStr, uniqueId, function(result) {
+  			if(result.error){
+  				//add new entry
+  				postContentArr["created"]= self.currentTimestamp();
+  				self.crudOpertions(db, tablenameStr, 'create', postContentArr, null, null, null, function(email_response) {
+					cb(email_response);
+				});
+  			}	else if(result.aaData){
+  				//update entry
+  				db.collection(tablenameStr).update({_id:new mongodb.ObjectID(uniqueId)}, postContentArr, (err, response) => {
+    				if (response){
+    					outputObj["success"]   = "Updated notification";
+					}else{
+    					outputObj["error"]   = "Sorry, some error occurred, please try after sometime!";
+    				}
+    				cb(outputObj);
+  				});
+  			}
+		});
+	},
+	
+	form_fixtures_history_obj : function (db, eventDetails, cb){
+		var outputObj = new Object();
+		if(eventDetails)	{
+			db.collection('fixtures_history').findOne({uuid : eventDetails.uuid}, function(searchErr, historyResult) {
+				if(historyResult)	{
+					outputObj["error"]   = "Fixture history exists";
+					cb(outputObj);
+				}else{
+					var fixtureDetails= eventDetails;
+					var teamsArr=new Array();
+					if(eventDetails.home_team_uuid && eventDetails.home_team_uuid!="")	{
+						teamsArr.push(new mongodb.ObjectID(eventDetails.home_team_uuid));
+					}
+					if(eventDetails.away_team_uuid && eventDetails.away_team_uuid!="")	{
+						teamsArr.push(new mongodb.ObjectID(eventDetails.away_team_uuid));
+					}
+					if(teamsArr.length>0)	{
+						db.collection('teams').find({_id : { '$in': teamsArr } }).sort({'events.date_time': 1}).toArray(function(err, teams_arr) {
+							if(teams_arr && teams_arr.length>0) {
+								for(var i=0; i<teams_arr.length; i++){
+									if(eventDetails.home_team_uuid && eventDetails.home_team_uuid!="" && eventDetails.home_team_uuid==teams_arr[i]._id)	{
+										delete teams_arr[i]['_id'];
+										fixtureDetails['home_team_details'] = teams_arr[i];
+									}
+									if(eventDetails.away_team_uuid && eventDetails.away_team_uuid!="" && eventDetails.away_team_uuid==teams_arr[i]._id)	{
+										delete teams_arr[i]['_id'];
+										fixtureDetails['away_team_details'] = teams_arr[i];
+									}
+								}
+							}
+							self.create_fixtures_history(db, fixtureDetails, teamsArr, function(result) {
+								cb(result);
+							});
+						});
+					}	else {
+						self.create_fixtures_history(db, fixtureDetails, teamsArr, function(result) {
+							cb(result);
+						});
+					}
+				}
+			});
+		}
+	},
+	
+	create_fixtures_history : function (db, fixtureHistoryObj, clearTeamPlayersArr, cb){
+		var outputObj = new Object();
+		if(fixtureHistoryObj){
+			fixtureHistoryObj.created=self.currentTimestamp();
+			fixtureHistoryObj.modified=self.currentTimestamp();
+			db.collection('fixtures_history').save(fixtureHistoryObj, (err, result) => {
+      			if (result){
+      				db.collection("teams").updateMany({_id : { '$in': clearTeamPlayersArr } }, {'$set' : {"players" : new Array()}}, (err1, response1) => {
+      					outputObj["success"]   = "Pushed to history successfully!";
+      					cb(outputObj);
+      				});
+      			} else	{
+      				outputObj["error"]   = "Error, while saving this in history!";
+      				cb(outputObj);
+      			}
+			});
+      	} else	{
+      		outputObj["error"]   = "Error, while saving this in history!";
+      		cb(outputObj);
+      	}
+	},
+	
+	save_scores : function (db, fixtureHistoryObj, cb){
+		var outputObj = new Object(), tablenameStr='results';
+		if(fixtureHistoryObj){
+			fixtureHistoryObj.created=self.currentTimestamp();
+			fixtureHistoryObj.modified=self.currentTimestamp();
+			
+			db.collection(tablenameStr).findOne({event_uuid: fixtureHistoryObj.event_uuid}, function(err, document_details) {
+				if (document_details) {
+      				//update
+      				db.collection(tablenameStr).update({event_uuid: fixtureHistoryObj.event_uuid}, fixtureHistoryObj, (err, response) => {
+    					if (response){
+    						outputObj["success"]   = "Updated results";
+						}else{
+    						outputObj["error"]   = "Sorry, some error occurred, please try after sometime!";
+    					}
+    					cb(outputObj);
+  					});
+     			}else{
+     				//insert
+     				self.crudOpertions(db, tablenameStr, 'create', fixtureHistoryObj, null, null, null, function(save_response) {
+						cb(save_response);
+					});
+     			}
+     		});
+      	} else	{
+      		outputObj["error"]   = "Error, while saving this in history!";
+      		cb(outputObj);
+      	}
 	}
 };

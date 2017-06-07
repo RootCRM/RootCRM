@@ -38,6 +38,7 @@ init.MongoClient.connect(init.mongoConnUrl, function (err, database) {
   	} else {
    		console.log('Connection established to', init.mongoConnUrl);
    		require('./controller/routes')(init, app,db);
+   		require('./controller/cron_process')(init,db);
   	}
 });
 
@@ -46,17 +47,37 @@ console.log('rootcms application started on port ' + init.port);
 
 app.locals.backendDirectory = init.backendDirectoryPath;
 
-app.locals.timeConverter = function(UNIX_timestamp) {
-  var a = new Date(UNIX_timestamp * 1000);
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var year = a.getFullYear();
-  var month = months[a.getMonth()];
-  var date = a.getDate();
-  var hour = a.getHours();
-  var min = a.getMinutes();
-  var sec = a.getSeconds();
-  var time = month + ' ' + date + ' ' + year + ', ' + hour + ':' + min ;
-  return time;
+app.locals.dateTimeFromUnix = function(UNIX_timestamp, showTimeBool) {
+	if (typeof showTimeBool === "undefined") { 
+		showTimeBool = true;
+	}
+	
+	if (!isNaN(UNIX_timestamp)) {
+  	var a = new Date(UNIX_timestamp * 1000);
+  
+  	var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  	var year = a.getFullYear();
+  	var month = months[a.getMonth()];
+  	var date = a.getDate();
+  
+  	var time = month + ' ' + date + ' ' + year;
+ 	if(showTimeBool){
+ 	 	var hour = a.getHours();
+  		var timeStr="am";
+  		if(hour>12){
+  			timeStr="pm";
+  			hour= hour-12;
+  		} 
+  		var min = a.getMinutes().toString();
+  		if(min.length==1)	{
+  			min = "0"+min;
+  		}
+  		time += ', '+ hour + ':' + min + " " + timeStr ;
+  	}
+  	} else {
+  		time= UNIX_timestamp;
+  	}
+  	return time;
 }
 
 app.locals.dynamicSort = function(property) {

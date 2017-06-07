@@ -1,7 +1,10 @@
 var xhrStatus;
 
-var pageSize=15, totalNum=0;
+var pageSize=15, totalNum=0, totalDisplayedNum=0;
 var start=0, end=pageSize;
+var accessRightCode=parseInt(access_right);
+var complete=false, completeScroll=false;
+
 function generateHeading(e, upperCase){
 	if(typeof upperCase == 'undefined' && upperCase==''){ 
 		var upperCase=false;
@@ -20,6 +23,7 @@ function generateHeading(e, upperCase){
 	function searchKeyword(e){
 		var searchField= $("#"+e).val();
 		if(searchField!=""){
+			$('#table-breakpoint').basictable('destroy');
 			$("#documents_data").html('');
 			$("#"+e).removeClass("errorPlaceHolder");
 			$('#display_more_btn').hide();
@@ -54,6 +58,13 @@ function generateHeading(e, upperCase){
 		$("#searchBtn").click(function()	{
 			searchKeyword('searchField');
 		});
+		$(window).scroll(function(){
+			if ($(window).scrollTop() == $(document).height() - $(window).height()){
+				if(complete==false && completeScroll==false) {
+					load_more();
+				}
+			}
+		});	
 	});
 
 function timeConverter(UNIX_timestamp){
@@ -70,7 +81,7 @@ function timeConverter(UNIX_timestamp){
 }
 
 function refresh_data(){
-	$('#table').basictable();
+	$('#table-breakpoint').basictable('destroy');
 	searchStr="";
 	$(".searchFieldClass").val("");
 	$("#documents_data").html('');
@@ -81,24 +92,38 @@ function refresh_data(){
 	load_data();
 }
 function load_more(){
+	$('#table-breakpoint').basictable('destroy');
 	$('#display_more_btn').hide();
 	$('#img_loading_div').show();
-	start=end;
+	if(start==0)	{
+		start=end+1;
+	} else{
+		start=end;
+	}
 	end=start+pageSize;
 	load_data();
 }
 	
 	function load_data(){
+		completeScroll=true;
 		$(".alert").remove();
-		var jsonRow=backendDirectory+"/api_fetch_list?start="+start+"&limit="+pageSize+"&templateStr="+templateStr+"&s="+searchStr,
+		var jsonRow=backendDirectory+"/api_fetch_list?start="+start+"&limit="+pageSize+"&templateStr="+templateStr+"&s="+searchStr;
+		if(xhrStatus) xhrStatus.abort();
 		xhrStatus=$.getJSON(jsonRow,function(html){
 			if(html.error){
+				complete=true;
 				$(".topOptionsClass").hide();
 				$("#table-breakpoint").before('<div class="alert alert-danger">'+html.error+'</div>');
 			}else{
 				var editorPage="javascript:void(0)";
 				if(html.total){
 					totalNum=parseInt(html.total);
+				}
+				if(html.iTotalRecordsReturned){
+					totalDisplayedNum=totalDisplayedNum+parseInt(html.iTotalRecordsReturned);
+				}
+				if(totalDisplayedNum>0 && totalNum>0){
+					$(".display_records_count").html("Showing "+totalDisplayedNum+" out of "+totalNum);
 				}
 				if (typeof html.display_columns !== 'undefined' && html.display_columns !== null && html.display_columns!="" && start==0){
 					var headFootStr="";
@@ -121,9 +146,9 @@ function load_more(){
 					$(".editorLink").attr("href", editorPage);
 					$(".editorLink").show();
 				}
-				var contentHtml="";
-				
+								
 				if(html.aaData.length>0){
+					var contentHtml="";
 					$.each(html.aaData, function(i,row){
 						contentHtml+="<tr>";
 						var uniqueFieldVal="";
@@ -136,10 +161,14 @@ function load_more(){
 									if(row.hasOwnProperty(col)==true && (col=="Modified" || col=="modified_timestamp" || col=="modified" || col=="Created" || col=="created_timestamp" || col=="created")){
 										contentHtml+="<td>"+timeConverter(row[col])+"</td>";
 									}else if(row.hasOwnProperty(col)==true && (col=="Status" || col=="status" || col=="active")){
-										if(row[col]==1 || row[col]=="1"){
-											contentHtml+='<td><span class="label label-success">Active</span></td>';
+										if (typeof html.table !== 'undefined' && html.table !== null && html.table=="email_queue"){
+											contentHtml+="<td>"+row[col]+"</td>";
 										}else{
-											contentHtml+='<td><span class="label label-danger">Inactive</span></td>';
+											if(row[col]==1 || row[col]=="1"){
+												contentHtml+='<td><span class="label label-success">Active</span></td>';
+											}else{
+												contentHtml+='<td><span class="label label-danger">Inactive</span></td>';
+											}
 										}
 									}else if(row.hasOwnProperty(col)){
 										contentHtml+="<td>"+row[col]+"</td>";
@@ -157,28 +186,35 @@ function load_more(){
 							});
 						}
 						if (typeof html.uniqueField !== 'undefined' && html.uniqueField !== null && uniqueFieldVal!=""){
-							contentHtml+='<td class="actions-list"><a href="'+editorPage+'?'+html.uniqueField+'='+uniqueFieldVal+'" title="Edit"><i class="fa fa-pencil"></i></a></td>';
+							if(accessRightCode==0){
+								contentHtml+='<td class="actions-list"><a href="javascript:void(0)" onClick="alert(\'Sorry you do not have access to this option!\');"><i class="fa fa-pencil"></i></a></td>';
+							}else{
+								contentHtml+='<td class="actions-list"><a href="'+editorPage+'?'+html.uniqueField+'='+uniqueFieldVal+'" title="Edit"><i class="fa fa-pencil"></i></a></td>';
+							}
 						}
 						contentHtml+="</tr>";
 					});
 					$("#documents_data").append(contentHtml);
 					
-					//initialize table
-					$('#table').basictable();
-	  				$('#table-breakpoint').basictable({
-        				breakpoint: 751
-     				});
+					if(html.total && html.iTotalRecordsReturned && html.iTotalRecordsReturned==html.total){
+						complete=true;
+					}else{
+						complete=false;
+					}
      			}else{
-     				$("#documents_data").html("");
-					$(".headFootClass").html("");
-					$("#table-breakpoint").before('<div class="alert alert-danger">No more records found!</div>');
+     				complete=true;
+					$("#table-breakpoint").before('<div class="alert alert-danger alert-dismissable"><button class="close" aria-hidden="true" data-dismiss="alert" type="button">×</button>No more records found!</div>');
      			}
+     			//initialize table
+				$('#table-breakpoint').basictable({
+        			breakpoint: 751
+     			});
 			}
 			
 			if(end< totalNum){
 				$('#display_more_btn').show();
 			}
 			$('#img_loading_div').hide();
-			
+			completeScroll=false;
 		});
 	}

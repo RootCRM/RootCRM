@@ -108,6 +108,7 @@ font-size: 20px;
       								<input type="hidden" class="form-control" id="id" name="id" value="<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %><%= contentObj._id %><% } %>">
       								<input type="hidden" class="form-control" id="editorField" name="editorField" value="<% if (typeof editorField !== 'undefined' && editorField !== null) { %><%= editorField %><% }else{ %>_id<% } %>">
       								<input type="hidden" class="form-control" id="editorValue" name="editorValue" value="<% if (typeof editorValue !== 'undefined' && editorValue !== null) { %><%= editorValue %><% } %>">
+            						<input type="hidden" class="form-control" id="data" name="data" value="">
             						
 									<div class="row" STYLE="margin-top:10px;">
 										<div class="col-xs-6">
@@ -133,16 +134,16 @@ font-size: 20px;
 																<div class="form-group">
     																<label for="" class="col-sm-3 control-label">&nbsp;</label>
     																<div class="col-sm-2">
-																		<label><input id="active" name="active" value="1" type="radio" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == 1) { %>checked<% } %>> Active</label>
+																		<label><input id="status" name="status" value="1" type="radio" <% if (typeof contentObj.status !== 'undefined' && contentObj.status !== null && contentObj.status == 1) { %>checked<% } %>> Active</label>
     			  													</div>
     			  													<div class="col-sm-3">
-																		<label><input id="active" name="active" value="0" type="radio" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == 1) { %>checked<% } %>> Completed</label>
+																		<label><input id="status" name="status" value="0" type="radio" <% if (typeof contentObj.status !== 'undefined' && contentObj.status !== null && contentObj.status == 0) { %>checked<% } %>> Completed</label>
     			  													</div>
   																</div>
   																<div class="form-group">
     																<label for="" class="col-sm-3 control-label">Stage <sup class="required">*</sup></label>
     																<div class="col-sm-9">
-																		<select class="form-control" id="status" name="status">
+																		<select class="form-control" id="stage" name="stage">
 																			<option value="Proposal" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == "Proposal") { %>selected<% } %>>Proposal</option>
 																			<option value="Development" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == "Development") { %>selected<% } %>>Development</option>
 																			<option value="Testing" <% if (typeof contentObj.active !== 'undefined' && contentObj.active !== null && contentObj.active == "Development") { %>selected<% } %>>Testing</option>
@@ -519,6 +520,9 @@ function savenote(uuid,actionStr, note){
 				name: { required: true },
 				Start_Date: { required: true },
 			},
+			submitHandler: function(form) {
+				dataAsJson('ProjectForm', form);
+ 			}
 		});			
 		
             // datepicker plugin

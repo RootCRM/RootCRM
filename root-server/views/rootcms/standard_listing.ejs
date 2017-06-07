@@ -40,82 +40,59 @@ if (typeof searched_keyword !== 'undefined' && searched_keyword !== null) {
     </section>
 
     <!-- Main content -->
-    <section class="content">
-	<div CLASS="row">
-	<div CLASS="col-md-12">
-	
-	
-	
-	
-	<div class="clearfix hidden-xs">
-      						<div class="form-group no-margin">
-     							<div class="pull-right margin-bottom-10 ">
-									<div class="form-inline" style="">                 	          
-                 						<div class="btn-inline display-inline-block">
-											<input class="form-control searchFieldClass" style="min-width:225px; height:36px;" required id="searchField" placeholder="Search here..." value="<%= keywordStr %>">
-											<button class="btn btn-left-align btn-link no-shadow bg-transparent no-padding-top padding-right-10 right-auto left" type="button" id="searchBtn"><i class="glyphicon glyphicon-search"></i></button>
-										</div>
-                                        <a href="javascript:void(0)" class="btn btn-danger btn-color padingmix  btn-icon-left btn-sm editorLink " style="display:none;"> <i class="fa fa-plus"></i>Enter a new</a>    
-                  						<button class="btn btn-primary btn-circle" type="button" onclick="refresh_data()">  <i class="fa fa-refresh"></i></button>
-                  					</div>
-         						</div>
-      						</div>
-     					</div>
-						
-						
-						
-						<div class="visible-xs ">
-						
-							<div class="row">
-								<div class="col-lg-6 col-sm-12 col-xs-12">
-									<div>
-										<form class="form-inline" method="get" action=""> 
-											<input class="form-control xs-margin-btm10 searchFieldClass" required id="smallSearchField" name="keyword" placeholder="Search..." type="text" value="<%= keywordStr %>">
-                     						<a href="javascript:void(0)" class="btn btn-danger btn-color padingmix btn-icon-left btn-sm editorLink" STYLE="width:100%; margin:10px 0px;display:none;"> <i class="fa fa-plus"></i>Enter a new</a>  
-                  						</form>
-									</div>
+	<section class="content">
+		<div CLASS="row">
+			<div class="clearfix hidden-xs">
+				<div class="col-md-6 display_records_count" style="padding-top:17px;font-weight:bold;"></div>
+				<div class="col-md-6 text-right">
+      				<div class="form-group no-margin">
+     					<div class="pull-right margin-bottom-10 ">
+							<div class="form-inline" style="">                 	          
+                 				<div class="btn-inline display-inline-block">
+									<input class="form-control searchFieldClass" style="min-width:225px; height:36px;" required id="searchField" placeholder="Search here..." value="<%= keywordStr %>">
+									<button class="btn btn-left-align btn-link no-shadow bg-transparent no-padding-top padding-right-10 right-auto left" type="button" id="searchBtn" title="Search"><i class="glyphicon glyphicon-search"></i></button>
 								</div>
-							</div>
-						</div>
-	
-	</div>
-	
-	</div>
-   
-      <div class="row">
-	  
-       
-		
-		
-		
-		<div class="content table-responsive table-full-width">
-		 <div class="table-responsive" style="border:none;" >
-                                <table class="table table-striped  table-bordered table-hover custom-tbl-st bt" id="table-breakpoint"  style="background-color: rgb(255, 255, 255); border-radius: 4px;" >
-                                    <thead class="headFootClass">
-                                       
-                                    </thead>
-                                     <tfoot class="headFootClass">
-                                       
-                                    </tfoot>
-                                    <tbody id="documents_data">
-                                    	
-                                    </tbody>
-                                </table>
-                            </div>
-		
-		
-						
-					</div>
-		
-		
-		
-        <!-- right col -->
+                				<button class="btn btn-primary btn-circle" type="button" onclick="refresh_data()" title="Clear search term">  <i class="fa fa-refresh"></i></button>
+              				</div>
+         				</div>
+      				</div>
+				</div>
+			</div>
+				<div class="visible-xs" >
+					<div class="col-md-12 display_records_count" style="font-weight:bold;"></div>
+					<div class="col-lg-6 col-sm-12 col-xs-12" style="margin-bottom:10px;">
+						<form class="form-inline" method="get" action=""> 
+							<input class="form-control xs-margin-btm10 searchFieldClass" required id="smallSearchField" name="keyword" placeholder="Search..." type="text" value="<%= keywordStr %>">
+                     	</form>
+                    </div>
+				</div>
+			</div>
+		<div class="row">
+	  		<div class="content table-responsive table-full-width">
+		 		<div class="table-responsive" style="border:none;" >
+                	<table class="table table-striped  table-bordered table-hover custom-tbl-st bt" id="table-breakpoint"  style="background-color: rgb(255, 255, 255); border-radius: 4px;" >
+                    	<thead class="headFootClass">
+                        </thead>
+                        <tfoot class="headFootClass">
+						</tfoot>
+                        <tbody id="documents_data">
+                        </tbody>
+                	</table>
+            	</div>
+			</div>
+			<div style="text-align:center; display:none;" id="display_more_btn">
+				<a style="width: 60%; margin-bottom: 10px;" class="btn palette-carrot btn-warning" title="Load more" onclick="load_more()" href="javascript:void(0);">
+					Load more
+				</a>
+        	</div>
+        	<div style="text-align:center" id="img_loading_div">
+				Loading...<br /> <img id="imgAjaxLoading" src="img/loading.gif" width="109" height="25" style="border-width: 0px;">
+			</div>
+		<!-- right col -->
       </div>
       <!-- /.row (main row) -->
-
-    </section>
-
-  </div>
+	</section>
+</div>
  
  <!--//Main Content--> 
 	<!-- Footer Starts Here-->
@@ -124,6 +101,12 @@ if (typeof searched_keyword !== 'undefined' && searched_keyword !== null) {
 <script src="js/basictable.js"></script>
 <script type="text/javascript">
 var templateStr="<%= currentTemplateStr %>", searchStr="<%= keywordStr %>";
+
+<% if (typeof authenticatedUser.access_right !== 'undefined' && authenticatedUser.access_right !== null) {	%>
+var	access_right="<%= authenticatedUser.access_right %>";
+<% }	else{	 %>
+var access_right=0;
+<% } %>
 </script>
 <script type="text/javascript" src="scripts/listing.js"></script>
 </body>
