@@ -149,12 +149,10 @@ function fetch_users_sites(){
 				contentHtmlStr+='<li class="';
 				if(item._id==activeSystemStr){
 					activeSystemNameStr=item.name;
-					/**if(item.logo_path){
-						logoPathStr=item.logo_path;
-					}**/
 					contentHtmlStr+='active2';
+					
 				}
-				contentHtmlStr+='"><a href="javascript:void(0)" onClick="switchInSystems(\''+item._id+'\'); return false;">'+item.name+'</li>';     
+				contentHtmlStr+='"><a href="javascript:void(0)" onClick="switchInSystems(\''+item._id+'\'); return false;">'+item.name+'</a></li>';     
 			});
 			if(countUserSystems>=1){
 				$("#loggedInUserSystems").show();
@@ -167,6 +165,8 @@ function fetch_users_sites(){
 		}**/
 		if(activeSystemNameStr!=""){
 			document.title = activeSystemNameStr;
+			$('#activeSystemNameID').show();
+			$('#activeSystemNameID').html('<a href="javascript:void(0)">'+activeSystemNameStr+'</a>');
 		}
 	});
 }

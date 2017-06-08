@@ -15,7 +15,7 @@
 							}
 							
 							if(bookmarkItems.length>0){	%>
-								<p><% if(navigation[fnav].label!="" && navigation[fnav].label!=" "){	%>
+								<p><% if(navigation[fnav].label!="" && navigation[fnav].label!=" " && navigation[fnav].label!="&nbsp;"){	%>
 								<STRONG><%= navigation[fnav].label %>:</STRONG>
 								<% } %>
 								<% bookmarkItems.sort(dynamicSort("item_sort_order"));

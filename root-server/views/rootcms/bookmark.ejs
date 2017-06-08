@@ -110,14 +110,14 @@
                     						<input type="text" required="required" id="label" name="label" class="form-control col-md-5 col-xs-12" value="<% if (typeof contentObj.label !== 'undefined' && contentObj.label !== null) { %><%= contentObj.label %><% } %>">
                   						</div>
                 					</div>
-              						<div class="form-group" id="linkurlSection" <% if (typeof contentObj.type !== 'undefined' && contentObj.type !== null && contentObj.type == "items") { %>style="display:none;"<% } %>>
+              						<div class="form-group linkurlSection" <% if (typeof contentObj.type !== 'undefined' && contentObj.type !== null && contentObj.type == "items") { %>style="display:none;"<% } %>>
                   						<label class="control-label col-md-3" id="urlSectionLabel">URL<span class="required">*</span></label>
                   						<div class="col-md-6 col-lg-4">
                    							<input type="text" class="form-control" STYLE="max-width:100%;" id="content" name="content" value="<% if (typeof contentObj.content !== 'undefined' && contentObj.content !== null) { %><%= contentObj.content %><% } %>">
                   						</div>
                 					</div>
-                					<div class="form-group" class="linkurlSection" <% if (typeof contentObj.type !== 'undefined' && contentObj.type !== null && contentObj.type == "items") { %>style="display:none;"<% } %>>
-                  						<label class="control-label col-md-3" id="urlSectionLabel">Or Select any web page as URL (Search for web page)</label>
+                					<div class="form-group linkurlSection" <% if (typeof contentObj.type !== 'undefined' && contentObj.type !== null && contentObj.type == "items") { %>style="display:none;"<% } %>>
+                  						<label class="control-label col-md-3">Or Select any web page as URL (Search for web page)</label>
                   						<div class="col-md-6 col-lg-4 ui-widget">
                    							 <select class="combobox form-control" id="document_id" >
                              					
@@ -130,7 +130,7 @@
                    							<input type="text"  class="form-control col-md-5 col-xs-12" id="order_by_num" name="order_by_num" value="<% if (typeof contentObj.order_by_num !== 'undefined' && contentObj.order_by_num !== null) { %><%= contentObj.order_by_num %><% } %>">
                   						</div>
                 					</div>
-                					<div class="form-group" class="linkTargetDivID">
+                					<div class="form-group" id="linkTargetDivID">
     									<label for="" class="col-sm-3 control-label">Target</label>
     									<div class="col-sm-9" style="margin-top:6px;">
     										<div STYLE="float:left; margin-right:10px;display:inline-block;">
@@ -199,7 +199,7 @@
 											  				<td><input id="related_documentField" type="hidden" value="<%= bookmark_items[i].related_document %>"><%= bookmark_items[i].related_document %></td>
 											  				<td><input id="query_stringField" type="hidden" value="<%= bookmark_items[i].query_string %>"><%= bookmark_items[i].query_string %></td>
 											  				<td><input id="levelField" type="hidden" value="<%= bookmark_items[i].level %>"><%= bookmark_items[i].level %></td>
-											  				<td><input id="sort_orderField" type="hidden" value="<%= bookmark_items[i].sort_order %>"><%= bookmark_items[i].item_sort_order %></td>
+											  				<td><input id="sort_orderField" type="hidden" value="<%= bookmark_items[i].item_sort_order %>"><%= bookmark_items[i].item_sort_order %></td>
 															<td><input id="targetField" type="hidden" value="<%= bookmark_items[i].target %>"><%= bookmark_items[i].target %></td>
 															<td><input id="statusField" type="hidden" value="<%= bookmark_items[i].status %>"><%= bookmark_items[i].status %></td>
 															<td><a href="javascript:void(0)" title="Edit" onClick="edit_item('<%= bookmark_items[i].uuid %>')"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" onClick="remove_item('<%= bookmark_items[i].uuid %>')" title="Remove"><i class="fa fa-trash"></i></a></td>
@@ -396,14 +396,20 @@ function edit_item(e){
 		var row= $(".itemtr_"+e).parents('.itemClass');	
 		var label=row.find('#label').html();
 		$("#item_uuid").val(e);
-		$("#item_type").val(row.find('#type').html());
-		var itemTypeSelected=row.find('#type').html();
-		$("#item_level").val(row.find('#level').html());
-		$("#item_sort_order").val(row.find('#sort_order').html());
-		$("#item_target").val(row.find('#target').html());
-		$("#item_label").val(row.find('#label').html());
+		$("#item_type").val(row.find('#typeField').val());
+		var itemTypeSelected=row.find('#typeField').val();
+		$("#item_level").val(row.find('#levelField').val());
+		$("#item_sort_order").val(row.find('#sort_orderField').val());
+		if(row.find('#statusField').val()=="Active"){
+			$("#item_active").val(1);
+		}else{
+			$("#item_active").val(0);
+		}
+		
+		$("#item_target").val(row.find('#targetField').val());
+		$("#item_label").val(row.find('#labelField').val());
 		$("#item_link").val(row.find('#contentField_'+e).val());
-		$("#item_query_string").val(row.find('#query_string').html());
+		$("#item_query_string").val(row.find('#query_stringField').val());
 		$("select#item_type").val(itemTypeSelected).trigger('change');
 		$('#myModal').modal('show'); 
 	}

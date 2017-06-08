@@ -32,7 +32,7 @@ if (typeof address_token !== 'undefined' && address_token !== null) {
 	<div class="container">
     	<div class="row">
         	<div class="col-lg-5 col-sm-5 address">
-          		<% if (typeof addressStr !== 'undefined' && addressStr !== null) {
+          		<% if (typeof addressStr !== 'undefined' && addressStr !== null && addressStr !== "") {
           			var tokenContentStr = JSON.parse(addressStr.token_content);  
           			var addrDetails= tokenContentStr[locStr];
           			if (typeof addrDetails.map !== 'undefined' && addrDetails.map !== null) {

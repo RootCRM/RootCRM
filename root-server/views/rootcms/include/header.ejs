@@ -44,7 +44,7 @@ if (typeof authenticatedUser !== 'undefined' && authenticatedUser !== null) {
           <!-- Tasks: style can be found in dropdown.less -->
           <li class="dropdown tasks-menu" id="loggedInUserSystems" style="display:none;">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <i class="fa fa-flag-o"></i>
+              <i class="fa fa-laptop"></i>
               <span class="label label-danger totalLoggedInUserSystems">1</span>
             </a>
             <ul class="dropdown-menu">
@@ -58,12 +58,13 @@ if (typeof authenticatedUser !== 'undefined' && authenticatedUser !== null) {
               	</li>
             </ul>
           </li>
+          <li class="dropdown tasks-menu" id="activeSystemNameID" style="display:none;">
+           
+          </li>
           <!-- User Account: style can be found in dropdown.less -->
           <% 	if (typeof loggedInUserNameStr !== 'undefined' && loggedInUserNameStr !== null && loggedInUserNameStr !== "") {	%>
           <li class="dropdown user user-menu">
-          	
-            
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          	<a href="#" class="dropdown-toggle" data-toggle="dropdown">
               	<img src="img/user2-160x160.jpg" class="user-image" alt="User Image">
               	<span class="hidden-xs"><%- loggedInUserNameStr %></span>
             </a>
@@ -75,8 +76,10 @@ if (typeof authenticatedUser !== 'undefined' && authenticatedUser !== null) {
 
                 <p>
                   <%- loggedInUserNameStr %> - Web Developer
-                  <% if (typeof authenticatedUser.club_name !== 'undefined' && authenticatedUser.club_name !== null) {	%>
+                  <% if (typeof authenticatedUser.club_name !== 'undefined' && authenticatedUser.club_name !== null && authenticatedUser.club_name !=="") {	%>
                   	<small>Club : <%- authenticatedUser.club_name %></small>
+                  <% } else if (typeof authenticatedUser.email !== 'undefined' && authenticatedUser.email !== null && authenticatedUser.email !== "") {	%>
+                  	<small>Email : <%- authenticatedUser.email %></small>
                   <% } %>
                 </p>
               </li>

@@ -222,7 +222,6 @@ var myObj = new Object();
 		
 		eval('var obj='+query);
 		eval('var fetchFieldsobj='+fetchFieldsObj);
-		console.log(query)
 		db.collection('documents').find(obj, fetchFieldsobj).skip(pageNum-1).limit(itemsPerPage).toArray(function(err, document) {
 			if (document) {
       			db.collection('documents').find(obj).count(function (e, count) {
@@ -288,11 +287,21 @@ app.get('/login', function(req, res) {
 app.get('/contact', function(req, res) {
     initFunctions.returnNavigation(db, function(resultNav) {
     	db.collection('tokens').findOne({"code" : "contact-page-address", uuid_system : init.system_id}, function(errdoc, addressContent) {
-    		res.render('contact', {
-      	 		navigation : resultNav ,
-      	 		address_token: addressContent,
-      	 		queryStr : req.query
-       		});
+    		if(addressContent && addressContent!=""){
+    			res.render('contact', {
+      	 			navigation : resultNav ,
+      	 			address_token: addressContent,
+      	 			queryStr : req.query
+       			});
+       		}else{
+       			db.collection('tokens').findOne({"code" : "contact-page-address", shared_systems : { $in: [init.system_id] }}, function(errdoc, addressContent) {
+    				res.render('contact', {
+      	 				navigation : resultNav ,
+      	 				address_token: addressContent,
+      	 				queryStr : req.query
+       				});
+    			});
+       		}
 		});
    	});
 });
@@ -304,7 +313,6 @@ app.post('/contact/save', (req, res) => {
 	postJson.Created=init.currentTimestamp;
     db.collection("contacts").save(postJson, (err, result) => {
 		if (err){
-    		return console.log(err);
     		link+="?msg=error";
     		res.redirect(link)
     	}else{ 
@@ -321,7 +329,6 @@ app.post('/contact/save', (req, res) => {
 			insertEmail["recipient"]='bwalia@tenthmatrix.co.uk';
 			insertEmail["status"]=0;
 			db.collection("email_queue").save(insertEmail, (err, e_result) => {
-				//console.log(e_result)
 				res.redirect(link);
 			})
     	} 	

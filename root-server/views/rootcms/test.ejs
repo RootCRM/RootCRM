@@ -51,7 +51,16 @@ table.head tr td {
 
     	<!-- Main content -->
     	<section class="content">
-     		<div class="row">
+    		<div class="row">
+    			<form action="<%= backendDirectory %>/upload" enctype="multipart/form-data" method="post">
+      <input type="text" name="title">
+      <input type="file" name="file">
+        <input type="submit" value="Upload">
+    </form>
+
+    		</div>
+     		<!--<div class="row">
+     			<button type="button" onClick="send_request();" class="btn btn-flat" style="border-left:none;line-height: 12px;">SEND REUQUEST</button>
         		<div class="col-md-3">
           			<div class="sidebar-form" STYLE="margin: 0px 0px 10px 0px;">
         				<div class="input-group">
@@ -98,7 +107,7 @@ table.head tr td {
           			<!-- /. box -->
         		</div>
        		 <!-- /.col -->
-      		</div>
+      		</div>-->
       		<!-- /.row -->
    		</section>
     	<!-- /.content -->
@@ -478,6 +487,25 @@ function load_tasks(){
 			$("#tasks_table_body").html(contentHtml);
 			ini_events($('.tableTr'));
 		});
+}
+
+function send_request(){
+	var dataString = 'collection=tasks&fieldName=name&fieldValue=abcv&action=update&name=abcv&reported_by=yyy&project=yxy&assigned_to=ooo&description=this is  for testing puropose&end_date=dateee&start_date=datess&due_date=datexx&estimated_hours=4&rate=15&Status=1&Created=avc';
+	
+	$.ajax({
+		type: "POST",
+		url: "<%= backendDirectory %>/api_crud_post",
+		data: dataString,
+		dataType: 'json',
+		cache: false,
+		success: function(html){
+			if(html.success){
+				alert(html.success);
+			} else if(html.error){
+				alert(html.error);
+			}
+		}
+	});
 }
 </script>
 </body>

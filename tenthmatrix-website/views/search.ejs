@@ -145,10 +145,7 @@ function load_more(){
 		totalNum=0;
 		var jsonRow="/search-results?start="+start+"&s="+searchkeyword+"&type="+typeStr+"&limit="+pageSize,
 		xhrStatus=$.getJSON(jsonRow,function(html){
-			if(html.error){
-				var msg='<div class="alert alert-danger">No search results found!</div>';
-				$.updateContent(typeStr,msg);
-			}else{
+			if(html.aaData && html.aaData.length>0){
 				if(html.total){
 					totalNum=parseInt(html.total);
 				}
@@ -169,6 +166,9 @@ function load_more(){
 					}
 				});
 				$.updateContent(typeStr,contentHtml);
+			}else{
+				var msg='<div class="alert alert-danger">No search results found!</div>';
+				$.updateContent(typeStr,msg);
 			}
 			if(end< totalNum){
 				if(totalNum==0){
