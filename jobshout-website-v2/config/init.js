@@ -16,12 +16,12 @@
 	var MongoClient = mongodbRe.MongoClient;
 	
 	// Connection URL. This is where your mongodb server is running.
-	var url = 'mongodb://localhost:27017/tenthmatrix_live';
+	var url = 'mongodb://localhost:27017/jobshout_live';
 	var _db;
 	module.exports = {
     	mongodb : mongodbRe,
     	MongoClient : MongoClient,
     	mongoConnUrl : url,
-    	port : 3001,
+    	port : 3003,
     	system_id : "59379c6009690d04012fd22a",
 	};

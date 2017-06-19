@@ -2307,6 +2307,7 @@ app.post(backendDirectoryPath+'/default_system', requireLogin, (req, res) => {
     		if(result.success){
     			var default_system_id=result._id;
     			db.collection("users").update({_id:req.authenticatedUser._id}, {'$set' : {"uuid_default_system" : default_system_id.toString(), "user_systems" : new Array(default_system_id)}}, (err1	, result) => {
+    				db.collection("modules").update({'active':1}, {'$set' : {"uuid_system" : default_system_id}}, { multi: true });
     				db.collection("session").update({'user_id':req.authenticatedUser._id}, {'$set' : {"active_system_uuid" : default_system_id}}, (err2	, result2) => {
     					res.redirect(backendDirectoryPath+'/default_system?success=Saved the basic details successfully!');
     				});
