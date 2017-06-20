@@ -350,29 +350,43 @@ app.post('/saveblogcomment', (req, res) => {
 		initFunctions.returnFindOneByMongoID(db, table_nameStr, blogID, function(resultObject) {
 			var myObj = new Object();
 			if(resultObject.aaData){
-				db.collection(table_nameStr).update({_id:mongoIDField}, { $push: { "BlogComments": postJson } }, (err, result) => {
-    				if(result){
-    					var insertEmail=new Object();
-    					var nameStr=req.body.name;
-    					postJson.uuid_system=init.system_id;
-						insertEmail["sender_name"]=nameStr;
-						insertEmail["sender_email"]=req.body.email;
-						insertEmail["subject"]=nameStr+" has posted a comment";;
-						insertEmail["body"]=req.body.comment;
-						insertEmail["created"]=init.nowTimestamp;
-						insertEmail["modified"]=init.nowTimestamp;
-						insertEmail["recipient"]='bwalia@tenthmatrix.co.uk';
-						insertEmail["status"]=0;
-						db.collection("email_queue").save(insertEmail, (err, e_result) => {
-							myObj["success"]   = "Thanks your comment has been posted OK and will be visible soon!";
-							res.send(myObj);
-						})
-    				}else{
-    					myObj["error"]   = "Error posting comment. Please try again later!!!";
-						res.send(myObj);
-    				}
-    			});
-				
+				var documentData=resultObject.aaData;
+				var insertEmail=new Object();
+    			var nameStr=req.body.name;
+    			postJson.uuid_system=init.system_id;
+				insertEmail["sender_name"]=nameStr;
+				insertEmail["sender_email"]=req.body.email;
+				insertEmail["subject"]=nameStr+" has posted a comment";;
+				insertEmail["body"]=req.body.comment;
+				insertEmail["created"]=init.nowTimestamp;
+				insertEmail["modified"]=init.nowTimestamp;
+				insertEmail["recipient"]='bwalia@tenthmatrix.co.uk';
+				insertEmail["status"]=0;
+				if(typeof(documentData.BlogComments)=="string"){
+	            	db.collection(table_nameStr).update({_id:mongoIDField}, { $set: { "BlogComments": new Array(postJson) } }, (err, result) => {
+    	                if(result){
+                    	    db.collection("email_queue").save(insertEmail, (err, e_result) => {
+                        		myObj["success"]   = "Thanks your comment has been posted OK and will be visible soon!";
+                                res.send(myObj);
+                            });
+                        }else{
+                        	myObj["error"]   = "Error posting comment. Please try again later!!!";
+                            res.send(myObj);
+                        }
+                    });
+        		} else {
+					db.collection(table_nameStr).update({_id:mongoIDField}, { $push: { "BlogComments": postJson } }, (err, result) => {
+                    	if(result){
+                        	db.collection("email_queue").save(insertEmail, (err, e_result) => {
+                            	myObj["success"]   = "Thanks your comment has been posted OK and will be visible soon!";
+                                res.send(myObj);
+                            })
+                        }else{
+                            myObj["error"]   = "Error posting comment. Please try again later!!!";
+                            res.send(myObj);
+                        }
+                    });
+                }
 			}else{
 				myObj["error"]   = "Error posting comment. Please try again later!!!";
 				res.send(myObj);
