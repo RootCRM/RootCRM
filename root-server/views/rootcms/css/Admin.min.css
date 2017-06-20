@@ -4559,7 +4559,7 @@ filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#e73f7c', endCo
   margin-top: -15px;
 }
 .alert button.close {
-  z-index: 1033;
+  z-index: 999;
     background-color: #FFFFFF;
     display: block;
     border-radius: 50%;
