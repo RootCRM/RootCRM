@@ -310,7 +310,8 @@ app.get('/contact', function(req, res) {
 app.post('/contact/save', (req, res) => {
 	var link="/contact";
 	var postJson=req.body;
-	postJson.Created=init.currentTimestamp;
+	postJson.Created=init.nowTimestamp;
+	postJson.uuid_system=init.system_id;
     db.collection("contacts").save(postJson, (err, result) => {
 		if (err){
     		link+="?msg=error";
@@ -324,8 +325,8 @@ app.post('/contact/save', (req, res) => {
 			insertEmail["sender_email"]=req.body.email;
 			insertEmail["subject"]=req.body.subject;
 			insertEmail["body"]=req.body.message;
-			insertEmail["created"]=init.currentTimestamp;
-			insertEmail["modified"]=init.currentTimestamp;
+			insertEmail["created"]=init.nowTimestamp;
+			insertEmail["modified"]=init.nowTimestamp;
 			insertEmail["recipient"]='bwalia@tenthmatrix.co.uk';
 			insertEmail["status"]=0;
 			db.collection("email_queue").save(insertEmail, (err, e_result) => {
@@ -338,8 +339,8 @@ app.post('/contact/save', (req, res) => {
 //save blog comment
 app.post('/saveblogcomment', (req, res) => {
 	var postJson=req.body;
-	postJson.created=init.currentTimestamp;
-	postJson.modified=init.currentTimestamp;
+	postJson.created=init.nowTimestamp;
+	postJson.modified=init.nowTimestamp;
 	postJson.status=0;
 	postJson.uuid=initFunctions.guid();
 	var blogID= req.body.blog_uuid;
@@ -353,12 +354,13 @@ app.post('/saveblogcomment', (req, res) => {
     				if(result){
     					var insertEmail=new Object();
     					var nameStr=req.body.name;
+    					insertEmail["uuid_system"]=init.system_id;
 						insertEmail["sender_name"]=nameStr;
 						insertEmail["sender_email"]=req.body.email;
 						insertEmail["subject"]=nameStr+" has posted a comment";;
 						insertEmail["body"]=req.body.comment;
-						insertEmail["created"]=init.currentTimestamp;
-						insertEmail["modified"]=init.currentTimestamp;
+						insertEmail["created"]=init.nowTimestamp;
+						insertEmail["modified"]=init.nowTimestamp;
 						insertEmail["recipient"]='bwalia@tenthmatrix.co.uk';
 						insertEmail["status"]=0;
 						db.collection("email_queue").save(insertEmail, (err, e_result) => {

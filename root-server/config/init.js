@@ -24,7 +24,7 @@
     	mongodb : mongodbRe,
     	MongoClient : MongoClient,
     	mongoConnUrl : url,
-    	port : 3004,
+    	port : 3009,
 		cookieName : "rootcms_login",
 		backendDirectoryPath : "/rootcms",
 		backendDirectoryName : "rootcms",

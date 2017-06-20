@@ -35,6 +35,9 @@ module.exports = function(init) {
 	// Request body parsing middleware should be above methodOverride
 	app.use(bodyParser.urlencoded({extended: true}))
 	
+	//we need this for pm2
+	app.set('views',__dirname + '/../views')
+	
 	// CookieParser should be above session
 	app.use(cookieParser());
 	

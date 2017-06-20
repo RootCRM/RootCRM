@@ -161,12 +161,13 @@ function load_more(){
 						var defaultImg="images/welcome.jpg";
 						if(row.virtualFields){
 							defaultImg=row.virtualFields['image_path'];
-							console.log(defaultImg)
+						}else if(row.image_path && row.image_path!=""){
+							defaultImg=row.image_path;
 						}
 						contentHtml+='<div class="blog-img"><img src="'+defaultImg+'" alt="'+row.Document+'" onerror="this.src=\'images/welcome.jpg\'"></div>';
               			contentHtml+='<div class="row">';
                 		contentHtml+='<div class="col-md-12">';
-                  		contentHtml+='<div class="blog-two-info"><p>'+timeConverter(row.created);
+                  		contentHtml+='<div class="blog-two-info"><p>'+timeConverter(row.Published_timestamp);
                   		var commentsNum =0;
                   		if(row.Objects){
                   			commentsNum =row.Objects.length;
