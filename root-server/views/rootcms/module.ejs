@@ -59,11 +59,17 @@
                 					</div>
                 					<div class="form-group">
                   						<label class="control-label col-md-1" for="">Icon Class </label>
-                  						<div class="col-md-6 col-lg-3">
-                  							<input type="text" id="icon_class" name="icon_class" class="form-control col-md-5 col-xs-12" value="<% if (typeof contentObj.icon_class !== 'undefined' && contentObj.icon_class !== null) { %><%= contentObj.icon_class %><% } %>">
+                  						<div class="col-md-2">
+                  							<select id="icon_class" name="icon_class" class="form-control col-md-5 col-xs-12" onChange="showIcon(this.value)">
+                   								
+                    						</select>
+                  							<!--<input type="text" id="icon_class" name="icon_class" class="form-control col-md-5 col-xs-12" value="<% if (typeof contentObj.icon_class !== 'undefined' && contentObj.icon_class !== null) { %><%= contentObj.icon_class %><% } %>">
+                   						-->
+                   						</div>
+                   						<div class="col-md-1" id="showIconDiv" style="font-size:30px;">              						
                    						</div>
                    						<label class="control-label col-md-1" for="">Icon Image Path </label>
-                  						<div class="col-md-6 col-lg-4">
+                  						<div class="col-md-6 col-lg-3">
                   							<input type="text" id="icon_path" name="icon_path" class="form-control col-md-5 col-xs-12" value="<% if (typeof contentObj.icon_path !== 'undefined' && contentObj.icon_path !== null) { %><%= contentObj.icon_path %><% } %>">
                    						</div>
                 					</div>
@@ -245,6 +251,9 @@
 <!-- Page-Level Plugin Scripts-->
 <script src="js/jquery.validate.js"></script>
 <script>
+function showIcon(val){
+	$("#showIconDiv").html('<i class="'+val+'"></i>');
+}
 $(document).ready(function(){
 	returnAllCollections();
 	// validate form on keyup and submit
@@ -273,7 +282,34 @@ $(document).ready(function(){
  				dataAsJson('contentForm', form);
  			}
 		});		
+	fetchIconsList();
 });
+function fetchIconsList(){
+	var jsonRow=backendDirectory+"/api_fetch_list?collection=system_lists&findFieldName=code&findFieldValue=icons-list";
+	var sVal="<% if (typeof contentObj.icon_class !== 'undefined' && contentObj.icon_class !== null) { %><%= contentObj.icon_class %><% } %>";
+	if(sVal!=""){
+		showIcon(sVal);
+	}
+	$.getJSON(jsonRow,function(result){
+		var contentHtml="<option value=''>--Select--</option>";
+		
+		if(result.iTotalRecordsReturned>0){
+			$.each(result.aaData, function(i,row){
+				var iconsData= row;
+				if(iconsData.list && iconsData.list.length>0)	{
+					$.each(iconsData.list, function(j,rowData){
+						contentHtml+="<option value='"+rowData.label+"' ";
+						if(sVal==rowData.label){
+							contentHtml+="selected";
+						}
+						contentHtml+=" >"+rowData.label+"</option>";
+					});
+				}
+			});
+     	}
+		$("#icon_class").html(contentHtml);
+	});
+}
 function returnAllCollections(){
 	$("#table").html('');
 	var jsonRow=backendDirectory+"/api_fetch_collections";

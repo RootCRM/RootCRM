@@ -437,7 +437,7 @@ var self = module.exports =
 	
 	saveSessionBeforeLogin : function(db, user_id, systems_access, cb){
 		var outputObj = new Object();
-		db.collection('sessions').save({"user_id": new mongodb.ObjectID(user_id), "status" : true, "active_system_uuid" : systems_access}, (err, result) => {
+		db.collection('sessions').save({"user_id": new mongodb.ObjectID(user_id), "status" : true, "active_system_uuid" : new mongodb.ObjectID(systems_access)}, (err, result) => {
 			if (result){
 				db.collection('systems').find({}).count(function (e, count) {
 					if(count==0){

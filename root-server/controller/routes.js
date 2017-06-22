@@ -553,17 +553,28 @@ app.get(backendDirectoryPath+'/api_get_count', requireLogin, function(req, res) 
 	var myObj = new Object();
 	if(req.authenticationBool){
 		if(req.query.collection && req.query.collection!=""){
+			var collectionStr= req.query.collection;
+			var activeSystemsStr=req.authenticatedUser.active_system_uuid.toString();
+			var query="{";
+			if (typeof activeSystemsStr !== 'undefined' && activeSystemsStr !== null && activeSystemsStr!="") {
+				if(definedAdminTablesArr.indexOf(collectionStr)==-1){
+					query+=" $or: [ { 'uuid_system' : { $in: ['"+activeSystemsStr+"'] } }, { 'shared_systems': { $in: ['"+activeSystemsStr+"'] } } ] ";
+				}
+			}
 			if(req.query.collection=="players"){
-				db.collection('users').find({user_type: 'member'}).count(function (e, count) {
-      				myObj["total"]   = count;
-      				res.send(myObj);
-     			});
-			}else{
-				db.collection(req.query.collection).find({}).count(function (e, count) {
-      				myObj["total"]   = count;
-      				res.send(myObj);
-     			});
-     		}
+				collectionStr="users";
+				if(query!="{"){
+					query += ",";
+				}
+				query += "'user_type': 'member'";
+			}
+			
+			query += "}";
+			eval('var queryObj='+query);
+			db.collection(collectionStr).find(queryObj).count(function (e, count) {
+      			myObj["total"]   = count;
+      			res.send(myObj);
+     		});
 		} else {
 			myObj["error"]   = 'You are not authorized to check the content!';
 			myObj["total"]   = 0;
@@ -1219,8 +1230,8 @@ app.get(backendDirectoryPath+'/swtich_user_system/', requireLogin, function(req,
 	if(req.authenticationBool){
 		var tempID=req.query.id;
 		tempID=new mongodb.ObjectID(tempID);
-			
-		db.collection("sessions").update({'user_id':req.authenticatedUser._id, 'active_system_uuid':req.authenticatedUser.active_system_uuid}, {'$set' : {"active_system_uuid" : tempID}}, (err, result) => {
+		
+		db.collection("sessions").update({_id: req.authenticatedUser.auth_id, 'user_id':req.authenticatedUser._id, 'active_system_uuid':req.authenticatedUser.active_system_uuid}, {'$set' : {"active_system_uuid" : tempID}}, (err, result) => {
 			if(result){
     			outputObj["success"]   = "OK";
 				res.send(outputObj);
@@ -1466,7 +1477,6 @@ app.get(backendDirectoryPath+'/api_fetch_list/', requireLogin, function(req, res
 					res.send(resultObject);
 				});
 			}else if(collectionStr!=""){
-				//var query="{ 'system_uuid': { $in: "+activeSystemsStr+" } ";
 				var query="{";
 				
 				if (typeof activeSystemsStr !== 'undefined' && activeSystemsStr !== null && activeSystemsStr!="") {
