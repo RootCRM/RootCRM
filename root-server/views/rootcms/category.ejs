@@ -1,5 +1,14 @@
 <% include include/main-header %>
 <link rel="stylesheet" href="css/chosen.css">
+<style>
+#select_systems{
+width : 402px!important;
+line-height: 36px !important;
+}
+
+</style>
+
+
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
 	<div class="wrapper">	
@@ -64,13 +73,13 @@
                 					</div>
                 					<div class="form-group">
                   						<label class="control-label col-md-2" for="">Meta Description</label>
-                  						<div class="col-md-6 col-lg-4">
-                   							<textarea class="form-control col-md-5 col-xs-12" id="meta_description" name="meta_description"><% if (typeof contentObj.meta_description !== 'undefined' && contentObj.meta_description !== null) { %><%= contentObj.meta_description %><% } %></textarea>
+                  						<div class="col-md-6 col-lg-9">
+                   							<textarea style="height:150px;" class="form-control col-md-5 col-xs-12" id="meta_description" name="meta_description"><% if (typeof contentObj.meta_description !== 'undefined' && contentObj.meta_description !== null) { %><%= contentObj.meta_description %><% } %></textarea>
                   						</div>
                 					</div>
                 					<div class="form-group">
                   						<label class="control-label col-md-2" for="">Meta Keywords </label>
-                  						<div class="col-md-6 col-lg-4">
+                  						<div class="col-md-6 col-lg-9">
                    							<textarea class="form-control col-md-5 col-xs-12" id="meta_keywords" name="meta_keywords"><% if (typeof contentObj.meta_keywords !== 'undefined' && contentObj.meta_keywords !== null) { %><%= contentObj.meta_keywords %><% } %></textarea>
                   						</div>
                 					</div>
