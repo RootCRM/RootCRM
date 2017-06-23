@@ -213,8 +213,8 @@
         <div class="row">
           <div class="col-lg-6 col-sm-12 wow fadeIn fadeInUp animated "  STYLE="overflow:hidden; padding-bottom:20px;">
 		  <h2>	<span>About</span> Jobshout</h2>
-		  <% if (typeof token !== 'undefined' && token !== null) {	%>
-		  	<p><%= token %></p>
+		  <% if (typeof aboutToken !== 'undefined' && aboutToken !== null && aboutToken!="") {	%>
+		  	<p><%= aboutToken %></p>
 		  <% }else{ %>
 		  	<p>Jobshout is a full service new media agency, incorporating web design, SEO (Search Engine Optimisation), development including databases and Content Management Systems. We are expert in deploying large scale web database applications using Openresty.org, NGINX, Lua, Redis, Memcached, Node.JS, MySQL, MSSQL Server, Oracle, 4D, PostgreSQL, Sybase & NoSQL such as MongoDB.</p>
 		  <% } %>	
@@ -295,7 +295,7 @@ $(document).ready(function() {
 		xhrStatus=$.getJSON(jsonRow,function(html){
 			if(html.aaData){
 				$.each(html.aaData, function(i,row){
-					if(row.token_content!="" && (row.Status=="1" || row.Status==1)){
+					if(row.token_content!="" && (row.status=="1" || row.status==1)){
 						if(row.code=="home_page_heading_1"){
 							$("#home_page_heading_1").html(row.token_content);
 						}

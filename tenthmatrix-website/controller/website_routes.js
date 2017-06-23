@@ -20,16 +20,30 @@ module.exports = function(init, app, db){
 	//index page
 	app.get('/', function(req, res) {
 		initFunctions.returnNavigation(db, function(resultNav) {
-			res.render('index', {
-      	 		navigation : resultNav 
+			db.collection('tokens').findOne({"code" : "home-page-about-us", "status" : { $in: [ 1, "1" ] }, "uuid_system" : init.system_id}, {token_content : 1}, function(err, foundRecord) {
+				var tokenStr='';
+				if(foundRecord.token_content && foundRecord.token_content!=""){
+					tokenStr = foundRecord.token_content;
+				}
+				res.render('index', {
+      	 			navigation : resultNav,
+      	 			aboutToken :  tokenStr
+       			});
        		});
     	});
 	});
 	
 	app.get('/index', function(req, res) {
 		initFunctions.returnNavigation(db, function(resultNav) {
-			res.render('index', {
-      	 		navigation : resultNav 
+			db.collection('tokens').findOne({"code" : "home-page-about-us", "status" : { $in: [ 1, "1" ] }, "uuid_system" : init.system_id}, {token_content : 1}, function(err, foundRecord) {
+				var tokenStr='';
+				if(foundRecord.token_content && foundRecord.token_content!=""){
+					tokenStr = foundRecord.token_content;
+				}
+				res.render('index', {
+      	 			navigation : resultNav,
+      	 			aboutToken :  tokenStr
+       			});
        		});
     	});
 	});

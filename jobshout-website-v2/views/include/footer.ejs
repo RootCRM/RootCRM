@@ -44,12 +44,12 @@
  			<div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-duration="2s" data-wow-delay=".3s">
  				<div><IMG SRC="images/phone-icon.png" align="left" STYLE="padding-bottom:20px; padding-right:15px;" ALT=""/>
 					<h4> Telephone</h4>
-					<p>T: 01442 255 285<BR>
+					<p id="telephoneHtmlDiv">T: 01442 255 285<BR>
 					</p>
 				</div>
 				<div CLASS="margin-top-35" STYLE="padding-bottom:30px;">  <IMG SRC="images/email.png" align="left" STYLE="padding-bottom:20px; padding-right:15px;" ALT=""/>
 					<h4> Email</h4>
-					<p>info@tenthmatrix.co.uk</p>
+					<p id="emailHtmlDiv">info@tenthmatrix.co.uk</p>
 				</div>
 			</div>
 		  
@@ -58,15 +58,15 @@
      				<IMG SRC="images/follow-us.png" align="left" STYLE="padding-bottom:20px; padding-right:15px;" ALT=""/>
 					<h4> Follow Us</h4>
 					<p>
-						<a target="_blank" href="https://www.facebook.com/Tenthmatrix-229638843781330/"><IMG SRC="images/facebok-icon.png"  ALT="Facebook"/></a>
-						<a target="_blank" href="https://plus.google.com/u/0/+BalinderWalia"><IMG SRC="images/gmail-icon.png"  ALT="Google Plus" STYLE="padding:0 10px;"/> </a>
-						<a target="_blank" href="https://www.linkedin.com/in/bwalia"><IMG SRC="images/linkdin.png"  ALT="Linkdin"/> </a> 
-						<a target="_blank" href="http://twitter.com/Tenthmatrix"><IMG SRC="images/skype.png" ALT="Skype" STYLE="padding-left:10px;"/></a>
+						<span id="fbHtml"><a target="_blank" href="https://www.facebook.com/Tenthmatrix-229638843781330/"><IMG SRC="images/facebok-icon.png"  ALT="Facebook"/></a></span>
+						<span id="googleHtml"><a target="_blank" href="https://plus.google.com/u/0/+BalinderWalia"><IMG SRC="images/gmail-icon.png"  ALT="Google Plus" STYLE="padding:0 10px;"/> </a></span>
+						<span id="linkedinhtml"><a target="_blank" href="https://www.linkedin.com/in/bwalia"><IMG SRC="images/linkdin.png"  ALT="Linkedin"/> </a> </span>
+						<span id="twitterHtml"><a target="_blank" href="http://twitter.com/Tenthmatrix"><IMG SRC="images/skype.png" ALT="Skype" STYLE="padding-left:10px;"/></a></span>
 					</p>
      			</div>
 
 				<div STYLE="margin-top:50px;">  <IMG SRC="images/copy-right.png" align="left" STYLE="padding-bottom:20px; padding-right:15px;" ALT=""/>
-					<p STYLE="font-size:12px;">Copyright 2017 - All rights reserved<BR>
+					<p STYLE="font-size:12px;" id="copyrightHtmlDiv">Copyright 2017 - All rights reserved<BR>
 					Tenthmatrix Information Systems Ltd. </p> 
 				</div>
 			</div>
@@ -86,8 +86,41 @@
 	<script src="js/wow.min.js"></script>
 	<script type="text/javascript" src="js/parallax-slider/modernizr.custom.28468.js"></script>
     <script type="text/javascript">
+function load_footer_tokens(){
+		var jsonRow="/tokens?code=telephone,company-email,copyright,facebook,google-plus,linkedin,twitter",
+		xhrStatus=$.getJSON(jsonRow,function(html){
+			if(html.aaData){
+				$.each(html.aaData, function(i,row){
+					if(row.token_content!="" && (row.status=="1" || row.status==1)){
+						if(row.code=="facebook"){
+							$("#fbHtml").html('<a target="_blank" href="'+row.token_content+'"><IMG SRC="images/facebok-icon.png"  ALT="Facebook"/></a>');
+						}
+						if(row.code=="google-plus"){
+							$("#googleHtml").html('<a target="_blank" href="'+row.token_content+'"><IMG SRC="images/gmail-icon.png"  ALT="Google Plus" STYLE="padding:0 10px;"/></a>');
+						}
+						if(row.code=="linkedin"){
+							$("#linkedinhtml").html('<a target="_blank" href="'+row.token_content+'"><IMG SRC="images/linkdin.png"  ALT="Linkedin"/></a>');
+						}
+						if(row.code=="twitter"){
+							$("#twitterHtml").html('<a target="_blank" href="'+row.token_content+'"><IMG SRC="images/skype.png" ALT="Skype" STYLE="padding-left:10px;"/></a>');
+						}
+						if(row.code=="copyright"){
+							$("#copyrightHtmlDiv").html(row.token_content);
+						}
+						if(row.code=="company-email"){
+							$("#emailHtmlDiv").html(row.token_content);
+						}
+						if(row.code=="telephone"){
+							$("#telephoneHtmlDiv").html(row.token_content);
+						}
+                    }
+				});
+			}
+		});
+}
 $(document).ready(function(){ 
-	var touch 	= $('#resp-menu');
+	load_footer_tokens();
+		var touch 	= $('#resp-menu');
 	var menu 	= $('.menu');
  
 	$(touch).on('click', function(e) {
