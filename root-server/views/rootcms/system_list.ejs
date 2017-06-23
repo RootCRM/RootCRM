@@ -100,7 +100,7 @@
     													
 											  		for(var i=0; i< list_items.length; i++){	%>
 											  			<tr class="itemClass item_<%= list_items[i].uuid %>">
-											  				<td><input type="hidden" value="<%= list_items[i].uuid %>" id="list_uuid"><input id="labelField" type="hidden" value="<%= list_items[i].label %>"><%= list_items[i].label %></td>
+											  				<td><input type="hidden" value="<%= list_items[i].uuid %>" id="list_uuid"><input class="itemtr_<%= list_items[i].uuid %>" id="labelField" type="hidden" value="<%= list_items[i].label %>"><%= list_items[i].label %></td>
 											  				<td><input id="sort_orderField" type="hidden" value="<%= list_items[i].item_sort_order %>"><%= list_items[i].item_sort_order %></td>
 															<td><input id="statusField" type="hidden" value="<%= list_items[i].status %>"><%= list_items[i].status %></td>
 															<td><a href="javascript:void(0)" title="Edit" onClick="edit_item('<%= list_items[i].uuid %>')"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" onClick="remove_item('<%= list_items[i].uuid %>')" title="Remove"><i class="fa fa-trash"></i></a></td>
@@ -146,7 +146,7 @@
                        <span class="sr-only">Close</span>
                 </button>
                 <h4 class="modal-title" id="myModalLabel">
-                    Bookmark item
+                    Item
                 </h4>
             </div>
 			
@@ -240,7 +240,7 @@ function edit_item(e){
 		}
 		
 		$("#item_label").val(row.find('#labelField').val());
-		('#myModal').modal('show'); 
+		$('#myModal').modal('show'); 
 	}
 }
 
@@ -263,7 +263,7 @@ function savelinkitem(){
 				item_uuid=guid();
 				newEntryFlag=true;
 			}
-			var subHTMLSTR='<td><input type="hidden" value="'+item_uuid+'" id="list_uuid"><input id="labelField" type="hidden" value="'+item_label+'">'+item_label+'</td>';
+			var subHTMLSTR='<td><input type="hidden" value="'+item_uuid+'" id="list_uuid"><input class="itemtr_'+item_uuid+'" id="labelField" type="hidden" value="'+item_label+'">'+item_label+'</td>';
 				subHTMLSTR+='<td><input id="sort_orderField" type="hidden" value="'+item_sort_order+'">'+item_sort_order+'</td>';
 				subHTMLSTR+='<td><input id="statusField" type="hidden" value="'+itemStatus+'">'+itemStatus+'</td>';
 				subHTMLSTR+='<td><a href="javascript:void(0)" title="Edit" onClick="edit_item(\''+item_uuid+'\')"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" onClick="remove_item(\''+item_uuid+'\')" title="Remove"><i class="fa fa-trash"></i></a></td>';
