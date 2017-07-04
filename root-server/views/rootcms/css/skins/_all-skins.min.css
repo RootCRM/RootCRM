@@ -34,12 +34,12 @@
 }
 }
 .skin-blue .main-header .logo {
-	background-color: #444;
+	background-color: #fff;
 	color: #fff;
-	border-bottom: 0 solid transparent
+	border-bottom: 1px solid #ddd;
 }
 .skin-blue .main-header .logo:hover {
-	background-color: #000
+	background-color: #efefef;
 }
 .skin-blue .main-header li.user-header {
 	background-color: #3c8dbc
@@ -63,7 +63,7 @@
 }
 .skin-blue .sidebar-menu>li:hover>a, .skin-blue .sidebar-menu>li.active>a {
 	color: #fff;
-	background: #fbb83b;
+	background: #b9003f;
 	border-left-color: #1e282c;
 }
 .skin-blue .sidebar-menu>li>.treeview-menu {
