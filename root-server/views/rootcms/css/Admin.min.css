@@ -2074,16 +2074,16 @@ border-left:none;
 	background-color: #00acd6
 }
 .btn-danger {
-	background-color: #fbb83b;
-	border-bottom: 3px solid #d69d33;
-border-right: 3px solid #d69d33;
+	background-color: #b9003f;
+	border-bottom: 2px solid #a50033;
+border-right: 2px solid #a50033;
 border-left:none;
 border-top:none;
 	
 }
 .btn-danger:hover, .btn-danger:active, .btn-danger.hover {
-	background-color: #fbb83b;border-bottom: 3px solid #d69d33;
-border-right: 3px solid #d69d33;
+	background-color: #b9003f;border-bottom: 2px solid #a50033;
+border-right: 2px solid #a50033;
 border-left:none;
 border-top:none;
 	
@@ -2093,6 +2093,8 @@ border-top:none;
 .btn-danger.focus, .btn-danger:focus{
 	background-color: #dc9a1e!important;
 }
+
+
 
 
 .btn-warning {
@@ -4882,10 +4884,14 @@ border:1px solid #CCCCCC;-webkit-box-shadow: #FEFFFF 0px 1px 1px ;-moz-box-shado
  .logo-margin {
     margin-top: 100px;
 }
+
+
 .login-panel .panel-heading {
-    background: #2a3f54;
+    background: #444444;
     color: #fff;
 }
+
+
 
 .checkbox input, .radio input{
 	display:block!important;
