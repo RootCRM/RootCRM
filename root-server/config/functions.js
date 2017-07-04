@@ -122,22 +122,28 @@ var self = module.exports =
     							} 
 							}
 							if(subQueryStr!=""){
+								var tempQueryStr='{';
 								if(query!="{") {
-									query+= ', ';
+									tempQueryStr= '{ $and: ['+query+'}, {';
 								}
 								if(templateResponse.search_condition=="and" || templateResponse.search_condition=="AND" ){
-									query+= '$and:[';
+									tempQueryStr+= '$and:[';
 								}else{
-									query+= '$or:[';
+									tempQueryStr+= '$or:[';
 								}
-								query+=subQueryStr;	
-								query+=']';
+								tempQueryStr+=subQueryStr;	
+								tempQueryStr+=']';
+								if(query!="{") {
+									tempQueryStr+=' }]';
+								}
+								query=tempQueryStr;
 							}
 						}
 					}
 					
 				}
 				query+="}";
+				
 				if(templateResponse.listing_columns){
 					eval('var obj='+query);
 					eval('var fetchFieldsobj='+fetchFieldsObj);
@@ -486,6 +492,8 @@ var self = module.exports =
 					allCollections.push(coll[i].name);
 				}
 			}
+			
+			console.log(allCollections);
 			return cb(allCollections);
 		});
 	},

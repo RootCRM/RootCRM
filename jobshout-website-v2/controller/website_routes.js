@@ -22,7 +22,7 @@ module.exports = function(init, app, db){
 		initFunctions.returnNavigation(db, function(resultNav) {
 			db.collection('tokens').findOne({"code" : "home-page-about-us", "status" : { $in: [ 1, "1" ] }, "uuid_system" : init.system_id}, {token_content : 1}, function(err, foundRecord) {
 				var tokenStr='';
-				if(foundRecord.token_content && foundRecord.token_content!=""){
+				if(foundRecord && foundRecord.token_content && foundRecord.token_content!=""){
 					tokenStr = foundRecord.token_content;
 				}
 				res.render('index', {
@@ -37,7 +37,7 @@ module.exports = function(init, app, db){
 		initFunctions.returnNavigation(db, function(resultNav) {
 			db.collection('tokens').findOne({"code" : "home-page-about-us", "status" : { $in: [ 1, "1" ] }, "uuid_system" : init.system_id}, {token_content : 1}, function(err, foundRecord) {
 				var tokenStr='';
-				if(foundRecord.token_content && foundRecord.token_content!=""){
+				if(foundRecord && foundRecord.token_content && foundRecord.token_content!=""){
 					tokenStr = foundRecord.token_content;
 				}
 				res.render('index', {

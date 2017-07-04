@@ -22,6 +22,6 @@
     	mongodb : mongodbRe,
     	MongoClient : MongoClient,
     	mongoConnUrl : url,
-    	port : 3002,
+    	port : 3003,
     	system_id : "5947cd768b69ec720d5814d7",
 	};

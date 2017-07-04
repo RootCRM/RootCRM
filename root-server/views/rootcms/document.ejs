@@ -5,9 +5,7 @@
 <style>
 #select_systems_chosen{
 width : 402px!important;
-line-height: 36px !important;
 }
-
 </style>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
@@ -30,7 +28,7 @@ line-height: 36px !important;
     		</section>	
     		<section class="content">
       			
-		<div class="row">
+		<div class="row" id="printMessageDivID">
 			<% if (typeof queryStr !== 'undefined' && queryStr !== null) {
     				if(queryStr.error_msg) {	%>
 			<div class="col-sm-12"><div class="alert alert-danger alert-dismissable">
@@ -100,12 +98,7 @@ line-height: 36px !important;
                     							</select>
       										</div>
   										</div>
-  										<div class="form-group">
-    										<label for="firstname" class="col-sm-2  control-label">Image Path </label>
-    										<div class="col-sm-9">
-      											<input type="text" class="form-control" id="image_path" name="image_path" value="<% if (typeof contentObj.image_path !== 'undefined' && contentObj.image_path !== null) { %><%= contentObj.image_path %><% } %>">
-    										</div>
-  										</div>
+  										
   										<div class="form-group no-margn-bottom">
               								<label for="dtp_input1" class="col-md-2 control-label" >Published On  <span class="required">*</span></label>
                   							<div class="col-md-6 col-lg-4" >
@@ -131,6 +124,33 @@ line-height: 36px !important;
 										</div>
   										
    									</div>
+   									<% if (typeof contentObj._id !== 'undefined' && contentObj._id !== null) { %>
+   									<div class=" col-sm-12 col-lg-3">
+   										<div class="form-group">
+    										<label for="" class="col-sm-2 control-label">Image</label>
+    										<div class="col-sm-9 div_imagetranscrits ">
+    											
+    										</div>
+  										</div>
+  										<div class="form-group">
+    										<label for="firstname" class="col-sm-2  control-label">Image Path </label>
+    										<div class="col-sm-9">
+      											<input type="text" class="form-control" id="image_path" name="image_path" value="<% if (typeof contentObj.image_path !== 'undefined' && contentObj.image_path !== null) { %><%= contentObj.image_path %><% } %>">
+    										</div>
+  										</div>
+   										<div class="form-group">
+    										<label for="" class="col-sm-2 control-label">Upload image</label>
+    										<div class="col-sm-9  ">
+    											<input type="hidden" id="file_type" value="document_image">
+    											<input type="file" id="file" class="form-control col-md-5 col-xs-12" value="">
+    										</div>
+  										</div>
+  										<div class="form-group">
+  											<label for="" class="col-sm-2 control-label">&nbsp;</label>
+    										<button type="button" class="btn btn-info sm-btn" onclick="upload_single_file(); return false;">Upload</button>
+  										</div>
+   									</div>
+   									<% } %>
        							</div>
       						</div>
       						<div role="tabpanel" class="tab-pane fade" id="licenceno" aria-labelledby="profile-tab">
@@ -513,6 +533,8 @@ function generate_metaTags(){
 }
 
 $(document).ready(function(){
+	load_team_logo();
+	
 	load_systems();
 	
 	$("#type").change(function(){
@@ -654,6 +676,73 @@ function load_systems(){
    		}
 	});
 }
+function load_team_logo(){
+	var noImageStr= backendDirectory+'/images/no_image.png';
+	if($("#id").val()!="")	{
+		$('.div_imagetranscrits').html('<img src="'+backendDirectory+"/file/"+$("#id").val()+'?'+$.now()+'" class="img-responsive" style="border-radius: 0 0 3px 3px; border: 1px solid #ddd;" onerror="this.src=\''+noImageStr+'\'"/>')
+	} else{
+		$('.div_imagetranscrits').html('<img id="" src="'+$('#image_path').val()+'" class="img-responsive" style="border-radius: 0 0 3px 3px; border: 1px solid #ddd;" onerror="this.src=\''+noImageStr+'\'">');
+	}
+}
+function upload_single_file(){
+	$(".uploadFile").remove();
+	if($('#file').val().length>0)	{
+		var data = new FormData();
+		data.append('related_collection', $('#table_name').val());
+		data.append('collection_id', $('#id').val());
+		data.append('type', $('#file_type').val());
+		
+		var filesize=Number($('#file')[0].files[0].size)/(1024*1024);
+		
+		if(filesize>5){
+			$('#printMessageDivID').before('<div class="alert alert-error alert-dismissable uploadFile"><button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>The file size larger than 5MB is not allowed</div>');
+			$('#file').focus();
+		}else{
+			var files= $('#file')[0].files;
+			$.each(files, function(key, value){
+				data.append('file', value);
+			});
+			
+			$.ajax({
+				url: backendDirectory+'/find_remove_file',
+				type: 'POST',
+				data: {'related_collection' : $('#table_name').val(), 'collection_id': $('#id').val()},
+				dataType: 'json',
+				success: function(response){
+					if(response.success){
+						$.ajax({
+							url: backendDirectory+'/upload',
+							type: 'POST',
+							data: data,
+							dataType: 'json',
+							contentType: false,
+							enctype: 'multipart/form-data',
+							cache: false,
+							processData: false, // Don't process the files
+							success: function(response){
+								if(response.success){
+									$("#image_path").val("");
+									load_team_logo();
+									__alertModalBox(response.success);
+								} else if(response.error) {
+									$('#printMessageDivID').before('<div class="alert alert-error alert-dismissable uploadFile"><button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>'+response.error+'</div>');
+								}else {
+									$('#printMessageDivID').before('<div class="alert alert-error alert-dismissable uploadFile"><button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>Sorry, error in uploading file!</div>');
+								}
+							}
+						});
+					}else {
+						$('#printMessageDivID').before('<div class="alert alert-error alert-dismissable uploadFile"><button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>Sorry, error in uploading file!</div>');
+					}
+				}
+			});
+			
+		}
+	}	else {
+		$('#printMessageDivID').before('<div class="alert alert-error alert-dismissable uploadFile"><button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>Please select file to upload!</div>');
+	}
+}
+
 </script>
 <script type="text/javascript" src="plugins/datetime-picker/bootstrap-datetimepicker.js" charset="UTF-8"></script>
 <script type="text/javascript">
