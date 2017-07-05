@@ -26,11 +26,11 @@
     	mongoConnUrl : url,
     	port : 3009,
 		cookieName : "rootcms_login",
-		backendDirectoryPath : "/rootcms",
-		backendDirectoryName : "rootcms",
+		backendDirectoryPath : "/jobshout",
+		backendDirectoryName : "jobshout",
 		adminTablesArr : definedAdminTablesArr,
-		system_name : "HHTCC Club",
+		system_name : "Tenthmatrix Website",
 		recipientStr : 'bwalia@tenthmatrix.co.uk',
 		websiteUrl : 'http://www.tenthmatrix.co.uk',
-		appUrl : 'http://www.tenthmatrix.co.uk/rootcms'
+		appUrl : 'http://www.tenthmatrix.co.uk/jobshout'
 	};

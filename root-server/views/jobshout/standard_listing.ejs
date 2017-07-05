@@ -44,18 +44,17 @@ if (typeof searched_keyword !== 'undefined' && searched_keyword !== null) {
 		<div CLASS="row">
 			<div class="clearfix hidden-xs">
 				<div class="col-md-6" style="">
-					<div class="btn-group open hidden-xs" id="statusActionDiv" style="background: #b9003f;border-radius: 3px; margin-bottom:5px; display:none;margin-right:10px;">
-  						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="true" style="color: #fff;border-radius: 0;">Action<span class="caret"></span></a>
-						<div class="dropdown-menu" style="width: 380px;">
-							<input class="" id="selectedRows" type="hidden" value="">
-     						<div class="col-md-6"><a href="javascript:void(0)" onClick="setSelectedAs('1');return false;" class="btn btn-default"> Set selected as active </a> </div>
-				            <div class="col-md-6"><a href="javascript:void(0)" onClick="filter_by_status('1');return false;" class="btn btn-default"> Show all active </a> </div>
-				            <div class="col-md-6" style="margin-top:8px;"><a href="javascript:void(0)" onClick="setSelectedAs('0');return false;" class="btn btn-default"> Set selected as inactive </a> </div>
-				            <div class="col-md-6" style="margin-top:8px;"><a href="javascript:void(0)" onClick="filter_by_status('0');return false;" class="btn btn-default"> Show all inactive  </a></div>
-						</div>
-					</div>
-	
+					<button data-toggle="collapse" CLASS="btn btn-danger hidden-xs" STYLE="" data-target="#statusBtn" id="statusActionDiv"><i CLASS="fa fa-bars"></i>  Action </button>
 					<span class="display_records_count" style="font-weight:bold;"></span>
+					<div id="statusBtn" class="collapse" style="background-color: #efefef; border-radius: 4px;padding: 12px; margin-top: 11px; overflow:hidden;">
+						<div class="">
+							<input class="" id="selectedRows" type="hidden" value="">
+     						<div class="col-md-6"><a href="javascript:void(0)" onClick="setSelectedAs('1');return false;" class="btn btn-danger" STYLE="width:100%;"> Set selected as active </a> </div>
+				            <div class="col-md-6"><a href="javascript:void(0)" onClick="filter_by_status('1');return false;" class="btn btn-danger" STYLE="width:100%;"> Show all active </a> </div>
+				            <div class="col-md-6" style="margin-top:8px;"><a href="javascript:void(0)" onClick="setSelectedAs('0');return false;" class="btn btn-danger" STYLE="width:100%;"> Set selected as inactive </a> </div>
+				            <div class="col-md-6" style="margin-top:8px;"><a href="javascript:void(0)" onClick="filter_by_status('0');return false;" class="btn btn-danger" STYLE="width:100%;"> Show all inactive  </a></div>
+						</div>			
+					</div>
 				</div>
 				<div class="col-md-6 text-right">
       				<div class="form-group no-margin">
