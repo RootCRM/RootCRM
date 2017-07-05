@@ -43,7 +43,20 @@ if (typeof searched_keyword !== 'undefined' && searched_keyword !== null) {
 	<section class="content">
 		<div CLASS="row">
 			<div class="clearfix hidden-xs">
-				<div class="col-md-6 display_records_count" style="padding-top:17px;font-weight:bold;"></div>
+				<div class="col-md-6" style="">
+					<div class="btn-group open hidden-xs" id="statusActionDiv" style="background: #b9003f;border-radius: 3px; margin-bottom:5px; display:none;margin-right:10px;">
+  						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="true" style="color: #fff;border-radius: 0;">Action<span class="caret"></span></a>
+						<div class="dropdown-menu" style="width: 380px;">
+							<input class="" id="selectedRows" type="hidden" value="">
+     						<div class="col-md-6"><a href="javascript:void(0)" onClick="setSelectedAs('1');return false;" class="btn btn-default"> Set selected as active </a> </div>
+				            <div class="col-md-6"><a href="javascript:void(0)" onClick="filter_by_status('1');return false;" class="btn btn-default"> Show all active </a> </div>
+				            <div class="col-md-6" style="margin-top:8px;"><a href="javascript:void(0)" onClick="setSelectedAs('0');return false;" class="btn btn-default"> Set selected as inactive </a> </div>
+				            <div class="col-md-6" style="margin-top:8px;"><a href="javascript:void(0)" onClick="filter_by_status('0');return false;" class="btn btn-default"> Show all inactive  </a></div>
+						</div>
+					</div>
+	
+					<span class="display_records_count" style="font-weight:bold;"></span>
+				</div>
 				<div class="col-md-6 text-right">
       				<div class="form-group no-margin">
      					<div class="pull-right margin-bottom-10 ">

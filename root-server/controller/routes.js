@@ -1119,6 +1119,62 @@ app.post(backendDirectoryPath+'/pull_team_from_history/', requireLogin, function
 	}	
 }); 
 
+//post api of change status
+app.post(backendDirectoryPath+'/api_change_status/', requireLogin, function(req, res) {
+	var selected_values_str="", statusNum="", collectionStr="", fieldNameStr='';
+	var outputObj = new Object();
+	
+	if(req.authenticationBool){
+		if(req.body.collection){
+			collectionStr=req.body.collection;
+		}
+	
+		if(req.body.selected_values){
+			selected_values_str=req.body.selected_values;
+		}
+	
+		if(req.body.status){
+			statusNum=parseInt(req.body.status);
+		}
+		if(req.body.status_field){
+			fieldNameStr= req.body.status_field;
+		}
+		
+		if(collectionStr!="" && selected_values_str!="" && fieldNameStr!=""){
+			var selectedArr = selected_values_str.split(',');
+			
+			if(selectedArr && selectedArr.length>0)	{
+				var definedRowIdArr=new Array();
+			
+				//loop and convert in mongo object id
+				for (var i=0; i < selectedArr.length; i++) {
+					var tempID=new mongodb.ObjectID(selectedArr[i]);
+					definedRowIdArr.push(tempID);
+				}
+				var updateQueryStr = "{'$set' : {"+fieldNameStr+" : "+statusNum+" }}";
+				eval('var updateQuery='+updateQueryStr);
+    			db.collection(collectionStr).update({_id : { $in: definedRowIdArr } }, updateQuery, { multi: true }, (err1, response1) => {
+      				if(err1){
+      					outputObj["error"]   = "Error while updating status!";
+      				}else{
+      					outputObj["success"]   = "Successfully changed the status of selected items!";
+      				}
+      				res.send(outputObj);
+      			});
+      		} else {
+      			outputObj["error"]   = "Please select some items before performing action!";
+				res.send(outputObj);
+      		}	
+		}else{
+			outputObj["error"]   = "Please pass all the required parameters!";
+			res.send(outputObj);
+		}
+	}else{
+		outputObj["error"]   = "Authorization error!";
+		res.send(outputObj);
+	}
+}); 
+
 //post api of CRUD
 app.post(backendDirectoryPath+'/api_crud_post/', requireLogin, function(req, res) {
 	var uniqueFieldNameStr = "", uniqueFieldValueStr="", actionStr="", collectionStr="";

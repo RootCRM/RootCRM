@@ -21,7 +21,7 @@ var self = module.exports =
   // These functions which will be called in the main file, which is server.js
   	
   	templateSearch : function (db, templateStr, activeSystemsStr, req, cb){
-     	var itemsPerPage = 10, pageNum=1;
+     	var itemsPerPage = 10, pageNum=1, findFieldNameStr="", findFieldValueStr="";
 		var outputObj = new Object();
 	
 		db.collection('system_templates').findOne({"code": templateStr , "status": { $in: [ 1, "1" ] } }, function(err, templateResponse) {
@@ -30,7 +30,12 @@ var self = module.exports =
 				cb(outputObj);
 			}
 			if(templateResponse){
-		
+				if(req.query.findFieldName){
+					findFieldNameStr=req.query.findFieldName;
+				}
+				if(req.query.findFieldValue){
+					findFieldValueStr=req.query.findFieldValue;
+				}
 				if(req.query.start){
 					pageNum=parseInt(req.query.start);
 				}
@@ -141,6 +146,18 @@ var self = module.exports =
 						}
 					}
 					
+				}
+				//search by criteria passed
+				if(findFieldValueStr!="" && findFieldNameStr!=""){
+					if(query!="{"){
+     					query+=",";
+     				}
+     				
+     				if(parseInt(findFieldValueStr)!=="NaN"){
+						query+=" '"+findFieldNameStr+"': { $in: ["+parseInt(findFieldValueStr)+", '"+findFieldValueStr+"'] } ";
+					}else{
+						query+=" '"+findFieldNameStr+"': { $in: ['"+findFieldValueStr+"'] } ";
+					}
 				}
 				query+="}";
 				
@@ -492,8 +509,6 @@ var self = module.exports =
 					allCollections.push(coll[i].name);
 				}
 			}
-			
-			console.log(allCollections);
 			return cb(allCollections);
 		});
 	},

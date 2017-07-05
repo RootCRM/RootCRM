@@ -1,7 +1,7 @@
 var xhrStatus;
 
-var pageSize=15, totalNum=0, totalDisplayedNum=0;
-var start=0, end=pageSize;
+var pageSize=15, totalNum=0, totalDisplayedNum=0, checkAllFlag= false;
+var start=0, end=pageSize, collectionNameStr='', statusFieldNameStr='', statusFieldValStr='';
 var accessRightCode=parseInt(access_right);
 var complete=false, completeScroll=false;
 
@@ -20,9 +20,62 @@ function generateHeading(e, upperCase){
 	return result;
 }
 
+function filter_by_status(valNum){
+	totalDisplayedNum=0;
+	statusFieldValStr = valNum;
+	$('#table-breakpoint').basictable('destroy');
+	$("#documents_data").html('');
+	$('#display_more_btn').hide();
+	$('#img_loading_div').show();
+	start=0;
+	end=start+pageSize;
+	load_data();
+}
+
+function setSelectedAs(valNum){
+	var selected='';
+	$('.check').each(function(){
+		if($(this).is(":checked")){
+			if(selected==''){
+				selected=$(this).val();
+			}else{
+				selected+=","+$(this).val();
+			}
+		}
+	});
+		
+	if(selected!=''){
+		$("#selectedRows").val(selected);
+			$.ajax({
+				type: "POST",
+				dataType: "json",
+				url: backendDirectory+"/api_change_status",
+				data: {"collection" : collectionNameStr, "selected_values" : $("#selectedRows").val(), "status" : valNum, "status_field" : statusFieldNameStr},
+				success: function(response){
+					if(response.success){
+						totalDisplayedNum=0;
+						$('#table-breakpoint').basictable('destroy');
+						searchStr="";
+						$(".searchFieldClass").val("");
+						$("#documents_data").html('');
+						$('#display_more_btn').hide();
+						$('#img_loading_div').show();
+						start=0;
+						load_data();
+					}else if(response.error){
+						__alertModalBox(response.error);
+					}
+				}
+			});
+	}else{
+		__alertModalBox('Please select some items before performing action!');
+	}
+}
+
 	function searchKeyword(e){
 		var searchField= $("#"+e).val();
 		if(searchField!=""){
+			totalDisplayedNum=0;
 			$('#table-breakpoint').basictable('destroy');
 			$("#documents_data").html('');
 			$("#"+e).removeClass("errorPlaceHolder");
@@ -58,6 +111,7 @@ function generateHeading(e, upperCase){
 		$("#searchBtn").click(function()	{
 			searchKeyword('searchField');
 		});
+
 		$(window).scroll(function(){
 			if ($(window).scrollTop() == $(document).height() - $(window).height()){
 				if(complete==false && completeScroll==false) {
@@ -66,6 +120,18 @@ function generateHeading(e, upperCase){
 			}
 		});	
 	});
+
+function set_check_all(e){
+	if ($(e).is(":checked")) {
+		checkAllFlag=true;
+		$('.check_all').prop("checked", true);
+  		$('.check').prop("checked", true);
+  	} else {
+  		checkAllFlag=false;
+		$('.check_all').prop("checked", false);
+  		$('.check').prop("checked", false);
+  	} 
+}
 
 function timeConverter(UNIX_timestamp){
   var a = new Date(UNIX_timestamp * 1000);
@@ -81,6 +147,7 @@ function timeConverter(UNIX_timestamp){
 }
 
 function refresh_data(){
+	totalDisplayedNum=0
 	$('#table-breakpoint').basictable('destroy');
 	searchStr="";
 	$(".searchFieldClass").val("");
@@ -108,6 +175,9 @@ function load_more(){
 		completeScroll=true;
 		$(".alert").remove();
 		var jsonRow=backendDirectory+"/api_fetch_list?start="+start+"&limit="+pageSize+"&templateStr="+templateStr+"&s="+searchStr;
+		if(statusFieldNameStr!="" && statusFieldValStr!=""){
+			jsonRow+="&findFieldName="+statusFieldNameStr+"&findFieldValue="+statusFieldValStr;
+		}
 		if(xhrStatus) xhrStatus.abort();
 		xhrStatus=$.getJSON(jsonRow,function(html){
 			if(html.error){
@@ -116,17 +186,23 @@ function load_more(){
 				$("#table-breakpoint").before('<div class="alert alert-danger">'+html.error+'</div>');
 			}else{
 				var editorPage="javascript:void(0)";
+				
 				if(html.total){
 					totalNum=parseInt(html.total);
+				} else {
+					totalNum=0;
 				}
 				if(html.iTotalRecordsReturned){
 					totalDisplayedNum=totalDisplayedNum+parseInt(html.iTotalRecordsReturned);
 				}
 				if(totalDisplayedNum>0 && totalNum>0){
 					$(".display_records_count").html("Showing "+totalDisplayedNum+" out of "+totalNum);
+					$(".display_records_count").show();
+				}else{
+					$(".display_records_count").hide();
 				}
 				if (typeof html.display_columns !== 'undefined' && html.display_columns !== null && html.display_columns!="" && start==0){
-					var headFootStr="";
+					var headFootStr='<th class="hidden-xs"><input type="checkbox" class="check_all" onClick="set_check_all(this);"></th>';
 					$.each(html.display_columns, function(i,row){
 						headFootStr+="<th>"+generateHeading(row)+"</th>";
 					});
@@ -134,6 +210,7 @@ function load_more(){
 					
 				}
 				if (typeof html.table !== 'undefined' && html.table !== null && html.table!="" && start==0){
+					collectionNameStr=html.table;
 					$("#pageMainHeading").html(generateHeading(html.table)+" <small>LIST VIEW</small>");
 					$("#breadcrumbTitle").html(generateHeading(html.table));
 				}
@@ -154,6 +231,15 @@ function load_more(){
 						var uniqueFieldVal="";
 						if (typeof html.uniqueField !== 'undefined' && html.uniqueField !== null && row.hasOwnProperty(html.uniqueField) ==true){
 							uniqueFieldVal=row[html.uniqueField];
+							if(accessRightCode==0){
+							
+							}else{
+								if(checkAllFlag){
+									contentHtml+='<td class="hidden-xs"><input type="checkbox" class="check" checked value="'+uniqueFieldVal+'"></td>';
+								}else{
+									contentHtml+='<td class="hidden-xs"><input type="checkbox" class="check" value="'+uniqueFieldVal+'"></td>';
+								}	
+							}
 						}
 						if (typeof html.display_columns !== 'undefined' && html.display_columns !== null && html.display_columns!=""){
 							$.each(html.display_columns, function(k,col){
@@ -161,6 +247,8 @@ function load_more(){
 									if(row.hasOwnProperty(col)==true && (col=="Modified" || col=="modified_timestamp" || col=="modified" || col=="Created" || col=="created_timestamp" || col=="created")){
 										contentHtml+="<td>"+timeConverter(row[col])+"</td>";
 									}else if(row.hasOwnProperty(col)==true && (col=="Status" || col=="status" || col=="active")){
+										statusFieldNameStr = col;
+										$("#statusActionDiv").show();
 										if (typeof html.table !== 'undefined' && html.table !== null && html.table=="email_queue"){
 											contentHtml+="<td>"+row[col]+"</td>";
 										}else{
