@@ -2073,27 +2073,38 @@ border-left:none;
 .btn-info:hover, .btn-info:active, .btn-info.hover {
 	background-color: #00acd6
 }
+
+
+
 .btn-danger {
-	background-color: #b9003f;
-	border-bottom: 2px solid #a50033;
-border-right: 2px solid #a50033;
+
+	background-color: #fbb83b;
+
+	border-bottom: 3px solid #8c0025;
+
+border-right: 3px solid #8c0025;
+
 border-left:none;
+
 border-top:none;
+
 	
+
 }
+
 .btn-danger:hover, .btn-danger:active, .btn-danger.hover {
-	background-color: #b9003f;border-bottom: 2px solid #a50033;
-border-right: 2px solid #a50033;
+
+	background-color: #8c0025;border-bottom: 3px solid #fbb83b;
+
+border-right: 3px solid #fbb83b;
+
 border-left:none;
+
 border-top:none;
-	
+
+
 
 }
-
-.btn-danger.focus, .btn-danger:focus{
-	background-color: #dc9a1e!important;
-}
-
 
 
 
