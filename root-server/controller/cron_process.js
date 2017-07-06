@@ -21,42 +21,54 @@ module.exports = function(init, db){
 	
 	//send pending emails
 	var send_email = function (db, db_id, from_addr, to_addr, subjectStr, bodyStr, cb){
-		var outputObj = new Object();
-		var emailApiUsername = process.env.emailApiUsername;
-  		var emailApiHost = process.env.emailApiHost;
-  		        
-		var emailLinkStr= 'smtps://'+emailApiUsername+':'+emailApiHost;
+		db.collection('system_lists').findOne({code: "aws-email-details"}, function(err, listDetails) {
+			var outputObj = new Object();
+			var emailApiUsername = process.env.emailApiUsername;
+  			var emailApiHost = process.env.emailApiHost;
+  		  	
+  		  	if(listDetails && listDetails.list && listDetails.list.length>0){
+				var listArr = listDetails.list;
+				for(var i=0; i<listArr.length; i++){
+					if(listArr[i].label=="Username")	{
+						emailApiUsername = listArr[i].value;
+					} else if(listArr[i].label=="Host"){
+						emailApiHost = listArr[i].value;
+					}
+				}
+			}
+  		      
+			var emailLinkStr= 'smtps://'+emailApiUsername+':'+emailApiHost;
 		
-		// create reusable transporter object using the default SMTP transport 
-		var transporter = nodemailer.createTransport(emailLinkStr);		
+			// create reusable transporter object using the default SMTP transport 
+			var transporter = nodemailer.createTransport(emailLinkStr);		
 				
-		// setup e-mail data with unicode symbols 
-		var mailOptions = {
-			from: from_addr, // sender address 
-    		to: to_addr, // list of receivers 
-    		subject: subjectStr, // Subject line 
-   			html: bodyStr // plaintext body
-		};
+			// setup e-mail data with unicode symbols 
+			var mailOptions = {
+				from: from_addr, // sender address 
+    			to: to_addr, // list of receivers 
+    			subject: subjectStr, // Subject line 
+   				html: bodyStr // plaintext body
+			};
 		
- 		// send mail with defined transport object 
-		transporter.sendMail(mailOptions, function(error, info){
-			if(error){
-				outputObj["error"]   = error;
-        		db.collection('email_queue').update({_id : new mongodb.ObjectID(db_id)}, { $inc: { status: 1 } }, (err, response) => {
-					if (response){
-						return cb(outputObj);
-      				}
-  				});
-    		}	else	{
-    			outputObj["success"]   = info.response;
+ 			// send mail with defined transport object 
+			transporter.sendMail(mailOptions, function(error, info){
+				if(error){
+					outputObj["error"]   = error;
+        			db.collection('email_queue').update({_id : new mongodb.ObjectID(db_id)}, { $inc: { status: 1 } }, (err, response) => {
+						if (response){
+							return cb(outputObj);
+      					}
+  					});
+    			}	else	{
+    				outputObj["success"]   = info.response;
     			
-    			db.collection('email_queue').update({_id : new mongodb.ObjectID(db_id)}, { $set: {"status" : -1 } }, (err, response) => {
-					if (response){
-						return cb(outputObj);
-      				}
-  				});
-    		}
-    		
+    				db.collection('email_queue').update({_id : new mongodb.ObjectID(db_id)}, { $set: {"status" : -1 } }, (err, response) => {
+						if (response){
+							return cb(outputObj);
+      					}
+  					});
+    			}
+    		});
 		});
 	}
 	 

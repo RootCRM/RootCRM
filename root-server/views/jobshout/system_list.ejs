@@ -85,6 +85,7 @@
 												<thead>
 												  <tr class="item">
 												  	  <th>Label</th>
+												  	  <th>Value</th>
 													  <th>Sort Order</th>
 													  <th>Status</th>
 													  <th colspan="2" align="center">Actions</th>
@@ -101,7 +102,15 @@
 											  		for(var i=0; i< list_items.length; i++){	%>
 											  			<tr class="itemClass item_<%= list_items[i].uuid %>">
 											  				<td><input type="hidden" value="<%= list_items[i].uuid %>" id="list_uuid"><input class="itemtr_<%= list_items[i].uuid %>" id="labelField" type="hidden" value="<%= list_items[i].label %>"><%= list_items[i].label %></td>
-											  				<td><input id="sort_orderField" type="hidden" value="<%= list_items[i].item_sort_order %>"><%= list_items[i].item_sort_order %></td>
+											  				<td>
+											  					<% var listValueStr='';
+											  					if(list_items[i].value) {
+											  						listValueStr=list_items[i].value;
+											  					}
+											  					%>
+											  					<input id="labelValueField" type="hidden" value="<%= listValueStr %>"><%= listValueStr %></td>
+											  				<td><input id="sort_orderField" type="hidden" value="<%= list_items[i].item_sort_order %>"><%= list_items[i].item_sort_order %>
+											  			</td>
 															<td><input id="statusField" type="hidden" value="<%= list_items[i].status %>"><%= list_items[i].status %></td>
 															<td><a href="javascript:void(0)" title="Edit" onClick="edit_item('<%= list_items[i].uuid %>')"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" onClick="remove_item('<%= list_items[i].uuid %>')" title="Remove"><i class="fa fa-trash"></i></a></td>
 														</tr>
@@ -165,10 +174,13 @@
                       <input class="form-control" id="item_label" placeholder="Enter Label"/>
                       <input type="hidden" class="form-control" id="item_uuid"/>
                   </div>
-                  
+                  <div class="form-group" style="margin-top:5px;">
+                 	<label><span for="item_type"><strong>Value</strong></span></label>
+                	<input type="text" class="form-control" id="item_value" placeholder="Value" value=""/>
+                  </div>
                  <div class="form-group" style="margin-top:5px;">
-                 <label >   <span for="item_type"><strong>Sort Order</strong></span></label>
-                	<input type="" class="form-control" id="item_sort_order" placeholder="Sort Order" value="0"/>
+                 	<label><span for="item_type"><strong>Sort Order</strong></span></label>
+                	<input type="text" class="form-control" id="item_sort_order" placeholder="Sort Order" value="0"/>
                   </div>
                   <div class="form-group">
 						<LABEL> <span for="item_type"><strong>Status</strong></span></LABEL>
@@ -182,7 +194,7 @@
             <!-- Modal Footer -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal" onClick="resetItemForm()">
-                            Close
+                	Close
                 </button>
                 <button type="button" class="btn btn-primary" onClick="savelinkitem()">
                     Add
@@ -209,6 +221,8 @@ function generateObjectJson(){
 		var uuid=$(this).find('#list_uuid').val();
   		createObject['uuid']=$(this).find('#list_uuid').val();
   		createObject['label']=$(this).find('#labelField').val();
+  		createObject['value']=$(this).find('#labelValueField').val();
+  		
   		var sortORderNum=$(this).find('#sort_orderField').val();
   		
   		if(sortORderNum=="" || sortORderNum==null || sortORderNum === 'undefined'){
@@ -247,6 +261,7 @@ function edit_item(e){
 function savelinkitem(){
 	$("#msgSpan").remove();
 	var item_uuid=$("#item_uuid").val();
+	var item_value = $("#item_value").val();
 	var item_label=$("#item_label").val();
 	var item_sort_order=$("#item_sort_order").val();
 	var item_active=$("#item_active").val();
@@ -264,6 +279,7 @@ function savelinkitem(){
 				newEntryFlag=true;
 			}
 			var subHTMLSTR='<td><input type="hidden" value="'+item_uuid+'" id="list_uuid"><input class="itemtr_'+item_uuid+'" id="labelField" type="hidden" value="'+item_label+'">'+item_label+'</td>';
+				subHTMLSTR+='<td><input id="labelValueField" type="hidden" value="'+item_value+'">'+item_value+'</td>';
 				subHTMLSTR+='<td><input id="sort_orderField" type="hidden" value="'+item_sort_order+'">'+item_sort_order+'</td>';
 				subHTMLSTR+='<td><input id="statusField" type="hidden" value="'+itemStatus+'">'+itemStatus+'</td>';
 				subHTMLSTR+='<td><a href="javascript:void(0)" title="Edit" onClick="edit_item(\''+item_uuid+'\')"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" onClick="remove_item(\''+item_uuid+'\')" title="Remove"><i class="fa fa-trash"></i></a></td>';
@@ -290,6 +306,7 @@ function savelinkitem(){
 function resetItemForm(){
 	$("#msgSpan").remove();
 	$("#item_uuid").val("");
+	$("#item_value").val("");
 	$("#item_label").val('');
 	$("#item_sort_order").val(0);
 	$("#item_active").val(1);
