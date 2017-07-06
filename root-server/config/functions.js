@@ -557,46 +557,57 @@ var self = module.exports =
 	
 	send_email : function (db, from_email, sender_name, to_email, subject, plaintext, htmlContent, cb){
   		var outputObj = new Object();
+  		db.collection('system_lists').findOne({code: "aws-email-details"}, function(err, listDetails) {
+  			var emailApiUsername = process.env.emailApiUsername;
+  			var emailApiHost = process.env.emailApiHost;
   		
-  		var emailApiUsername = process.env.emailApiUsername;
-  		var emailApiHost = process.env.emailApiHost;
+  			if(listDetails && listDetails.list && listDetails.list.length>0){
+				var listArr = listDetails.list;
+				for(var i=0; i<listArr.length; i++){
+					if(listArr[i].label=="Username")	{
+						emailApiUsername = listArr[i].value;
+					} else if(listArr[i].label=="Host"){
+						emailApiHost = listArr[i].value;
+					}
+				}
+			}
   		        
-		var emailLinkStr= 'smtps://'+emailApiUsername+':'+emailApiHost;
+			var emailLinkStr= 'smtps://'+emailApiUsername+':'+emailApiHost;
 		
-		// create reusable transporter object using the default SMTP transport 
-		var transporter = nodemailer.createTransport(emailLinkStr);
+			// create reusable transporter object using the default SMTP transport 
+			var transporter = nodemailer.createTransport(emailLinkStr);
 
-		// setup e-mail data with unicode symbols 
-		var mailOptions = {
-    		from: from_email, // sender address 
-    		to: to_email, // list of receivers 
-    		subject: subject, // Subject line 
-   			text: plaintext, // plaintext body 
-    		html: htmlContent // html body 
-		};
+			// setup e-mail data with unicode symbols 
+			var mailOptions = {
+    			from: from_email, // sender address 
+    			to: to_email, // list of receivers 
+    			subject: subject, // Subject line 
+   				text: plaintext, // plaintext body 
+    			html: htmlContent // html body 
+			};
  
-		// send mail with defined transport object 
-		transporter.sendMail(mailOptions, function(error, info){
-			var insertEmail=new Object();
-			insertEmail["sender_name"]=sender_name;
-			insertEmail["sender_email"]=to_email;
-			insertEmail["subject"]=subject;
-			insertEmail["body"]=plaintext;
-			insertEmail["created"]=self.currentTimestamp();
-			insertEmail["modified"]=self.currentTimestamp();
-			insertEmail["recipient"]=from_email;
+			// send mail with defined transport object 
+			transporter.sendMail(mailOptions, function(error, info){
+				var insertEmail=new Object();
+				insertEmail["sender_name"]=sender_name;
+				insertEmail["sender_email"]=to_email;
+				insertEmail["subject"]=subject;
+				insertEmail["body"]=plaintext;
+				insertEmail["created"]=self.currentTimestamp();
+				insertEmail["modified"]=self.currentTimestamp();
+				insertEmail["recipient"]=from_email;
   			
-  			if(error){
-        		outputObj["error"]   = error;
-        		insertEmail["status"]=0;
-    		}	else	{
-    			outputObj["success"]   = info.response;
-    			insertEmail["status"]=-1;
-    		}
-    		self.crudOpertions(db, 'email_queue', 'create', insertEmail, null, null, null,function(email_response) {
-				cb(outputObj);
+  				if(error){
+        			outputObj["error"]   = error;
+        			insertEmail["status"]=0;
+    			}	else	{
+    				outputObj["success"]   = info.response;
+    				insertEmail["status"]=-1;
+    			}
+    			self.crudOpertions(db, 'email_queue', 'create', insertEmail, null, null, null,function(email_response) {
+					cb(outputObj);
+				});
 			});
-			
 		});
 	},
 	

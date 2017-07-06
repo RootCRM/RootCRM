@@ -2074,15 +2074,13 @@ border-left:none;
 	background-color: #00acd6
 }
 
-
-
 .btn-danger {
 
-	background-color: #fbb83b;
+	background-color: #bb0040;
 
-	border-bottom: 3px solid #8c0025;
+	border-bottom: 3px solid #880021;
 
-border-right: 3px solid #8c0025;
+border-right: 3px solid #880021;
 
 border-left:none;
 
@@ -2094,19 +2092,19 @@ border-top:none;
 
 .btn-danger:hover, .btn-danger:active, .btn-danger.hover {
 
-	background-color: #8c0025;border-bottom: 3px solid #fbb83b;
+	background-color: #880021;border-bottom: 3px solid #bb0040;
 
-border-right: 3px solid #fbb83b;
+border-right: 3px solid #bb0040;
 
 border-left:none;
 
 border-top:none;
 
 
-
 }
-
-
+.btn-danger.focus, .btn-danger:focus{
+	background-color: #bb0040!important;
+}
 
 .btn-warning {
 	background-color: #f39c12;
