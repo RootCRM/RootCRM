@@ -326,7 +326,7 @@ app.post('/contact/save', (req, res) => {
 	var postJson=req.body;
 	postJson.Created=init.nowTimestamp;
 	postJson.uuid_system=init.system_id;
-    db.collection("contacts").save(postJson, (err, result) => {
+    db.collection("website_enquiries").save(postJson, (err, result) => {
 		if (err){
     		link+="?msg=error";
     		res.redirect(link)
