@@ -1,0 +1,69 @@
+<% 
+var drawTopNav="", drawFooterNav="", pageContentHtml=drawTemplate;
+
+if (typeof navigation !== "undefined" && navigation !== null) {
+	for(var tnav=0; tnav<navigation.length; tnav++){
+		if(navigation[tnav].categories=="top-navigation"){
+			if(navigation[tnav].type=="url"){		
+				drawTopNav+=' <li><a HREF="'+navigation[tnav].content+'" title="'+navigation[tnav].label+'"><span>'+navigation[tnav].label+'</span></a></li>';
+			}else if(navigation[tnav].type=="items"){
+				try{
+					var bookmarkItems = JSON.parse(navigation[tnav].bookmark_items); 
+        		}	catch (error){
+       				var bookmarkItems = navigation[tnav].bookmark_items; 
+    			} 
+				if(bookmarkItems.length>0){
+					drawTopNav+='<li><a href="#">'+navigation[tnav].label+' <i class="fa fa-angle-down"></i></a></li>';
+					drawTopNav+='<ul class="sub-menu">';
+					bookmarkItems.sort(dynamicSort("item_sort_order"));
+					for(var count=0; count< bookmarkItems.length; count++){
+						if(bookmarkItems[count].type=="url"){
+							drawTopNav+='<li><a href="'+bookmarkItems[count].content+'" title="'+bookmarkItems[count].label+'">'+bookmarkItems[count].label+'</a></li>';
+						}else if(bookmarkItems[count].type=="html"){
+							drawTopNav+='	<li>'+bookmarkItems[count].content+'</li>';
+						}
+					}
+					drawTopNav+='</ul>';
+				}
+			}
+		} else if(navigation[tnav].categories=="footer-nav"){
+			if(navigation[tnav].type=="url"){		
+				drawFooterNav+=' <p><a HREF="'+navigation[tnav].content+'" title="'+navigation[tnav].label+'"><span>'+navigation[tnav].label+'</span></a></p>';
+			}else if(navigation[tnav].type=="items"){
+				try{
+					var bookmarkItems = JSON.parse(navigation[tnav].bookmark_items); 
+        		}	catch (error){
+       				var bookmarkItems = navigation[tnav].bookmark_items; 
+    			} 
+				if(bookmarkItems.length>0){
+					drawFooterNav+='<p>';
+					if(navigation[tnav].label!="" && navigation[tnav].label!="&nbsp;"){
+					drawFooterNav+='<STRONG>'+navigation[tnav].label+': </STRONG>';
+					}
+					bookmarkItems.sort(dynamicSort("item_sort_order"));
+					for(var count=0; count< bookmarkItems.length; count++){
+						if(bookmarkItems[count].type=="url"){
+							var bsourceStr="";
+	  						if(bookmarkItems[count].target=="0" || bookmarkItems[count].target==0){	
+	  							bsourceStr="target='_blank'";
+	  						}
+							if(count!=0){
+								drawFooterNav+='&nbsp;|&nbsp;';
+							}
+							drawFooterNav+='<a href="'+bookmarkItems[count].content+'" '+bsourceStr+' title="'+bookmarkItems[count].label+'">'+bookmarkItems[count].label+'</a>';
+						}else if(bookmarkItems[count].type=="html"){
+							drawFooterNav+=''+bookmarkItems[count].content+'';
+						}
+					}
+					drawFooterNav+='</p>';
+				}
+			}
+		} 
+	}	
+} 
+
+pageContentHtml = pageContentHtml.replace("__headerbookmark__", drawTopNav);
+pageContentHtml = pageContentHtml.replace("__footerbookmark__", drawFooterNav);
+%>
+
+<%- pageContentHtml %>
