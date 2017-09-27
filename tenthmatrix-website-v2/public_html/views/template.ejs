@@ -13,7 +13,7 @@ if (typeof navigation !== "undefined" && navigation !== null) {
        				var bookmarkItems = navigation[tnav].bookmark_items; 
     			} 
 				if(bookmarkItems.length>0){
-					drawTopNav+='<li><a href="#">'+navigation[tnav].label+' <i class="fa fa-angle-down"></i></a></li>';
+					drawTopNav+='<li><a href="#">'+navigation[tnav].label+' <i class="fa fa-angle-down"></i></a>';
 					drawTopNav+='<ul class="sub-menu">';
 					bookmarkItems.sort(dynamicSort("item_sort_order"));
 					for(var count=0; count< bookmarkItems.length; count++){
@@ -23,7 +23,7 @@ if (typeof navigation !== "undefined" && navigation !== null) {
 							drawTopNav+='	<li>'+bookmarkItems[count].content+'</li>';
 						}
 					}
-					drawTopNav+='</ul>';
+					drawTopNav+='</ul></li>';
 				}
 			}
 		} else if(navigation[tnav].categories=="footer-nav"){
